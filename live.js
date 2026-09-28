@@ -203,6 +203,8 @@
     try { L.es && L.es.close(); } catch (e) {}
     L.es = null; L.me = null; L.pub = null;
     S.convs = []; S.notifs = []; S.profile = null; S.roles = [];
+    L.loaded = {};
+    (L.onEnd || []).forEach((f) => { try { f(); } catch (e) { console.warn(e); } });
     if (expired && S.auth) { S.auth = false; S.hist = []; go('home'); toast('نشست تمام شد؛ دوباره وارد شو'); }
     S.auth = false;
   }
@@ -454,6 +456,7 @@
   async function activate(k) {
     try { await api('POST', '/me/active-role', { role: k }); await loadMe(); S.mode = ({ worker: 'jobs', specialist: 'jobs', engineer: 'consult' })[k] || 'workers'; S.roleF = 'all'; return true; }
     catch (e) { err(e); return false; }
+    finally { L.loaded = {}; } // دادهٔ نقش قبلی (پروژه‌ها، مدارک، ...) دوباره گرفته شود
   }
   wrap('setRole', function (prev, k) {
     if (!L.on || !S.auth) return prev(k);
@@ -717,6 +720,9 @@
     if (phoneRow && L.me) { const s = phoneRow.querySelector('small'); if (s) s.textContent = faPhone(L.me.user.phone); }
   });
 
+  /* ابزار مشترک برای live-projects.js */
+  Object.assign(L, { upsertPerson, fillPerson, loadMe, loadConvs, mapAd, abs, rel, faDate, dayLabel, money, err, toEn, faPhone, fsize, isUuid, wrap, ini });
+
   /* =================== شروع =================== */
   async function boot() {
     if (!L.base) return;
@@ -730,6 +736,8 @@
     }
     L.on = true;
     document.documentElement.dataset.live = '1';
+    // فایل‌های دیگر اتصال (live-projects.js) دادهٔ نمایشی خودشان را همین‌جا کنار می‌گذارند
+    (L.onLive || []).forEach((f) => { try { f(); } catch (e) { console.warn(e); } });
     // دادهٔ نمایشی کنار می‌رود
     ADS.length = 0;
     S.convs = []; S.notifs = []; S._demoEv = 1; S.auth = false;
