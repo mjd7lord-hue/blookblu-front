@@ -1936,6 +1936,56 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .ed-form .rf{margin-bottom:12px}.ed-form .rf:last-child{margin-bottom:0}
 @media (prefers-reduced-motion:reduce){.hup{transition:none}}
 :root[data-en] select.field{background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%;padding-right:36px}
+
+/* ===== ROUND 25: داوری حضوری ===== */
+.tline.t5{display:flex;gap:0;margin:10px 0 4px}
+.tline.t5>div{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;padding:0;text-align:center;animation:none}
+.tline.t5>div::before{right:auto;left:50%;top:10px;bottom:auto;width:100%;height:2px;transform:translateX(-50%)}
+.tline.t5>div:first-child::before{display:none}.tline.t5>div:last-child::before{display:block}
+.tline.t5 b{font-size:11px;line-height:1.5;font-weight:600;color:var(--muted)}.tline.t5 .n b,.tline.t5 .d b{color:var(--ink)}
+.tline.t5 i{width:20px;height:20px}
+.arbbox{margin-top:10px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 7%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);display:flex;flex-direction:column;gap:8px}
+.arbbox>b{font-size:14.5px}.arbbox>span{font-size:13px;color:var(--muted);line-height:1.8}.arbbox>small{font-size:12.5px;color:var(--muted)}
+.arbbox .cta{margin-top:2px}.arbbox.done{background:color-mix(in srgb,var(--ok,#16a34a) 9%,var(--surface));border-color:color-mix(in srgb,var(--ok,#16a34a) 25%,transparent)}
+.arbbox .rq-a{margin-top:0}.arbbox .linkrow{margin:0}
+.arb-find{display:flex;align-items:center;gap:12px}.arb-find span:last-child{display:flex;flex-direction:column}.arb-find b{font-size:14px}.arb-find small{font-size:12.5px;color:var(--muted)}
+.radar{position:relative;width:34px;height:34px;flex:none;border-radius:50%;background:var(--accent)}
+.radar i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);animation:arbRad 1.6s infinite}.radar i+i{animation-delay:.8s}
+.radar.big{width:60px;height:60px;display:inline-block;margin-bottom:14px}
+@keyframes arbRad{from{transform:scale(1);opacity:.8}to{transform:scale(2.2);opacity:0}}
+.arb-paid{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--accent);font-weight:600}.arb-paid .ico{width:16px;height:16px;flex:none}
+.arb-r{display:flex;align-items:center;gap:10px}.arb-r .hex{width:40px;height:44px;font-size:13px;flex:none}.arb-r>span{flex:1;min-width:0;display:flex;flex-direction:column}.arb-r b{font-size:14px}.arb-r small{font-size:12px;color:var(--muted)}
+.arb-ok{font-size:12.5px;color:var(--ok,#16a34a);font-weight:600;line-height:1.7}
+.arb-when{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:8px 10px;border-radius:10px;background:var(--surface)}.arb-when span{color:var(--muted)}
+.arb-split{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}.arb-split b{color:var(--ink)}
+.arb-how{margin-top:12px}.arb-how .how{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:13.5px;line-height:1.8}
+.arb-how .how i{font-style:normal;width:22px;height:22px;flex:none;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;margin-top:2px}
+.arb-join{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;text-align:right;font-family:inherit;cursor:pointer;border:1.5px solid #A98CFF;background:color-mix(in srgb,#A98CFF 10%,var(--surface));color:var(--ink)}
+.aj-i{width:42px;height:42px;flex:none;border-radius:12px;background:#A98CFF;display:grid;place-items:center;color:#111}.aj-i .ico{width:22px;height:22px}
+.arb-join>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}.arb-join b{font-size:14.5px}.arb-join small{font-size:12.5px;color:var(--muted);line-height:1.7}.arb-join em{font-style:normal;color:var(--muted)}
+.arb-amt{display:flex;align-items:center;gap:10px}.arb-amt input{flex:1;padding:0;height:auto;border:0;background:none;accent-color:var(--accent)}.arb-amt b{flex:none;font-size:14px;min-width:92px;text-align:left}
+.arb-chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.8;margin:12px 0 4px;cursor:pointer}.arb-chk input{width:18px;height:18px;flex:none;margin-top:4px;accent-color:var(--accent)}
+.arb-fee{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.af-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}.af-row.tot{border-top:1px dashed var(--line);padding-top:8px;font-size:15px;font-weight:800}.af-row.tot b{color:var(--accent)}
+.af-why{font-size:11.5px;color:var(--muted);line-height:1.7}
+.af-bar{display:flex;height:8px;border-radius:5px;overflow:hidden;margin-top:4px}.af-bar i{background:var(--accent);transition:flex .4s}.af-bar i.b{background:var(--gold)}
+.af-leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--muted)}.af-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--accent);margin-left:5px}.af-leg i.b{background:var(--gold)}
+.arb-ph{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.arb-ph span{position:relative;height:0;padding-top:66%;border-radius:12px;background:linear-gradient(135deg,#8a8f86,#5f6b64);overflow:hidden;animation:fadeUp .3s both;animation-delay:calc(var(--k)*80ms)}
+.arb-ph .ico{position:absolute;top:50%;left:50%;width:26px;height:26px;transform:translate(-50%,-60%);color:rgba(255,255,255,.7)}
+.arb-ph small{position:absolute;bottom:6px;right:8px;font-size:10.5px;color:#fff;background:rgba(0,0,0,.35);padding:1px 6px;border-radius:6px}
+.arb-rep p{margin:2px 0 4px;font-size:13.5px;line-height:1.9}
+.arbj-hero{display:block}.arbj-hero h2{margin:4px 0}.arbj-hero p{font-size:13px;line-height:1.9;color:var(--concrete);margin:0}.arbj-hero p b{color:var(--gold-2)}
+.arbj-ex{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.07);display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}
+.arbj-ex span{font-size:12.5px;color:var(--concrete)}.arbj-ex b{grid-row:span 2;font-size:17px;color:var(--gold-2)}.arbj-ex small{font-size:11.5px;color:var(--concrete)}
+.arbj-c{display:flex;gap:10px;align-items:center;padding:6px 0;font-size:13.5px}.arbj-c i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:var(--warn,#dc2626);color:#fff;flex:none}.arbj-c.ok i{background:var(--ok,#16a34a)}
+.arbj-up{width:100%;font-family:inherit;border:1.5px dashed var(--line);background:var(--surface);color:var(--accent);font-weight:700;cursor:pointer;text-align:center}.arbj-up.ok{border-style:solid;border-color:var(--ok,#16a34a);color:var(--ok,#16a34a)}
+.arbj-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.arbj-st div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;display:flex;flex-direction:column}.arbj-st b{font-size:17px}.arbj-st span{font-size:11.5px;color:var(--muted)}
+.arbjob{margin-bottom:10px;display:flex;flex-direction:column;gap:8px}.arbjob b{display:block;font-size:14.5px;margin-top:4px}.arbjob small{font-size:12px;color:var(--muted)}.arbjob p{margin:0;font-size:13.5px;line-height:1.8}
+.arbjob-m{text-align:left;flex:none}.arbjob-m b{color:var(--accent);font-size:14px;margin:0}.arbjob .rq-a{margin-top:0}.arbjob .arb-chk{margin:0}
+.arbjob.no{opacity:.6}
+:root[data-en] .arbjob-m,:root[data-en] .arb-amt b{text-align:right}:root[data-en] .arb-join,:root[data-en] .af-leg i{text-align:left}
+:root[data-en] .hup{text-align:left}
 /* ===== RTL FIX (موبایل) ===== */
 html{direction:rtl}
 body,body *{letter-spacing:0!important}
@@ -2020,6 +2070,7 @@ svg text{direction:rtl;unicode-bidi:plaintext}
   <section class="screen" id="s-cmp" aria-label="مقایسهٔ پیشنهادها"></section>
   <section class="screen" id="s-docs" aria-label="مدارک و گواهی‌ها"></section>
   <section class="screen" id="s-disp" aria-label="حل اختلاف"></section>
+  <section class="screen" id="s-arbj" aria-label="حل‌کنندهٔ حضوری"></section>
   <section class="screen" id="s-visit" aria-label="رزرو بازدید"></section>
   <section class="screen" id="s-safe" aria-label="ایمنی کارگاه"></section>
   <section class="screen" id="s-boost" aria-label="ارتقای آگهی"></section>
@@ -4142,7 +4193,7 @@ function renderCtr(){const key=S.role+':'+S.pi,c=ctrOf(key),p=c.p,w=P[p.who],me=
     <h4>مادهٔ ۴ · مدت</h4><p class="num">${fa(c.days)} روز از تاریخ شروع کار. هر روز تأخیر غیرموجه، ۰٫۵٪ از مبلغ مرحلهٔ جاری کسر می‌شود.</p>
     <h4>مادهٔ ۵ · تضمین</h4><p class="num">${fa(c.ret)}٪ از مبلغ کل به‌عنوان حسن انجام کار نزد کارفرما می‌ماند و ۳ ماه پس از تحویل پرداخت می‌شود.</p>
     <h4>مادهٔ ۶ · بیمه و ایمنی</h4><p>ایمنی کارگاه و بیمهٔ نیروهای مجری بر عهدهٔ مجری است؛ تجهیزات حفاظت فردی الزامی است.</p>
-    <h4>مادهٔ ۷ · اختلاف</h4><p>در صورت اختلاف، ابتدا داوری بلوک با حضور یک مهندس ناظر مستقل انجام می‌شود و در صورت عدم توافق، مراجع قانونی صالح‌اند.</p>
+    <h4>مادهٔ ۷ · اختلاف و داوری</h4><p>طرفین می‌پذیرند هر اختلاف ابتدا با گفت‌وگو در چت بلوک (۴۸ ساعت) و در صورت حل نشدن، با <b>داوری حضوری بلوک</b> حل شود: یک حل‌کنندهٔ مستقل و تأییدشده در همان حوزه (مهندس یا متخصص) از محل بازدید می‌کند و گزارش و رأی می‌دهد. هزینهٔ داوری را ثبت‌کنندهٔ اختلاف پیش از تعیین حل‌کننده می‌پردازد. رأی پس از ۷۲ ساعت مهلت اعتراض (بازبینی با حل‌کنندهٔ دوم) برای طرفین لازم‌الاجراست. این ماده، موافقت‌نامهٔ داوری طرفین است.</p>
     <div class="pp-sign"><div class="${c.me?'on':''}"><small>امضای شما</small>${c.me?sigSVG('M6 28c10-18 16-20 18-8s6 10 12-4 10-10 14 2 8 8 16-6 10-6 14 4 20 2'):'<em>—</em>'}</div>
       <div class="${c.them?'on':''}"><small>امضای ${esc(w.name)}</small>${c.them?sigSVG('M8 24c6-14 14-16 16-4 2 10 10-12 16-10s4 16 12 6 12-12 18-2 16 6 22-4'):'<em>—</em>'}</div></div>
     ${st===2?`<div class="pp-seal" aria-hidden="true"><b>تأیید بلوک</b><small class="num">۱۴۰۵/۰۷/۰۴</small></div>`:''}
@@ -7061,7 +7112,203 @@ Object.assign(I18N.dict,{
 "کارگاه ساختمانی احمدی · بازدید فونداسیون مجتمع": "Ahmadi Construction · Complex foundation inspection",
 "شهر محل کار": "Work city"
 });
-Object.assign(I18N.names,{"مجید":"Majid","علی":"Ali","مجید یحیایی":"Majid Yahyaei","علی رضایی":"Ali Rezaei","ساحل‌سازان هرمز":"Sahel Sazan Hormoz"});
+Object.assign(I18N.dict,{
+"حل‌کنندهٔ حضوری": "On-site resolver",
+"داوری حضوری بلوک": "Block on-site arbitration",
+"اختلاف را در محل کار، با یک متخصص بی‌طرف حل کن": "Settle disputes on site with a neutral expert",
+"اول گفت‌وگو؛ اگر حل نشد، مهندس یا متخصص همان حوزه می‌آید، می‌بیند و رأی می‌دهد": "Talk first; if that fails, an engineer or specialist in that field visits, inspects and rules",
+"گفت‌وگو {#} ساعت": "{#}h talk",
+"بازدید و گزارش": "Visit & report",
+"مرحلهٔ دوم پرداخت {#} روز عقب افتاده؛ کارفرما می‌گوید کیفیت بتن سقف انباری مطابق قرارداد نیست.": "Payment stage 2 is {#} days late; the client says the storage roof concrete doesn't meet the contract.",
+"مهلت گفت‌وگو تمام شد و توافقی ثبت نشد": "The talk period ended without agreement",
+"یک مهندس یا متخصص بی‌طرفِ همین حوزه را به محل کار بفرست تا ببیند و رأی بدهد.": "Send a neutral engineer or specialist in this field to the site to inspect and rule.",
+"درخواست حل‌کنندهٔ حضوری": "Request an on-site resolver",
+"داوری حضوری چطور کار می‌کند؟": "How does on-site arbitration work?",
+"ثبت اختلاف؛ طرف مقابل {#} ساعت فرصت دارد در چت به توافق برسید.": "File a dispute; you have {#} hours to reach agreement in chat.",
+"حل نشد؟ حوزهٔ مشکل و مبلغ مورد اختلاف را بگو؛ هزینهٔ داوری خودکار حساب می‌شود.": "Not settled? Pick the field and disputed amount; the fee is calculated automatically.",
+"ثبت‌کنندهٔ اختلاف هزینه را پیش از تعیین حل‌کننده می‌پردازد؛ پول نزد بلوک امانت می‌ماند.": "The filer pays before a resolver is assigned; Block holds the money in escrow.",
+"بلوک یک حل‌کنندهٔ بی‌طرف همان حوزه را می‌فرستد (بدون هیچ سابقهٔ همکاری با دو طرف). هر طرف یک بار حق رد دارد.": "Block sends a neutral resolver in that field (no prior work with either side). Each side may reject once.",
+"بازدید، گزارش استاندارد با عکس و اندازه‌گیری، و رأی. {#} ساعت مهلت اعتراض و بازبینی با حل‌کنندهٔ دوم.": "Visit, standard report with photos and measurements, and a ruling. {#} hours to appeal for review by a second resolver.",
+"اگر حل‌کننده سر قرار نیاید، کل مبلغ برمی‌گردد.": "If the resolver doesn't show up, you get a full refund.",
+"مشکل در کدام حوزه است؟": "Which field is the problem in?",
+"اسکلت و سازه": "Frame & structure",
+"سفت‌کاری و بنایی": "Masonry & shell",
+"عایق و نم": "Insulation & damp",
+"متره و صورت‌وضعیت": "Quantities & statements",
+"بتن، آرماتور، قالب، جوش اسکلت فلزی": "Concrete, rebar, formwork, steel welding",
+"دیوارچینی، شاقول، ملات، سقف سفال": "Walls, plumb, mortar, block slabs",
+"کاشی، سرامیک، گچ، نقاشی، کف": "Tile, ceramic, plaster, paint, flooring",
+"ایزوگام، نشت آب، نم دیوار": "Membrane, leaks, damp walls",
+"سیم‌کشی، تابلو، ارت": "Wiring, panels, earthing",
+"لوله‌کشی، نشتی، موتورخانه": "Piping, leaks, plant room",
+"مقدار کار انجام‌شده، مبلغ مرحله": "Work done, stage amount",
+"حل‌کننده: مهندس همین حوزه": "Resolver: engineer in this field",
+"حل‌کننده: متخصص همین حوزه": "Resolver: specialist in this field",
+"مبلغ مورد اختلاف (میلیون تومان)": "Disputed amount (million tomans)",
+"بیش از یک موضوع (مثلاً هم کیفیت و هم مقدار کار)": "More than one issue (e.g. both quality and quantity)",
+"هزینهٔ داوری": "Arbitration fee",
+"پایه {#} تومان": "Base {#} tomans",
+"({#})": "({#})",
+"{#} تا {#} میلیون": "{#}–{#} million",
+"تا {#} میلیون": "up to {#} million",
+"بیش از {#} میلیارد": "over {#} billion",
+"{#} میلیون تا {#} میلیارد": "{#} million–{#} billion",
+"رفت‌وآمد (حل‌کننده در همین شهر)": "Travel (resolver in this city)",
+"رفت‌وآمد (داخل استان)": "Travel (within province)",
+"رفت‌وآمد (از استان دیگر)": "Travel (from another province)",
+"رایگان": "Free",
+"حل‌کننده {#}٪ + رفت‌وآمد": "Resolver {#}% + travel",
+"کمیسیون بلوک {#}٪ · پرونده پیچیده": "Block commission {#}% · complex case",
+"کمیسیون بلوک {#}٪ · پرونده ساده": "Block commission {#}% · simple case",
+"جمع قابل پرداخت": "Total to pay",
+"می‌دانم رأی حل‌کننده پس از {#} ساعت مهلت اعتراض، طبق مادهٔ {#} قرارداد، برای دو طرف لازم‌الاجراست.": "I understand the ruling becomes binding on both sides after the {#}-hour appeal window, per article {#} of the contract.",
+"پرداخت امانی و ادامه": "Pay into escrow & continue",
+"پرداخت امانی": "Escrow payment",
+"پیش از تعیین حل‌کننده · ثبت‌کنندهٔ اختلاف می‌پردازد": "Before assignment · paid by the filer",
+"روش پرداخت": "Payment method",
+"درگاه بانکی": "Bank gateway",
+"کیف پول بلوک": "Block wallet",
+"پول نزد بلوک امانت می‌ماند و فقط بعد از ثبت گزارش بازدید به حل‌کننده می‌رسد. اگر حل‌کننده سر قرار نیاید، کامل برمی‌گردد.": "Block holds the money and releases it to the resolver only after the visit report. Full refund if the resolver doesn't show up.",
+"پرداخت {#} تومان": "Pay {#} tomans",
+"در حال پیدا کردن حل‌کننده": "Finding a resolver",
+"بررسی بی‌طرفی و روزهای آزاد": "checking neutrality and availability",
+"{#} تومان پرداخت شد و نزد بلوک امانت است": "{#} tomans paid, held in escrow by Block",
+"پرداخت شد؛ دنبال حل‌کنندهٔ بی‌طرف می‌گردیم": "Paid; finding a neutral resolver",
+"★ {#}": "★ {#}",
+"✓ بی‌طرفی بررسی شد: هیچ همکاری، پروژه یا گفت‌وگوی قبلی با دو طرف ندارد": "✓ Neutrality checked: no prior work, project or chat with either side",
+"زمان بازدید": "Visit time",
+"یکشنبه {#} مهر · {#} صبح": "Sun {#} Mehr · {#} am",
+"دوشنبه {#} مهر · {#} صبح": "Mon {#} Mehr · {#} am",
+"سه‌شنبه {#} مهر · {#} صبح": "Tue {#} Mehr · {#} am",
+"چهارشنبه {#} مهر · {#} صبح": "Wed {#} Mehr · {#} am",
+"{#} تومان امانی · بعد از ثبت گزارش آزاد می‌شود": "{#} tomans in escrow · released after the report",
+"رد این حل‌کننده ({#} بار)": "Reject this resolver ({#}×)",
+"حق رد استفاده شد": "Rejection used",
+"شبیه‌سازی بازدید": "Simulate visit",
+"حل‌کنندهٔ حضوری تعیین شد": "On-site resolver assigned",
+"{@} — یکشنبه {#} مهر · {#} صبح": "{@} — Sun {#} Mehr · {#} am",
+"{@} — دوشنبه {#} مهر · {#} صبح": "{@} — Mon {#} Mehr · {#} am",
+"{@} در محل کار است": "{@} is on site",
+"عکس، اندازه‌گیری و مقایسه با قرارداد…": "Photos, measurements, contract comparison…",
+"رأی": "Ruling",
+"رأی بازبینی": "Review ruling",
+"مجری نقص‌ها را ظرف {#} روز رفع می‌کند و پرداخت انجام می‌شود.": "The contractor fixes the defects within {#} days, then payment is made.",
+"دیدن گزارش کامل و رأی": "View full report & ruling",
+"مهلت اعتراض": "Appeal window",
+"{#} ساعت": "{#} hours",
+"اعتراض و بازبینی": "Appeal & review",
+"قبول رأی و بستن پرونده": "Accept ruling & close",
+"گزارش و رأی حل‌کننده ثبت شد": "Resolver's report and ruling filed",
+"گزارش بازدید و رأی": "Visit report & ruling",
+"عکس {#} · {@}": "Photo {#} · {@}",
+"اندازه‌گیری و مشاهده": "Measurements & observations",
+"کار با مشخصات قرارداد مقایسه شد؛ {#} مورد نقص جزئی دیده شد.": "Work compared with the contract; {#} minor defects found.",
+"مقایسه با قرارداد و آیین‌نامه": "Comparison with contract & code",
+"مغایرت جزئی": "Minor deviation",
+"مغایرت اساسی": "Major deviation",
+"مطابق": "Compliant",
+"رأی و کار اصلاحی": "Ruling & corrective work",
+"عکس‌ها با زمان و مکان ثبت شده‌اند. این گزارش در صورت مراجعه به دادگاه هم مدرک است.": "Photos are time- and location-stamped. This report is also evidence if the case goes to court.",
+"یک حل‌کنندهٔ دوم (غیر از قبلی) گزارش را بررسی و در صورت نیاز دوباره بازدید می‌کند": "A second resolver reviews the report and revisits if needed",
+"هزینهٔ بازبینی (نصف هزینهٔ داوری)": "Review fee (half the arbitration fee)",
+"اگر رأی عوض شود، این مبلغ به تو برمی‌گردد. رأی بازبینی نهایی است.": "Refunded if the ruling changes. The review ruling is final.",
+"دلیل اعتراض": "Reason for appeal",
+"پرداخت و ثبت اعتراض": "Pay & file appeal",
+"کدام بخش گزارش یا رأی نادرست است؟": "Which part of the report or ruling is wrong?",
+"اعتراض ثبت شد؛ حل‌کنندهٔ دوم تعیین می‌شود": "Appeal filed; assigning a second resolver",
+"دلیل اعتراض را کامل‌تر بنویس": "Explain your appeal in more detail",
+"رأی قبلی تأیید شد؛ مجری نقص‌ها را ظرف {#} روز رفع می‌کند و پرداخت انجام می‌شود.": "Original ruling upheld; the contractor fixes the defects within {#} days, then payment is made.",
+"رأی نهایی": "Final ruling",
+"رأی بازبینی ثبت شد": "Review ruling filed",
+"رأی نهایی است": "The ruling is final",
+"پرونده با رأی حل‌کننده بسته شد": "Case closed by the resolver's ruling",
+"سهم حل‌کننده": "Resolver's share",
+"کمیسیون بلوک": "Block commission",
+"به حل‌کننده امتیاز بده": "Rate the resolver",
+"پرونده بسته شد؛ سهم حل‌کننده آزاد شد": "Case closed; resolver's share released",
+"امتیاز به حل‌کننده": "Rate the resolver",
+"{#} ★": "{#} ★",
+"بی‌طرف بود؟": "Were they neutral?",
+"بله": "Yes",
+"حل‌کنندهٔ حضوری بلوک": "Block on-site resolver",
+"شغل تازه در بلوک": "New job on Block",
+"اختلاف‌های حوزهٔ خودت را حضوری حل کن": "Resolve disputes in your field on site",
+"بلوک پرونده را بر اساس حوزه و شهرت می‌فرستد؛ هزینه از قبل پرداخت و امانی است. سهم تو:": "Block sends cases by field and city; fees are prepaid into escrow. Your share:",
+"{#} تا {#}٪": "{#}–{#}%",
+"هزینهٔ داوری + کامل رفت‌وآمد را می‌گیری.": "of the fee + all travel costs.",
+"نمونه: اختلاف {#} میلیونی سازه": "Example: {#}M structural dispute",
+"سهم تو برای یک بازدید و گزارش": "Your share for one visit & report",
+"شرایط": "Requirements",
+"نقش مهندس یا متخصص تأییدشده": "Verified engineer or specialist",
+"حداقل {#} سال سابقه": "At least {#} years' experience",
+"امتیاز بلوک {#} به بالا ({#})": "Block score {#}+ ({#})",
+"حوزه‌های داوری": "Arbitration fields",
+"فقط حوزه‌ای که مدرک داری": "Only fields you're certified in",
+"محدودهٔ بازدید": "Visit range",
+"استان‌های همسایه": "Neighboring provinces",
+"گواهی مهارت فنی‌وحرفه‌ای یا سابقهٔ کار": "Skills certificate or work record",
+"+ بارگذاری تصویر مدرک": "+ Upload document",
+"مدرک بارگذاری شد": "Document uploaded",
+"تعهدنامهٔ بی‌طرفی:": "Neutrality pledge:",
+"در پرونده‌ای که با یکی از طرفین نسبت، همکاری یا منفعت داشته باشم داوری نمی‌کنم، گزارش را فقط بر پایهٔ مشاهده و قرارداد می‌نویسم و از طرفین وجهی جدا نمی‌گیرم.": "I won't arbitrate cases where I'm related to, work with, or benefit from either side; I'll base reports only on observation and the contract, and take no separate payment from either side.",
+"✓ مدرک بارگذاری شد": "✓ Document uploaded",
+"درخواستت در حال بررسی است": "Your application is under review",
+"بلوک مدرک و سابقه‌ات را بررسی می‌کند؛ معمولاً {#} ساعت.": "Block checks your documents and record; usually {#} hours.",
+"پرونده‌های داوری من": "My arbitration cases",
+"پرونده بسته": "Closed",
+"درآمد (تومان)": "Earned (tomans)",
+"پرونده‌ها": "Cases",
+"کاشی‌کاری واحد {#}": "Tiling, unit {#}",
+"سقف دوم ویلای طولا": "Second slab, Tola villa",
+"سهم تو · امانی": "Your share · escrow",
+"پوکی کاشی کف و اختلاف در متراژ.": "Hollow floor tiles and a dispute over area.",
+"ترک مویی سقف بعد از قالب‌برداری؛ کارفرما می‌گوید بتن‌ریزی عجولانه بوده.": "Hairline slab cracks after stripping; the client says the pour was rushed.",
+"با هیچ‌کدام از طرفین نسبت، همکاری یا منفعتی ندارم.": "I have no relation, work or interest with either side.",
+"نمی‌توانم": "Can't take it",
+"قبول پرونده": "Accept case",
+"اول بی‌طرفی را تأیید کن": "Confirm neutrality first",
+"حل‌کنندهٔ حضوری بلوک شدی": "You're now a Block on-site resolver",
+"اولین پرونده‌ها برایت فرستاده شد": "Your first cases have been sent",
+"هماهنگی با طرفین": "Coordinate with parties",
+"پرونده قبول شد؛ زمان بازدید به طرفین اعلام شد": "Case accepted; visit time sent to both sides",
+"پرونده به حل‌کنندهٔ دیگری سپرده می‌شود": "The case goes to another resolver",
+"رد شد؛ به حل‌کنندهٔ دیگری سپرده شد": "Declined; assigned to another resolver",
+"گزارش استاندارد بازدید": "Standard visit report",
+"حداقل {#} عکس با زمان و مکان": "At least {#} time- and location-stamped photos",
+"+ گرفتن عکس از محل": "+ Take a site photo",
+"حق با کارفرما": "Client is right",
+"حق با مجری": "Contractor is right",
+"تقسیم مسئولیت": "Shared responsibility",
+"کار اصلاحی یا مبلغ": "Corrective work or amount",
+"ثبت گزارش و رأی": "Submit report & ruling",
+"مثلاً مقاومت بتن، شاقول، متراژ، محل ترک…": "e.g. concrete strength, plumb, area, crack location…",
+"چه کسی، چه کاری، تا کی؛ یا چه مبلغی کسر/پرداخت شود": "Who does what by when; or what amount is deducted/paid",
+"حداقل {#} عکس لازم است": "At least {#} photos required",
+"اندازه‌گیری و کار اصلاحی را کامل بنویس": "Complete the measurements and corrective work",
+"گزارش برای طرفین فرستاده شد؛ {#} ساعت مهلت اعتراض": "Report sent to both sides; {#}-hour appeal window",
+"✓ گزارش ثبت شد · سهم تو پس از مهلت اعتراض آزاد می‌شود": "✓ Report filed · your share is released after the appeal window",
+"اختلاف‌های حوزهٔ خودت را حضوری حل کن؛ {#} تا {#}٪ هزینه برای تو": "Resolve disputes in your field on site; you get {#}–{#}% of the fee",
+"داوری حضوری": "On-site arbitration",
+"این بخش برای نقش مهندس و متخصص است. از «تغییر نقش» وارد شو.": "This section is for engineers and specialists. Switch role to use it.",
+"فعلاً پرونده‌ای در حوزه‌های تو نیست؛ به‌محض ثبت، اعلان می‌گیری.": "No cases in your fields yet; you'll be notified.",
+"پرونده‌های داوری من ": "My arbitration cases",
+"برای ۸۰ تا ۸۵٪ هزینهٔ داوری، اختلاف‌های حوزهٔ خودت را حضوری حل کن": "Resolve disputes in your field on site for 80–85% of the fee",
+"بازدیدها، گزارش‌ها و درآمد داوری": "Visits, reports and arbitration income",
+"مقاومت بتن سقف با چکش اشمیت {#} مگاپاسکال؛ قرارداد C{#} خواسته. پوشش آرماتور در {#} نقطه کمتر از {#} سانت.": "Slab concrete strength by rebound hammer: {#} MPa; contract requires C{#}. Rebar cover under {#} cm at {#} points.",
+"مغایر با قرارداد در بخش بتن؛ آرماتوربندی مطابق نقشه": "Concrete doesn't meet the contract; rebar matches drawings",
+"مجری {#}٪ از مبلغ بتن‌ریزی سقف را کسر می‌کند؛ کارفرما باقی مرحلهٔ دوم را ظرف {#} روز می‌پردازد.": "Contractor deducts {#}% of the slab pour amount; client pays the rest of stage 2 within {#} days.",
+"رأی قبلی تأیید شد؛ مجری {#}٪ از مبلغ بتن‌ریزی سقف را کسر می‌کند؛ کارفرما باقی مرحلهٔ دوم را ظرف {#} روز می‌پردازد.": "Original ruling upheld; contractor deducts {#}% of the slab pour amount; client pays the rest of stage 2 within {#} days.",
+"متراژ اجراشده {#} متر مربع؛ صورت‌وضعیت مجری {#} متر ادعا کرده بود.": "Area executed {#} m²; the contractor's statement claimed {#} m.",
+"اختلاف {#} متر در مقدار کار": "{#} m difference in quantity",
+"پرداخت بر اساس {#} متر؛ کارفرما مبلغ اصلاح‌شده را ظرف {#} روز می‌پردازد.": "Payment based on {#} m; client pays the corrected amount within {#} days.",
+"مغایر در دیوار شمالی": "Deviation in the north wall",
+"مجری دیوار شمالی را ظرف {#} روز اصلاح می‌کند؛ پرداخت بعد از اصلاح.": "Contractor fixes the north wall within {#} days; payment after the fix.",
+"شاقول دیوار شمالی {#} سانت انحراف در {#} متر؛ ملات {#} به {#} به جای {#} به {#}.": "North wall is {#} cm out of plumb over {#} m; mortar {#}:{#} instead of {#}:{#}.",
+"مادهٔ ۷ · اختلاف و داوری": "Article 7 · Disputes & arbitration",
+"حل‌کنندهٔ دیگری تعیین می‌شود": "Assigning another resolver",
+"حداقل ۲ حرف بنویس": "Type at least 2 characters"
+});
+Object.assign(I18N.names,{"مهندس فرهاد سلیمانی":"Eng. Farhad Soleimani","مهندس لیلا امیری":"Eng. Leila Amiri","استاد حمید نجفی":"Master Hamid Najafi","مهندس سعید رستمی":"Eng. Saeed Rostami","مهندس کامران زارعی":"Eng. Kamran Zarei","مجید":"Majid","علی":"Ali","مجید یحیایی":"Majid Yahyaei","علی رضایی":"Ali Rezaei","ساحل‌سازان هرمز":"Sahel Sazan Hormoz"});
 /* =================== ROUND 15: تنظیمات نمایش، زبان و دسترسی‌پذیری =================== */
 const PREF_DEF={fs:'md',lang:'fa',contrast:false,motion:false,bold:false,latin:false,big:false,saver:false,haptic:true};
 S.prefs=Object.assign({},PREF_DEF);
@@ -7679,6 +7926,195 @@ function demoEvents(){if(S._demoEv)return;S._demoEv=1;
     c.msgs.push(m);c.unread=(c.unread||0)+1;if(typeof updNavBadge==='function')updNavBadge();if(S.cur==='msg')renderMsgs();
     if(S.nprefs.msg!==false&&!c.muted)notify({t:'پیام از '+convName(c),s:m.t,ty:'msg',go:`openChat('${c.id}')`})},14000);
   setTimeout(()=>{if(!S.auth)return;if(S.nprefs.req!==false)notify({t:'درخواست همکاری تازه',s:'کارگاه ساختمانی احمدی · بازدید فونداسیون مجتمع',ty:'req',go:"go('req')"})},32000)}
+/* =================== ROUND 25: حل اختلاف حضوری — شغل تازه برای مهندس‌ها و متخصص‌ها =================== */
+/* ثبت‌کنندهٔ اختلاف هزینه را پیش از تعیین حل‌کننده (امانی) می‌پردازد؛ کمیسیون بلوک ۱۵٪ ساده / ۲۰٪ پیچیده؛ بقیه برای حل‌کننده */
+GATE.arbj='حل‌کنندهٔ حضوری';
+const ARB_F=[
+  {k:'struct',n:'اسکلت و سازه',who:'engineer',f:1.4,ex:'بتن، آرماتور، قالب، جوش اسکلت فلزی'},
+  {k:'mas',n:'سفت‌کاری و بنایی',who:'specialist',f:1,ex:'دیوارچینی، شاقول، ملات، سقف سفال'},
+  {k:'fin',n:'نازک‌کاری',who:'specialist',f:1,ex:'کاشی، سرامیک، گچ، نقاشی، کف'},
+  {k:'iso',n:'عایق و نم',who:'specialist',f:1.1,ex:'ایزوگام، نشت آب، نم دیوار'},
+  {k:'elec',n:'تأسیسات برقی',who:'engineer',f:1.2,ex:'سیم‌کشی، تابلو، ارت'},
+  {k:'mech',n:'تأسیسات مکانیکی',who:'engineer',f:1.2,ex:'لوله‌کشی، نشتی، موتورخانه'},
+  {k:'qty',n:'متره و صورت‌وضعیت',who:'engineer',f:1.1,ex:'مقدار کار انجام‌شده، مبلغ مرحله'}];
+const ARB_BASE=1200000,ARB_TRAVEL={city:0,prov:600000,far:2000000};
+const ARB_AMT=[[50,1,'تا ۵۰ میلیون'],[200,1.6,'۵۰ تا ۲۰۰ میلیون'],[1000,2.6,'۲۰۰ میلیون تا ۱ میلیارد'],[1e9,4,'بیش از ۱ میلیارد']];
+/* حل‌کننده‌های تأییدشدهٔ نمونه */
+Object.assign(P,{
+  arb1:Object.assign({},P.karimi,{role:'engineer',name:'مهندس فرهاد سلیمانی',ini:'ف.س',title:'مهندس عمران · حل‌کنندهٔ حضوری بلوک',place:'قشم',rating:4.9,done:31,code:'B-S1F4',verified:true}),
+  arb2:Object.assign({},P.karimi,{role:'engineer',name:'مهندس لیلا امیری',ini:'ل.ا',title:'مهندس برق · حل‌کنندهٔ حضوری بلوک',place:'بندرعباس',rating:4.8,done:14,code:'B-A2L8',verified:true}),
+  arb3:Object.assign({},P.karimi,{role:'specialist',name:'استاد حمید نجفی',ini:'ح.ن',title:'استادکار ارشد · حل‌کنندهٔ حضوری بلوک',place:'قشم',rating:4.9,done:22,code:'B-N3H1',verified:true}),
+  arb4:Object.assign({},P.karimi,{role:'engineer',name:'مهندس سعید رستمی',ini:'س.ر',title:'مهندس مکانیک · حل‌کنندهٔ حضوری بلوک',place:'بندرعباس',rating:4.7,done:17,code:'B-R4S6',verified:true}),
+  arb5:Object.assign({},P.karimi,{role:'engineer',name:'مهندس کامران زارعی',ini:'ک.ز',title:'مهندس سازه · حل‌کنندهٔ حضوری بلوک',place:'شیراز',rating:4.8,done:26,code:'B-Z5K2',verified:true})});
+const ARBS=[{id:'arb1',f:['struct','qty']},{id:'arb2',f:['elec']},{id:'arb3',f:['mas','fin','iso']},{id:'arb4',f:['mech','qty']},{id:'arb5',f:['struct','qty']}];
+const DSTG2=['ثبت شد','گفت‌وگو ۴۸ ساعت','حل‌کنندهٔ حضوری','بازدید و گزارش','رأی و بستن پرونده'];
+const mny=n=>tmn(n)+' تومان';
+
+/* پروندهٔ نمونه: مهلت گفت‌وگو تمام شده و حل نشده */
+(function(){const d=S.disp[0];if(d){d.st=1;d.mine=true;d.place='قشم';d.late=true;d.desc='مرحلهٔ دوم پرداخت ۱۲ روز عقب افتاده؛ کارفرما می‌گوید کیفیت بتن سقف انباری مطابق قرارداد نیست.';d.why='کیفیت کار'}})();
+
+function arbSuggest(d){return {'کیفیت کار':'struct','مصالح و ابزار':'mas','تأخیر در پرداخت':'qty','تأخیر در اجرا':'qty','ترک کار':'qty'}[d.why]||'qty'}
+function arbTravel(field,place){const pr=provOf(place),L=ARBS.filter(a=>a.f.includes(field)).map(a=>P[a.id].place);
+  if(L.includes(place))return ['city',ARB_TRAVEL.city];if(L.some(c=>provOf(c)===pr))return ['prov',ARB_TRAVEL.prov];return ['far',ARB_TRAVEL.far]}
+function arbFee(a,place){const F=ARB_F.find(x=>x.k===a.field),am=ARB_AMT.find(x=>a.amt<=x[0]),tv=arbTravel(a.field,place);
+  const fee=Math.round(ARB_BASE*F.f*am[1]/10000)*10000,cx=(a.amt>200||F.f>=1.4||a.multi)?1:0,pct=cx?20:15;
+  const blk=Math.round(fee*pct/100/1000)*1000;return {fee,pct,cx,blk,res:fee-blk,travel:tv[1],tvk:tv[0],total:fee+tv[1],F,am}}
+
+/* ---------- صفحهٔ حل اختلاف (بازنویسی با مرحلهٔ حضوری) ---------- */
+window.renderDisp=function(){const L=S.disp,canJoin=['engineer','specialist'].includes(S.role);
+  $('s-disp').innerHTML=`${pageBar('حل اختلاف')}
+  <div class="hcard disp-hero"><div class="scale" aria-hidden="true"><svg viewBox="0 0 100 70"><path d="M50 8v52M34 62h32" stroke="var(--gold-2)" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="8" r="4" fill="var(--gold)"/>
+    <g class="beam"><path d="M16 16h68" stroke="var(--gold-2)" stroke-width="3" stroke-linecap="round"/><g class="pan l"><path d="M16 16l-9 18M16 16l9 18" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/><path d="M4 34h24a12 6 0 0 1-24 0z" fill="var(--accent-2,#2DD4BF)"/></g><g class="pan r"><path d="M84 16l-9 18M84 16l9 18" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/><path d="M72 34h24a12 6 0 0 1-24 0z" fill="var(--gold)"/></g></g></svg></div>
+    <div><small>داوری حضوری بلوک</small><h2>اختلاف را در محل کار، با یک متخصص بی‌طرف حل کن</h2><p>اول گفت‌وگو؛ اگر حل نشد، مهندس یا متخصص همان حوزه می‌آید، می‌بیند و رأی می‌دهد</p></div></div>
+  <div class="section"><div class="sec-head"><h3>پرونده‌های من</h3><span class="num">${fa(L.length)} پرونده</span></div>
+  ${L.length?L.map(d=>dispCard(d)).join(''):'<div class="empty">پرونده‌ای نداری.</div>'}</div>
+  <div class="section"><button class="cta" onclick="dispNew()">ثبت اختلاف تازه</button>
+  <div class="card arb-how"><span class="label" style="margin-top:0">داوری حضوری چطور کار می‌کند؟</span>
+    ${[['۱','ثبت اختلاف؛ طرف مقابل ۴۸ ساعت فرصت دارد در چت به توافق برسید.'],['۲','حل نشد؟ حوزهٔ مشکل و مبلغ مورد اختلاف را بگو؛ هزینهٔ داوری خودکار حساب می‌شود.'],['۳','ثبت‌کنندهٔ اختلاف هزینه را پیش از تعیین حل‌کننده می‌پردازد؛ پول نزد بلوک امانت می‌ماند.'],['۴','بلوک یک حل‌کنندهٔ بی‌طرف همان حوزه را می‌فرستد (بدون هیچ سابقهٔ همکاری با دو طرف). هر طرف یک بار حق رد دارد.'],['۵','بازدید، گزارش استاندارد با عکس و اندازه‌گیری، و رأی. ۷۲ ساعت مهلت اعتراض و بازبینی با حل‌کنندهٔ دوم.'],['۶','اگر حل‌کننده سر قرار نیاید، کل مبلغ برمی‌گردد.']].map(s=>`<div class="how"><i class="num">${s[0]}</i><span>${s[1]}</span></div>`).join('')}</div>
+  ${canJoin?`<button class="card arb-join" onclick="go('arbj')"><span class="aj-i">${I.shield}</span><span><b>${S.arbMe&&S.arbMe.st==='ok'?'پرونده‌های داوری من':'حل‌کنندهٔ حضوری بلوک شو'}</b><small>${S.arbMe&&S.arbMe.st==='ok'?'بازدیدها، گزارش‌ها و درآمد داوری':'برای ۸۰ تا ۸۵٪ هزینهٔ داوری، اختلاف‌های حوزهٔ خودت را حضوری حل کن'}</small></span><em>‹</em></button>`:''}</div>`};
+function dispCard(d){const a=d.arb,st=d.st;
+  return `<div class="card dcase" id="dc_${d.id}"><div class="need" style="padding-top:0">${hexA(P[d.with])}<div style="flex:1;min-width:0"><b style="display:block">${esc(d.proj)}</b><span style="font-size:13px;color:var(--muted)"><span>با ${esc(P[d.with].name)}</span> · <span>${esc(d.why)}</span> · <span>${d.time}</span></span></div><span class="tag ${st>=4?'ok':'wait'}">${DSTG2[Math.min(st,4)]}</span></div>
+    <div class="tline t5">${DSTG2.map((x,k)=>`<div class="${k<st||st>=4?'d':k===st?'n':''}"><i></i><b>${x}</b></div>`).join('')}</div>
+    <p style="margin:6px 0 0;font-size:14px;line-height:1.9">${esc(d.desc)}<br><b>درخواست شما:</b> ${esc(d.ask)}</p>
+    ${arbBox(d)}
+    <div class="rq-a" style="margin-top:10px"><button onclick="openChatWith('${d.with}')">چت با طرف مقابل</button><button onclick="toast('مدرک به پرونده اضافه شد')">افزودن مدرک</button>${st<3&&!(a&&a.paid)?`<button class="yes" onclick="dispClose('${d.id}')">توافق کردیم</button>`:''}</div></div>`}
+function arbBox(d){const a=d.arb;
+  if(d.st===1&&!a)return `<div class="arbbox"><b>${d.late?'مهلت گفت‌وگو تمام شد و توافقی ثبت نشد':'اگر در ۴۸ ساعت به توافق نرسیدید'}</b><span>یک مهندس یا متخصص بی‌طرفِ همین حوزه را به محل کار بفرست تا ببیند و رأی بدهد.</span>
+    ${d.mine?`<button class="cta" onclick="arbAsk('${d.id}')">درخواست حل‌کنندهٔ حضوری</button>`:`<small>درخواست حل‌کننده با ثبت‌کنندهٔ اختلاف است.</small>`}</div>`;
+  if(!a)return '';const R=a.who&&P[a.who];
+  if(a.st==='match')return `<div class="arbbox"><div class="arb-find"><span class="radar"><i></i><i></i></span><span><b>در حال پیدا کردن حل‌کننده</b><small><span>${esc(a.F)}</span> · <span>${esc(d.place)}</span> · <span>بررسی بی‌طرفی و روزهای آزاد</span></small></span></div><div class="arb-paid">${I.shield}<span>${mny(a.total)} پرداخت شد و نزد بلوک امانت است</span></div></div>`;
+  if(a.st==='assigned')return `<div class="arbbox"><div class="arb-r">${hexA(R)}<span><b>${esc(R.name)}</b><small><span>${esc(a.F)}</span> · <span>${esc(R.place)}</span> · <span class="num">★ ${fa(R.rating)}</span> · <span>${fa(R.done)} پرونده</span></small></span><button class="mini" onclick="openProfile('${a.who}')">پروفایل</button></div>
+    <div class="arb-ok">✓ بی‌طرفی بررسی شد: هیچ همکاری، پروژه یا گفت‌وگوی قبلی با دو طرف ندارد</div>
+    <div class="arb-when"><span>زمان بازدید</span><b>${esc(a.when)}</b></div>
+    <div class="arb-paid">${I.shield}<span>${mny(a.total)} امانی · بعد از ثبت گزارش آزاد می‌شود</span></div>
+    <div class="rq-a"><button onclick="arbReject('${d.id}')" ${a.rej?'disabled':''}>${a.rej?'حق رد استفاده شد':'رد این حل‌کننده (۱ بار)'}</button><button class="yes" onclick="arbVisit('${d.id}')">شبیه‌سازی بازدید</button></div></div>`;
+  if(a.st==='visit')return `<div class="arbbox"><div class="arb-find"><span class="radar"><i></i><i></i></span><span><b>${esc(R.name)} در محل کار است</b><small>عکس، اندازه‌گیری و مقایسه با قرارداد…</small></span></div></div>`;
+  if(a.st==='report'||a.st==='appeal')return `<div class="arbbox"><div class="arb-r">${hexA(R)}<span><b><span>${a.st==='appeal'?'رأی بازبینی':'رأی'}</span> <span>${esc(R.name)}</span></b><small>${esc(a.rep.v)}</small></span></div>
+    <button class="linkrow" onclick="arbReport('${d.id}')"><span class="ic">${QI.doc}</span><span>دیدن گزارش کامل و رأی</span><small>‹</small></button>
+    <div class="arb-when"><span>مهلت اعتراض</span><b class="num">${a.st==='appeal'?'رأی نهایی':'۷۲ ساعت'}</b></div>
+    <div class="rq-a">${a.st==='appeal'?'':`<button onclick="arbAppeal('${d.id}')">اعتراض و بازبینی</button>`}<button class="yes" onclick="arbAccept('${d.id}')">قبول رأی و بستن پرونده</button></div></div>`;
+  if(a.st==='done')return `<div class="arbbox done"><b>پرونده با رأی حل‌کننده بسته شد</b><span>${esc(a.rep.v)}</span><div class="arb-split"><span>سهم حل‌کننده <b class="num">${mny(a.res+a.travel)}</b></span><span>کمیسیون بلوک <b class="num">${mny(a.blk)}</b></span></div>${a.rated?'':`<button class="ghost" style="width:100%;margin-top:8px" onclick="arbRate('${d.id}')">به حل‌کننده امتیاز بده</button>`}</div>`;
+  return ''}
+
+/* ---------- درخواست و محاسبهٔ هزینه ---------- */
+function arbAsk(id){const d=S.disp.find(x=>x.id===id);S.arbQ={id,field:arbSuggest(d),amt:120,multi:false,ok:false};arbSheet()}
+function arbSheet(){const q=S.arbQ,d=S.disp.find(x=>x.id===q.id),f=arbFee(q,d.place);
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">درخواست حل‌کنندهٔ حضوری</h3><p class="sub"><span>${esc(d.proj)}</span> · <span>${esc(d.place)}</span></p>
+  <span class="label">مشکل در کدام حوزه است؟</span><div class="chips">${ARB_F.map(x=>`<button class="chip" aria-pressed="${q.field===x.k}" onclick="S.arbQ.field='${x.k}';arbSheet()">${x.n}</button>`).join('')}</div>
+  <p class="hint" style="margin:6px 0 0"><span>${esc(f.F.ex)}</span> · <span>${f.F.who==='engineer'?'حل‌کننده: مهندس همین حوزه':'حل‌کننده: متخصص همین حوزه'}</span></p>
+  <span class="label">مبلغ مورد اختلاف (میلیون تومان)</span><div class="arb-amt"><input class="field num" type="range" min="5" max="1500" step="5" value="${q.amt}" oninput="S.arbQ.amt=+this.value;arbFeeUpd()"><b class="num" id="arbAmt">${fa(q.amt)} میلیون</b></div>
+  <label class="arb-chk"><input type="checkbox" ${q.multi?'checked':''} onchange="S.arbQ.multi=this.checked;arbFeeUpd()"><span>بیش از یک موضوع (مثلاً هم کیفیت و هم مقدار کار)</span></label>
+  <div class="card arb-fee" id="arbFee">${arbFeeHTML(f)}</div>
+  <label class="arb-chk"><input type="checkbox" ${q.ok?'checked':''} onchange="S.arbQ.ok=this.checked;$('arbGo').disabled=!this.checked"><span>می‌دانم رأی حل‌کننده پس از ۷۲ ساعت مهلت اعتراض، طبق مادهٔ ۷ قرارداد، برای دو طرف لازم‌الاجراست.</span></label>
+  <button class="cta" id="arbGo" ${q.ok?'':'disabled'} onclick="arbPay()">پرداخت امانی و ادامه</button>`;show()}
+function arbFeeHTML(f){return `<div class="af-row"><span>هزینهٔ داوری</span><b class="num">${mny(f.fee)}</b></div>
+  <small class="af-why"><span>پایه ${mny(ARB_BASE)}</span> × <span>${esc(f.F.n)}</span> <span class="num">(${fa(f.F.f)})</span> × <span>${esc(f.am[2])}</span> <span class="num">(${fa(f.am[1])})</span></small>
+  <div class="af-row"><span>رفت‌وآمد ${f.tvk==='city'?'(حل‌کننده در همین شهر)':f.tvk==='prov'?'(داخل استان)':'(از استان دیگر)'}</span><b class="num">${f.travel?mny(f.travel):'رایگان'}</b></div>
+  <div class="af-bar"><i style="flex:${100-f.pct}"></i><i class="b" style="flex:${f.pct}"></i></div>
+  <div class="af-leg"><span><i></i>حل‌کننده ${fa(100-f.pct)}٪ + رفت‌وآمد</span><span><i class="b"></i>کمیسیون بلوک ${fa(f.pct)}٪ · ${f.cx?'پرونده پیچیده':'پرونده ساده'}</span></div>
+  <div class="af-row tot"><span>جمع قابل پرداخت</span><b class="num">${mny(f.total)}</b></div>`}
+function arbFeeUpd(){const q=S.arbQ,d=S.disp.find(x=>x.id===q.id);$('arbAmt').textContent=fa(q.amt)+' میلیون';$('arbFee').innerHTML=arbFeeHTML(arbFee(q,d.place))}
+function arbPay(){const q=S.arbQ,d=S.disp.find(x=>x.id===q.id),f=arbFee(q,d.place);
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">پرداخت امانی</h3><p class="sub">پیش از تعیین حل‌کننده · ثبت‌کنندهٔ اختلاف می‌پردازد</p>
+  <div class="card arb-fee"><div class="af-row tot"><span>مبلغ</span><b class="num">${mny(f.total)}</b></div></div>
+  <span class="label">روش پرداخت</span><div class="chips"><button class="chip" aria-pressed="true" onclick="pickOne(this)">درگاه بانکی</button><button class="chip" aria-pressed="false" onclick="pickOne(this)">کیف پول بلوک</button></div>
+  <div class="note" style="margin-top:12px">${I.shield}<span>پول نزد بلوک امانت می‌ماند و فقط بعد از ثبت گزارش بازدید به حل‌کننده می‌رسد. اگر حل‌کننده سر قرار نیاید، کامل برمی‌گردد.</span></div>
+  <button class="cta" onclick="arbPaid()">پرداخت ${mny(f.total)}</button>`;show()}
+function arbPaid(){const q=S.arbQ,d=S.disp.find(x=>x.id===q.id),f=arbFee(q,d.place);
+  d.arb=Object.assign({},f,{st:'match',paid:true,field:q.field,F:f.F.n,amt:q.amt});d.st=2;closeSheet();renderDisp();toast('پرداخت شد؛ دنبال حل‌کنندهٔ بی‌طرف می‌گردیم');
+  setTimeout(()=>arbAssign(d),2600)}
+function arbPick(d,skip){const conv=new Set(S.convs.map(c=>c.pid));
+  const L=ARBS.filter(a=>a.f.includes(d.arb.field)&&a.id!==d.with&&!conv.has(a.id)&&!(skip||[]).includes(a.id)).map(a=>a.id);
+  L.sort((x,y)=>(P[y].place===d.place)-(P[x].place===d.place)||(provOf(P[y].place)===provOf(d.place))-(provOf(P[x].place)===provOf(d.place)));return L[0]}
+function arbAssign(d){const a=d.arb;a.who=arbPick(d,a.skip);if(!a.who){a.who=ARBS.find(x=>x.f.includes(a.field)).id}
+  a.st='assigned';a.when=['یکشنبه ۶ مهر · ۱۰ صبح','دوشنبه ۷ مهر · ۸ صبح'][(a.skip||[]).length%2];
+  if(S.cur==='disp')renderDisp();notify({t:'حل‌کنندهٔ حضوری تعیین شد',s:P[a.who].name+' — '+a.when,ty:'req',go:"go('disp')"})}
+function arbReject(id){const d=S.disp.find(x=>x.id===id),a=d.arb;if(a.rej)return;a.rej=1;(a.skip=a.skip||[]).push(a.who);a.st='match';renderDisp();toast('حل‌کنندهٔ دیگری تعیین می‌شود');setTimeout(()=>arbAssign(d),2000)}
+function arbVisit(id){const d=S.disp.find(x=>x.id===id),a=d.arb;a.st='visit';d.st=3;renderDisp();
+  setTimeout(()=>{a.st='report';a.rep=arbDemoReport(a);if(S.cur==='disp')renderDisp();notify({t:'گزارش و رأی حل‌کننده ثبت شد',s:a.rep.v,ty:'req',go:"go('disp')"})},2600)}
+function arbDemoReport(a){const R={struct:['مقاومت بتن سقف با چکش اشمیت ۲۲ مگاپاسکال؛ قرارداد C25 خواسته. پوشش آرماتور در ۲ نقطه کمتر از ۲٫۵ سانت.','مغایر با قرارداد در بخش بتن؛ آرماتوربندی مطابق نقشه','مجری ۳۰٪ از مبلغ بتن‌ریزی سقف را کسر می‌کند؛ کارفرما باقی مرحلهٔ دوم را ظرف ۷ روز می‌پردازد.'],
+  mas:['شاقول دیوار شمالی ۲٫۵ سانت انحراف در ۳ متر؛ ملات ۱ به ۶ به جای ۱ به ۴.','مغایر در دیوار شمالی','مجری دیوار شمالی را ظرف ۵ روز اصلاح می‌کند؛ پرداخت بعد از اصلاح.'],
+  qty:['متراژ اجراشده ۲۱۰ متر مربع؛ صورت‌وضعیت مجری ۲۴۰ متر ادعا کرده بود.','اختلاف ۳۰ متر در مقدار کار','پرداخت بر اساس ۲۱۰ متر؛ کارفرما مبلغ اصلاح‌شده را ظرف ۳ روز می‌پردازد.']}[a.field]||['کار با مشخصات قرارداد مقایسه شد؛ ۲ مورد نقص جزئی دیده شد.','مغایرت جزئی','مجری نقص‌ها را ظرف ۵ روز رفع می‌کند و پرداخت انجام می‌شود.'];
+  return {m:R[0],c:R[1],v:R[2],ph:4}}
+function arbReport(id){const d=S.disp.find(x=>x.id===id),a=d.arb,R=P[a.who],r=a.rep;
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">گزارش بازدید و رأی</h3><p class="sub"><span>${esc(R.name)}</span> · <span>${esc(a.F)}</span> · <span>${esc(d.proj)}</span></p>
+  <div class="arb-ph">${Array.from({length:r.ph},(_,k)=>`<span style="--k:${k}">${MI.img}<small>عکس ${fa(k+1)} · ${esc(d.place)}</small></span>`).join('')}</div>
+  <div class="arb-rep"><span class="label">اندازه‌گیری و مشاهده</span><p>${esc(r.m)}</p><span class="label">مقایسه با قرارداد و آیین‌نامه</span><p>${esc(r.c)}</p><span class="label">رأی و کار اصلاحی</span><p><b>${esc(r.v)}</b></p></div>
+  <div class="note" style="margin-top:10px">${I.shield}<span>عکس‌ها با زمان و مکان ثبت شده‌اند. این گزارش در صورت مراجعه به دادگاه هم مدرک است.</span></div>
+  <button class="cta" onclick="closeSheet()">بستن</button>`;show()}
+function arbAppeal(id){const d=S.disp.find(x=>x.id===id),a=d.arb,fee=Math.round(a.fee/2/10000)*10000;
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">اعتراض و بازبینی</h3><p class="sub">یک حل‌کنندهٔ دوم (غیر از قبلی) گزارش را بررسی و در صورت نیاز دوباره بازدید می‌کند</p>
+  <div class="card arb-fee"><div class="af-row"><span>هزینهٔ بازبینی (نصف هزینهٔ داوری)</span><b class="num">${mny(fee)}</b></div><small class="af-why">اگر رأی عوض شود، این مبلغ به تو برمی‌گردد. رأی بازبینی نهایی است.</small></div>
+  <span class="label">دلیل اعتراض</span><textarea class="field" id="apW" rows="3" placeholder="کدام بخش گزارش یا رأی نادرست است؟"></textarea>
+  <button class="cta" onclick="if($('apW').value.trim().length<10){toast('دلیل اعتراض را کامل‌تر بنویس');return}arbAppealGo('${id}')">پرداخت و ثبت اعتراض</button>`;show()}
+function arbAppealGo(id){const d=S.disp.find(x=>x.id===id),a=d.arb;(a.skip=a.skip||[]).push(a.who);closeSheet();a.st='match';renderDisp();toast('اعتراض ثبت شد؛ حل‌کنندهٔ دوم تعیین می‌شود');
+  setTimeout(()=>{a.who=arbPick(d,a.skip)||a.who;a.st='appeal';a.rep=Object.assign({},a.rep,{v:'رأی قبلی تأیید شد؛ '+a.rep.v});if(S.cur==='disp')renderDisp();notify({t:'رأی بازبینی ثبت شد',s:'رأی نهایی است',ty:'req',go:"go('disp')"})},3000)}
+function arbAccept(id){const d=S.disp.find(x=>x.id===id);d.arb.st='done';d.st=4;renderDisp();toast('پرونده بسته شد؛ سهم حل‌کننده آزاد شد')}
+function arbRate(id){const d=S.disp.find(x=>x.id===id),R=P[d.arb.who];
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">امتیاز به حل‌کننده</h3><p class="sub">${esc(R.name)}</p>
+  <div class="chips" style="justify-content:center">${[1,2,3,4,5].map(n=>`<button class="chip" aria-pressed="${n===5}" onclick="pickOne(this)">${fa(n)} ★</button>`).join('')}</div>
+  <span class="label">بی‌طرف بود؟</span><div class="chips"><button class="chip" aria-pressed="true" onclick="pickOne(this)">بله</button><button class="chip" aria-pressed="false" onclick="pickOne(this)">نه</button></div>
+  <button class="cta" onclick="S.disp.find(x=>x.id==='${id}').arb.rated=1;closeSheet();renderDisp();toast('امتیاز ثبت شد')">ثبت امتیاز</button>`;show()}
+(function(){const dc=dispClose;window.dispClose=function(id){dc(id);const d=S.disp.find(x=>x.id===id);d.st=4;renderDisp()}})();
+
+/* ---------- سمت مهندس/متخصص: ثبت‌نام حل‌کننده و پرونده‌ها ---------- */
+S.arbMe=null;S.arbEarn=0;
+S.arbJobs=[{id:'j1',proj:'سقف دوم ویلای طولا',a:'noori',b:'tavakoli',field:'struct',issue:'ترک مویی سقف بعد از قالب‌برداری؛ کارفرما می‌گوید بتن‌ریزی عجولانه بوده.',place:'طولا',amt:180,when:'سه‌شنبه ۸ مهر · ۹ صبح',st:'new'},
+  {id:'j2',proj:'کاشی‌کاری واحد ۴',a:'ahmadi',b:'rezaei',field:'fin',issue:'پوکی کاشی کف و اختلاف در متراژ.',place:'قشم',amt:40,when:'چهارشنبه ۹ مهر · ۱۱ صبح',st:'new'}];
+function arbMyFields(){return ARB_F.filter(x=>x.who===S.role||(S.role==='engineer'&&x.k==='qty'))}
+function openArbJ(){gate('arbj',()=>go('arbj'))}
+function renderArbJ(){const m=S.arbMe,el=$('s-arbj'),can=['engineer','specialist'].includes(S.role);
+  if(!can){el.innerHTML=`${pageBar('حل‌کنندهٔ حضوری')}<div class="section"><div class="empty">این بخش برای نقش مهندس و متخصص است. از «تغییر نقش» وارد شو.</div></div>`;return}
+  if(!m||m.st==='form'){const q=S.arbQ2||(S.arbQ2={fields:arbMyFields().slice(0,1).map(x=>x.k),range:'کل استان',doc:false,pledge:false});
+    const pd=(S.profile&&S.profile.d)||{},yrs=EXP_Y[pd.exp]||(S.role==='engineer'?7:7),sc=86;
+    const chk=[['نقش مهندس یا متخصص تأییدشده',1],['حداقل ۵ سال سابقه',yrs>=5],['امتیاز بلوک ۸۰ به بالا ('+fa(sc)+')',sc>=80],['هویت تأییدشده',1]];
+    el.innerHTML=`${pageBar('حل‌کنندهٔ حضوری بلوک')}
+    <div class="hcard arbj-hero"><small>شغل تازه در بلوک</small><h2>اختلاف‌های حوزهٔ خودت را حضوری حل کن</h2><p><span>بلوک پرونده را بر اساس حوزه و شهرت می‌فرستد؛ هزینه از قبل پرداخت و امانی است. سهم تو:</span> <b>۸۰ تا ۸۵٪</b> <span>هزینهٔ داوری + کامل رفت‌وآمد را می‌گیری.</span></p>
+      <div class="arbj-ex"><span>نمونه: اختلاف ۱۲۰ میلیونی سازه</span><b class="num">${mny(arbFee({field:'struct',amt:120,multi:false},'قشم').res)}</b><small>سهم تو برای یک بازدید و گزارش</small></div></div>
+    <div class="section"><div class="sec-head"><h3>شرایط</h3></div><div class="card">${chk.map(c=>`<div class="arbj-c ${c[1]?'ok':''}"><i>${c[1]?'✓':'✕'}</i><span>${c[0]}</span></div>`).join('')}</div></div>
+    <div class="section"><div class="sec-head"><h3>حوزه‌های داوری</h3><span>فقط حوزه‌ای که مدرک داری</span></div>
+      <div class="chips">${arbMyFields().map(x=>`<button class="chip" aria-pressed="${q.fields.includes(x.k)}" onclick="arbQF('${x.k}')">${x.n}</button>`).join('')}</div>
+      <span class="label">محدودهٔ بازدید</span><div class="chips">${['فقط شهر خودم','کل استان','استان‌های همسایه'].map(x=>`<button class="chip" aria-pressed="${q.range===x}" onclick="S.arbQ2.range='${x}';renderArbJ()">${x}</button>`).join('')}</div>
+      <span class="label">${S.role==='engineer'?'پروانهٔ اشتغال نظام مهندسی':'گواهی مهارت فنی‌وحرفه‌ای یا سابقهٔ کار'}</span>
+      <button class="card arbj-up ${q.doc?'ok':''}" onclick="S.arbQ2.doc=true;renderArbJ();toast('مدرک بارگذاری شد')">${q.doc?'✓ مدرک بارگذاری شد':'+ بارگذاری تصویر مدرک'}</button>
+      <label class="arb-chk"><input type="checkbox" ${q.pledge?'checked':''} onchange="S.arbQ2.pledge=this.checked;renderArbJ()"><span><b>تعهدنامهٔ بی‌طرفی:</b> در پرونده‌ای که با یکی از طرفین نسبت، همکاری یا منفعت داشته باشم داوری نمی‌کنم، گزارش را فقط بر پایهٔ مشاهده و قرارداد می‌نویسم و از طرفین وجهی جدا نمی‌گیرم.</span></label>
+      <button class="cta" ${q.doc&&q.pledge&&q.fields.length?'':'disabled'} onclick="arbJoin()">ارسال درخواست</button></div>`;return}
+  if(m.st==='review'){el.innerHTML=`${pageBar('حل‌کنندهٔ حضوری بلوک')}<div class="section center" style="margin-top:30px"><span class="radar big"><i></i><i></i></span><h2>درخواستت در حال بررسی است</h2><p class="hint">بلوک مدرک و سابقه‌ات را بررسی می‌کند؛ معمولاً ۲۴ ساعت.</p></div>`;return}
+  const J=S.arbJobs.filter(j=>m.fields.includes(j.field));
+  el.innerHTML=`${pageBar('پرونده‌های داوری من')}
+  <div class="section"><div class="arbj-st"><div><b class="num">${fa(J.filter(j=>j.st==='done').length)}</b><span>پرونده بسته</span></div><div><b class="num">${fa(J.filter(j=>j.st!=='done').length)}</b><span>در جریان</span></div><div><b class="num">${tmn(S.arbEarn)}</b><span>درآمد (تومان)</span></div></div>
+    <div class="chips" style="margin-top:10px">${m.fields.map(k=>`<span class="tag">${ARB_F.find(x=>x.k===k).n}</span>`).join('')}<span class="tag">${esc(m.range)}</span></div></div>
+  <div class="section"><div class="sec-head"><h3>پرونده‌ها</h3></div>${J.length?'':'<div class="empty">فعلاً پرونده‌ای در حوزه‌های تو نیست؛ به‌محض ثبت، اعلان می‌گیری.</div>'}${J.map(j=>{const f=arbFee(j,j.place),F=ARB_F.find(x=>x.k===j.field);
+    return `<div class="card arbjob ${j.st}"><div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><span class="tag">${F.n}</span><b>${esc(j.proj)}</b><small><span>${esc(P[j.a].name)}</span> و <span>${esc(P[j.b].name)}</span> · <span>${esc(j.place)}</span></small></div><div class="arbjob-m"><b class="num">${mny(f.res+f.travel)}</b><small>سهم تو · امانی</small></div></div>
+      <p>${esc(j.issue)}</p><div class="arb-when"><span>زمان بازدید</span><b>${esc(j.when)}</b></div>
+      ${j.st==='new'?`<label class="arb-chk"><input type="checkbox" id="cf_${j.id}"><span>با هیچ‌کدام از طرفین نسبت، همکاری یا منفعتی ندارم.</span></label><div class="rq-a"><button onclick="arbJob('${j.id}','no')">نمی‌توانم</button><button class="yes" onclick="if(!$('cf_${j.id}').checked){toast('اول بی‌طرفی را تأیید کن');return}arbJob('${j.id}','acc')">قبول پرونده</button></div>`:
+        j.st==='acc'?`<div class="rq-a"><button onclick="openChatWith('${j.a}')">هماهنگی با طرفین</button><button class="yes" onclick="arbRepForm('${j.id}')">ثبت گزارش بازدید</button></div>`:
+        j.st==='done'?`<div class="arb-ok">✓ گزارش ثبت شد · سهم تو پس از مهلت اعتراض آزاد می‌شود</div>`:`<div class="arb-ok" style="color:var(--muted)">رد شد؛ به حل‌کنندهٔ دیگری سپرده شد</div>`}</div>`}).join('')}</div>`}
+function arbQF(k){const L=S.arbQ2.fields,i=L.indexOf(k);i>-1?L.splice(i,1):L.push(k);renderArbJ()}
+function arbJoin(){const q=S.arbQ2;S.arbMe={st:'review',fields:q.fields.slice(),range:q.range};renderArbJ();
+  setTimeout(()=>{S.arbMe.st='ok';if(S.cur==='arbj')renderArbJ();notify({t:'حل‌کنندهٔ حضوری بلوک شدی',s:'اولین پرونده‌ها برایت فرستاده شد',ty:'id',go:"go('arbj')"})},3200)}
+function arbJob(id,st){const j=S.arbJobs.find(x=>x.id===id);j.st=st;renderArbJ();toast(st==='acc'?'پرونده قبول شد؛ زمان بازدید به طرفین اعلام شد':'پرونده به حل‌کنندهٔ دیگری سپرده می‌شود')}
+function arbRepForm(id){const j=S.arbJobs.find(x=>x.id===id);S.arbR={id,ph:0};
+  sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">گزارش استاندارد بازدید</h3><p class="sub"><span>${esc(j.proj)}</span> · <span>حداقل ۳ عکس با زمان و مکان</span></p>
+  <button class="card arbj-up" id="arPh" onclick="S.arbR.ph++;this.textContent='✓ '+fa(S.arbR.ph)+' عکس ثبت شد (زمان و مکان خودکار)';this.classList.toggle('ok',S.arbR.ph>=3)">+ گرفتن عکس از محل</button>
+  <span class="label">اندازه‌گیری و مشاهده</span><textarea class="field" id="arM" rows="2" placeholder="مثلاً مقاومت بتن، شاقول، متراژ، محل ترک…"></textarea>
+  <span class="label">مقایسه با قرارداد و آیین‌نامه</span><div class="chips" id="arC"><button class="chip" aria-pressed="false" onclick="pickOne(this)">مطابق</button><button class="chip" aria-pressed="true" onclick="pickOne(this)">مغایرت جزئی</button><button class="chip" aria-pressed="false" onclick="pickOne(this)">مغایرت اساسی</button></div>
+  <span class="label">رأی</span><div class="chips" id="arV"><button class="chip" aria-pressed="false" onclick="pickOne(this)">حق با کارفرما</button><button class="chip" aria-pressed="false" onclick="pickOne(this)">حق با مجری</button><button class="chip" aria-pressed="true" onclick="pickOne(this)">تقسیم مسئولیت</button></div>
+  <span class="label">کار اصلاحی یا مبلغ</span><textarea class="field" id="arA" rows="2" placeholder="چه کسی، چه کاری، تا کی؛ یا چه مبلغی کسر/پرداخت شود"></textarea>
+  <button class="cta" onclick="arbRepSave('${id}')">ثبت گزارش و رأی</button>`;show()}
+function arbRepSave(id){if(S.arbR.ph<3){toast('حداقل ۳ عکس لازم است');return}if($('arM').value.trim().length<8||$('arA').value.trim().length<8){toast('اندازه‌گیری و کار اصلاحی را کامل بنویس');return}
+  const j=S.arbJobs.find(x=>x.id===id),f=arbFee(j,j.place);j.st='done';S.arbEarn+=f.res+f.travel;closeSheet();renderArbJ();toast('گزارش برای طرفین فرستاده شد؛ ۷۲ ساعت مهلت اعتراض')}
+
+/* ---------- اتصال‌ها: مسیر، «من»، خانهٔ مهندس ---------- */
+(function(){const r0=render;window.render=function(){if(S.cur==='arbj'){renderArbJ();return}r0()};
+  const g=go;window.go=function(name,noPush){if(name==='arbj'&&!S.auth){gate('arbj',()=>g(name,noPush));return}g(name,noPush)};
+  const rm=renderMe;window.renderMe=function(){rm();if(!S.auth||!['engineer','specialist'].includes(S.role))return;const grid=document.querySelector('#s-me .mygrid');if(!grid||grid.querySelector('.arbj-b'))return;
+    const n=S.arbMe&&S.arbMe.st==='ok'?S.arbJobs.filter(j=>S.arbMe.fields.includes(j.field)&&(j.st==='new'||j.st==='acc')).length:0;
+    grid.insertAdjacentHTML('beforeend',`<button class="arbj-b" onclick="go('arbj')"><span class="ic" style="--c:#A98CFF">${I.shield}</span>داوری حضوری${n?`<em class="num">${fa(n)}</em>`:''}</button>`)};
+  const he=window.homeEngineer;window.homeEngineer=function(){return he()+`<div class="section"><button class="card arb-join" onclick="go('arbj')"><span class="aj-i">${I.shield}</span><span><b>${S.arbMe&&S.arbMe.st==='ok'?'پرونده‌های داوری من':'حل‌کنندهٔ حضوری بلوک شو'}</b><small>اختلاف‌های حوزهٔ خودت را حضوری حل کن؛ ۸۰ تا ۸۵٪ هزینه برای تو</small></span><em>‹</em></button></div>`};
+})();
 go('home',true);</script>
+<!-- اتصال به API بک‌اند؛ بدون سرور، نسخهٔ نمایشی می‌ماند -->
+<script src="live.js"></script>
 
 </body></html>
