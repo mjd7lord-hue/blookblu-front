@@ -30,8 +30,10 @@
   // اگر مرورگر اجازهٔ ذخیره ندهد (حالت خصوصی)، همان آدرسِ داخل لینک
   const saved = fromUrl || store.get('blk-api');
   const local = ['localhost', '127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
+  // روی دامنهٔ اصلی (blooko.ir) خودکار به سرور واقعی وصل می‌شود
+  const prod = /(^|\.)blooko\.ir$/.test(location.hostname) ? 'https://api.blooko.ir' : null;
   const L = (window.LIVE = {
-    base: saved === 'off' ? null : saved || (local ? 'http://localhost:3000' : null),
+    base: saved === 'off' ? null : saved || (local ? 'http://localhost:3000' : prod),
     on: false,
     tok: null,
     me: null, // پاسخ /me
