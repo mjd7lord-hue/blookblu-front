@@ -725,4 +725,40 @@
     if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S.pview = 'card'; return prev('profile', noPush); }
     return prev(name, noPush);
   });
+
+  /* ---------- کاوش: آگهی خود کاربر همیشه پیدا شود ---------- */
+  // هر نقش پیش‌فرض «طرف مقابل» را می‌بیند (کارگر ← پیدا کردن کار)؛ آگهی خودت در زبانهٔ دیگر است
+  wrap('listFor', function (prev, ignoreRole) {
+    const seen = new Set();
+    return prev(ignoreRole).filter((x) => (seen.has(x.a.id) ? false : seen.add(x.a.id)));
+  });
+  wrap('renderResults', function (prev, first) {
+    prev(first);
+    if (!on()) return;
+    if (!fresh('myads:' + S.role, 60000)) { loadMyAds().then(() => { if (S.cur === 'explore') renderResults(); }).catch(() => {}); return; }
+    const t = modeType(), el = document.getElementById('results');
+    const mine = ADS.filter((a) => a.who === 'me' && (!a.st || a.st === 'active') && a.type !== t);
+    if (!el || !mine.length || el.querySelector('#blkMyAds')) return;
+    const byType = {};
+    mine.forEach((a) => (byType[a.type] = byType[a.type] || []).push(a));
+    el.insertAdjacentHTML('afterbegin', `<div class="section" id="blkMyAds">${Object.entries(byType).map(([ty, L2]) => {
+      const m = MODES.find((x) => x[2] === ty);
+      return `<div class="tstep" role="button" tabindex="0" onclick="setMode('${m[0]}')" style="background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px"><span class="n num">${fa(L2.length)}</span><span class="t"><b>${L2.length > 1 ? fa(L2.length) + ' آگهی تو' : 'آگهی تو «' + esc(L2[0].title) + '»'}</b><small>در بخش «${m[1]}» نمایش داده می‌شود</small></span><span class="go">‹</span></div>`;
+    }).join('')}</div>`);
+  });
+
+  /* ---------- بدون زوم و لرزش صفحه (مثل اپ‌های دیگر) ---------- */
+  (function noZoom() {
+    const st = document.createElement('style');
+    st.textContent = `
+      html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
+      html,body{overflow-x:clip;overscroll-behavior-x:none}
+      /* آیفون روی کادر متنی با نوشتهٔ کوچک‌تر از ۱۶ خودش زوم می‌کند */
+      @supports (-webkit-touch-callout:none){input,select,textarea{font-size:max(16px,1em)!important}}`;
+    document.head.appendChild(st);
+    // آیفون user-scalable=no را نادیده می‌گیرد: جلوی زوم دو انگشتی و دو ضربه‌ای
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (e) => e.preventDefault(), { passive: false }));
+    // زوم دو ضربه‌ای را touch-action: manipulation بالا می‌بندد (بدون کند کردن لمس‌های پشت‌سرهم)
+    document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  })();
 })();
