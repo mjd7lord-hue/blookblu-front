@@ -747,6 +747,33 @@
     }).join('')}</div>`);
   });
 
+  /* ---------- «تازه‌های بلوک» بعد از هر به‌روزرسانی (هنگام ورود، حداکثر ۲ بار، بعد دیگر هرگز) ---------- */
+  const WN_MAX = 2;
+  let wnShownThisSession = false;
+  const wnKey = (v) => 'blk-wn:' + v;
+  function maybeWhatsNew() {
+    const w = L.cfg && L.cfg.whatsNew;
+    if (!on() || wnShownThisSession || !w || !w.items || !w.items.length) return;
+    if (S.cur !== 'home' || document.querySelector('#sheet.on')) return;
+    let n = 0;
+    try { n = +(localStorage.getItem(wnKey(w.v)) || 0); } catch (e) { return; }
+    if (n >= WN_MAX) return;
+    wnShownThisSession = true;
+    try { localStorage.setItem(wnKey(w.v), String(n + 1)); } catch (e) {}
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">${esc(w.title || 'تازه‌های بلوک')}</h3><p class="sub">این به‌روزرسانی چه چیزهایی آورد و چطور از آن استفاده کنی</p>
+      <div class="card" style="box-shadow:none;background:var(--bg);padding:6px 14px">${w.items.map((x, i) => `<div class="tstep" style="cursor:default"><span class="n num">${fa(i + 1)}</span><span class="t"><b>${esc(x.t)}</b>${x.d ? `<small>${esc(x.d)}</small>` : ''}</span></div>`).join('')}</div>
+      <button class="cta" onclick="closeSheet()">فهمیدم</button>`;
+    show();
+  }
+  L.whatsNew = maybeWhatsNew;
+  wrap('renderHome', function (prev) {
+    prev();
+    setTimeout(maybeWhatsNew, 900);
+    setTimeout(maybeWhatsNew, 3500);
+  });
+  const loadCfg0 = L.loadCfg;
+  L.loadCfg = () => loadCfg0().then(() => setTimeout(maybeWhatsNew, 300));
+
   /* ---------- بدون زوم و لرزش صفحه (مثل اپ‌های دیگر) ---------- */
   (function noZoom() {
     const st = document.createElement('style');
