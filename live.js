@@ -227,7 +227,8 @@
       case 'deal': return Object.assign(b, { k: 'deal', d: { job: p.job, qty: p.qty || '—', price: p.price, start: p.start, dur: fa(p.durationDays || 1) + ' روز', plan: (p.plan || []).map((x) => [x.title, x.pct]) }, st: dst(m.status), projectId: m.projectId });
       case 'day': return Object.assign(b, { k: 'day', t: /[۰-۹]/.test(p.date || '') ? p.date : (p.date || '') + ' ' + fa(new Date(m.createdAt).getDate()), h: p.hour, st: dst(m.status) });
       case 'del': return Object.assign(b, { k: 'del' });
-      default: return Object.assign(b, { k: 'text', t: m.body || '' });
+      // پیام «پشتیبانی بلوک» (مدیر از پنل)
+      default: return Object.assign(b, { k: 'text', t: (m.admin ? '🛡 پشتیبانی بلوک: ' : '') + (m.body || '') });
     }
   }
   function buildMsgs(items, readAt) {
