@@ -747,6 +747,130 @@
     }).join('')}</div>`);
   });
 
+  /* =================================================================
+   * بخش ۷: چت روی گوشی — پیام صوتی واقعی، بدون ذره‌بین روی دکمه، کادر نوشتن چسبیده به کیبورد،
+   *        سربرگ ثابت (نام و مرحله) و فقط فهرست پیام‌ها اسکرول می‌شود
+   * ================================================================= */
+  (function chatCss() {
+    const st = document.createElement('style');
+    st.textContent = `
+      /* نگه داشتن دکمهٔ صدا: بدون ذره‌بین، انتخاب متن و منوی لمس طولانی */
+      #s-chat .composer, #s-chat .composer *:not(textarea), #s-chat .voice, #s-chat .voice *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+      #s-chat .snd{touch-action:none}
+      @media (max-width:799px){
+        body.blk-chat{overflow:hidden;overscroll-behavior:none}
+        body.blk-chat .nav{display:none!important}
+        /* صفحهٔ چت = ارتفاع قسمت دیده‌شده (بالای کیبورد)؛ سربرگ و کادر نوشتن ثابت، فقط پیام‌ها اسکرول */
+        body.blk-chat #s-chat{position:fixed;left:0;right:0;top:var(--vvt,0px);height:var(--vvh,100dvh);display:flex;flex-direction:column;z-index:25;background:var(--bg);overflow:hidden}
+        body.blk-chat #s-chat .chat-top{position:relative;top:0;flex:none;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+        body.blk-chat #s-chat .ctxbar{position:relative;top:0;flex:none;margin-bottom:6px}
+        body.blk-chat #s-chat .msgs{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:12px}
+        body.blk-chat #s-chat .composer{position:relative;flex:none;bottom:auto;left:auto;right:auto;background:var(--bg);padding:6px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+        body.blk-chat.blk-kb #s-chat .composer{padding-bottom:6px}
+        body.blk-chat.blk-kb #s-chat .qr{display:none}
+      }`;
+    document.head.appendChild(st);
+  })();
+  const isChat = () => S.cur === 'chat' && innerWidth < 800;
+  // ارتفاع و جای قسمت دیده‌شدهٔ صفحه (آیفون موقع باز شدن کیبورد صفحه را جابه‌جا می‌کند)
+  function vvSync() {
+    const vv = window.visualViewport;
+    const h = vv ? vv.height : innerHeight, t = vv ? vv.offsetTop : 0;
+    document.documentElement.style.setProperty('--vvh', h + 'px');
+    document.documentElement.style.setProperty('--vvt', t + 'px');
+    document.body.classList.toggle('blk-kb', !!vv && h < innerHeight * 0.8);
+  }
+  function syncChatMode() {
+    document.body.classList.toggle('blk-chat', isChat());
+    vvSync();
+  }
+  if (window.visualViewport) {
+    let wasBottom = true;
+    const msgsEl = () => document.getElementById('msgs');
+    visualViewport.addEventListener('resize', () => {
+      const el = msgsEl();
+      if (el && isChat()) wasBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      vvSync();
+      // کیبورد باز شد: آخرین پیام درست بالای کادر نوشتن دیده شود
+      if (el && isChat() && wasBottom) requestAnimationFrame(() => (el.scrollTop = el.scrollHeight));
+    });
+    visualViewport.addEventListener('scroll', vvSync);
+  }
+  addEventListener('resize', syncChatMode);
+  wrap('go', function (prev, name, noPush) { const r = prev(name, noPush); syncChatMode(); return r; });
+  wrap('renderChat', function (prev) { const r = prev(); syncChatMode(); return r; });
+  // در حالت چت، فهرست پیام‌ها اسکرول می‌شود نه خود صفحه
+  wrap('scrollEnd', function (prev, inst) {
+    const el = document.getElementById('msgs');
+    if (!isChat() || !el) return prev(inst);
+    requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: inst || reduce ? 'auto' : 'smooth' }));
+  });
+  document.addEventListener('contextmenu', (e) => { if (e.target.closest && e.target.closest('#s-chat .composer, #s-chat .voice')) e.preventDefault(); });
+
+  /* ---------- ضبط و پخش صدای واقعی ---------- */
+  const rec = { state: null, mr: null, chunks: [], stream: null, t0: 0 };
+  const pickMime = () => (window.MediaRecorder && ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t))) || '';
+  const liveConv = () => { const c = S.convs.find((x) => x.id === S.cid); return L.on && c && c._live ? c : null; };
+  wrap('startRec', function (prev) {
+    if (!liveConv()) return prev();
+    if (!navigator.mediaDevices || !window.MediaRecorder) { toast('این مرورگر ضبط صدا ندارد؛ پیام بنویس'); return; }
+    prev();
+    rec.state = 'starting'; rec.chunks = []; rec.t0 = Date.now();
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then((stream) => {
+      if (rec.state !== 'starting') { stream.getTracks().forEach((t) => t.stop()); return; }
+      const mime = pickMime();
+      rec.stream = stream;
+      rec.mr = new MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 32000 } : undefined);
+      rec.mr.ondataavailable = (e) => { if (e.data && e.data.size) rec.chunks.push(e.data); };
+      rec.mr.start();
+      rec.state = 'rec'; rec.t0 = Date.now();
+    }).catch(() => {
+      rec.state = null;
+      try { stopRec(false); } catch (e) {}
+      toast('برای پیام صوتی، به بلوک اجازهٔ میکروفون بده');
+    });
+  });
+  wrap('stopRec', function (prev, send) {
+    if (!liveConv() || !rec.state) return prev(send);
+    const was = rec.state;
+    rec.state = null;
+    const done = () => { if (rec.stream) rec.stream.getTracks().forEach((t) => t.stop()); rec.stream = null; rec.mr = null; };
+    if (was === 'starting') { done(); prev(false); if (send) toast('اجازهٔ میکروفون داده شد؛ دوباره دکمه را نگه دار'); return; }
+    const dur = Math.max(1, Math.round((Date.now() - rec.t0) / 1000));
+    const mr = rec.mr;
+    mr.onstop = () => {
+      const blob = new Blob(rec.chunks, { type: (mr.mimeType || 'audio/webm').split(';')[0] });
+      done();
+      if (!send) { prev(false); return; }
+      if (blob.size < 500) { prev(false); toast('صدا خیلی کوتاه بود'); return; }
+      L._voiceBlob = blob;
+      prev(true); // پیام را در صفحه می‌گذارد و live.js آن را آپلود می‌کند
+      const c = liveConv(), m = c && [...c.msgs].reverse().find((x) => x.me && x.k === 'voice');
+      if (m) { m.dur = dur; if (!m.src) m.src = URL.createObjectURL(blob); }
+    };
+    try { mr.stop(); } catch (e) { done(); prev(false); }
+  });
+  let audio = null, audioI = null;
+  wrap('playVoice', function (prev, i) {
+    const c = S.convs.find((x) => x.id === S.cid), m = c && c.msgs[i];
+    if (!m || !m.src) return prev(i);
+    const btn = document.getElementById('pl' + i), wf = document.getElementById('wf' + i), bars = wf ? [...wf.children] : [], tEl = document.getElementById('vt' + i);
+    const reset = () => { clearInterval(audioI); bars.forEach((b) => b.classList.remove('on')); if (btn) btn.innerHTML = MI.play; if (tEl) tEl.textContent = fa('0:' + String(m.dur || 0).padStart(2, '0')); };
+    if (audio && audio._i === i && !audio.paused) { audio.pause(); reset(); return; }
+    if (audio) { audio.pause(); const ob = document.getElementById('pl' + audio._i); if (ob) ob.innerHTML = MI.play; clearInterval(audioI); }
+    audio = new Audio(m.src); audio._i = i;
+    audio.onended = reset;
+    audio.play().then(() => {
+      if (btn) btn.innerHTML = MI.pause;
+      audioI = setInterval(() => {
+        const d = audio.duration && isFinite(audio.duration) ? audio.duration : m.dur || 1;
+        const k = Math.round((audio.currentTime / d) * bars.length);
+        bars.forEach((b, j) => b.classList.toggle('on', j < k));
+        if (tEl) tEl.textContent = fa('0:' + String(Math.round(audio.currentTime)).padStart(2, '0'));
+      }, 120);
+    }).catch(() => { reset(); toast('پخش نشد؛ دوباره امتحان کن'); });
+  });
+
   /* ---------- «تازه‌های بلوک» بعد از هر به‌روزرسانی (هنگام ورود، حداکثر ۲ بار، بعد دیگر هرگز) ---------- */
   const WN_MAX = 2;
   let wnShownThisSession = false;

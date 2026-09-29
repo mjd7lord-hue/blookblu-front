@@ -248,6 +248,7 @@
       case 'deal': return Object.assign(b, { k: 'deal', d: { job: p.job, qty: p.qty || '—', price: p.price, start: p.start, dur: fa(p.durationDays || 1) + ' روز', plan: (p.plan || []).map((x) => [x.title, x.pct]) }, st: dst(m.status), projectId: m.projectId });
       case 'day': return Object.assign(b, { k: 'day', t: /[۰-۹]/.test(p.date || '') ? p.date : (p.date || '') + ' ' + fa(new Date(m.createdAt).getDate()), h: p.hour, st: dst(m.status) });
       case 'del': return Object.assign(b, { k: 'del' });
+      case 'voice': return Object.assign(b, { k: 'voice', dur: p.dur || 1, src: abs(p.url) });
       // پیام «پشتیبانی بلوک» (مدیر از پنل)
       default: return Object.assign(b, { k: 'text', t: (m.admin ? '🛡 پشتیبانی بلوک: ' : '') + (m.body || '') });
     }
@@ -637,7 +638,24 @@
       path = '/conversations/' + c.id + '/deals';
       body = { job: d.job, qty: d.qty || null, price: d.price || 'توافقی', amount: /تن|متر|روز|ساعت/.test(d.price || '') ? undefined : amount, start: d.start, durationDays: Math.max(1, faInt(d.dur) || 1), plan, retentionPct: 0 };
     } else if (m.k === 'day') { path = '/conversations/' + c.id + '/days'; body = { date: m.t, hour: m.h }; }
-    else { failMsg(c, m, 'پیام صوتی هنوز در نسخهٔ واقعی فعال نیست'); return; }
+    else if (m.k === 'voice') {
+      // فایل ضبط‌شده (live-more.js ← L._voiceBlob) به‌صورت پیوست
+      const blob = m._blob || L._voiceBlob; L._voiceBlob = null;
+      if (!blob) { failMsg(c, m, 'صدایی ضبط نشد'); return; }
+      m._blob = blob; if (!m.src) m.src = URL.createObjectURL(blob);
+      const ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+      const fd = new FormData(); fd.append('file', blob, 'voice.' + ext); fd.append('duration', String(m.dur || 1));
+      try {
+        const d = await api('POST', '/conversations/' + c.id + '/attachments', fd);
+        const nm = mapMsg(d.message);
+        if (!m.id) m.id = nm.id;
+        m._pending = false; m._at = nm._at; m.st = 'sent'; m._blob = null;
+        const i = c.msgs.indexOf(m);
+        if (S.cur === 'chat' && S.cid === c.id && i > -1) rerenderMsg(i);
+      } catch (e) { failMsg(c, m, e.message); }
+      return;
+    }
+    else { failMsg(c, m, 'این نوع پیام هنوز فرستاده نمی‌شود'); return; }
     try {
       const d = await api('POST', path, body);
       const nm = mapMsg(d.message);
