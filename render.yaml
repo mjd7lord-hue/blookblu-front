@@ -1,0 +1,19 @@
+# انتشار اپ بلوک روی Render به‌صورت سایت ایستا: Dashboard → New → Blueprint → همین مخزن (blookblu-front)
+# دامنهٔ اصلی blooko.ir فقط به این سرویس وصل باشد؛ پنل ادمین روی admin.blooko.ir و API روی api.blooko.ir
+# روی blooko.ir اپ خودکار به https://api.blooko.ir وصل می‌شود (live.js)
+services:
+  - type: web
+    name: blookblu-front
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    domains:
+      - blooko.ir
+      - www.blooko.ir
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
