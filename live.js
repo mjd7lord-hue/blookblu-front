@@ -94,8 +94,10 @@
     else if (body !== undefined) { h['Content-Type'] = 'application/json'; b = JSON.stringify(body); }
     if (L.tok && L.tok.a) h.Authorization = 'Bearer ' + L.tok.a;
     let res;
+    busy(1);
     try { res = await fetch(L.base + '/api' + path, { method, headers: h, body: b }); }
     catch (e) { throw { code: 'NETWORK', message: 'اتصال به سرور بلوک برقرار نشد؛ اینترنت را بررسی کن' }; }
+    finally { busy(-1); }
     if (res.status === 401 && !retried && L.tok) {
       if (await refresh()) return api(method, path, body, true);
       endSession(true);
@@ -105,6 +107,25 @@
     return data;
   }
   L.api = api;
+  // نوار بارگذاری: کاربر می‌بیند که لمسش ثبت شد و منتظر سرور است
+  let busyN = 0, busyT = null;
+  function busy(d) {
+    busyN = Math.max(0, busyN + d);
+    let bar = document.getElementById('blkBusy');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'blkBusy';
+      bar.setAttribute('aria-hidden', 'true');
+      bar.style.cssText = 'position:fixed;top:0;right:0;left:0;height:3px;z-index:9998;pointer-events:none;opacity:0;transition:opacity .2s;background:linear-gradient(90deg,transparent,var(--accent,#0F9C88),transparent);background-size:50% 100%;background-repeat:no-repeat;animation:blkBusy 1s linear infinite';
+      const st = document.createElement('style');
+      st.textContent = '@keyframes blkBusy{from{background-position:-50% 0}to{background-position:150% 0}}';
+      document.head.appendChild(st);
+      document.body.appendChild(bar);
+    }
+    clearTimeout(busyT);
+    if (busyN) busyT = setTimeout(() => (bar.style.opacity = '1'), 150);
+    else bar.style.opacity = '0';
+  }
 
   /* ---------- افراد و آگهی‌ها ---------- */
   function trustIdentity(o, trust) {
@@ -146,7 +167,7 @@
   }
   async function loadAds(type, force) {
     const k = 'ads:' + type;
-    if (!force && L.loaded[k] && Date.now() - L.loaded[k] < 60000) return;
+    if (!force && L.loaded[k] && Date.now() - L.loaded[k] < 15000) return;
     L.loaded[k] = Date.now();
     const d = await api('GET', '/ads?type=' + type + '&limit=50');
     for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].type === type && ADS[i]._live) ADS.splice(i, 1);
@@ -161,7 +182,7 @@
     if (id === 'me') return 'me';
     Object.assign(P[id], {
       _full: true, _pid: pp.id, bio: pp.bio || '', place: pp.city, born: pp.city, since: monthYear(pp.since), phone: faPhone(pp.phone),
-      verified: !!pp.identityVerified, docVerified: !!pp.verified, stars: pp.stars, exp: (pp.data && pp.data.exp) || '—',
+      verified: !!pp.identityVerified, docVerified: !!pp.verified, stars: pp.stars, exp: (pp.data && pp.data.exp) || '—', age: (L.ageOf && pp.data && L.ageOf(pp.data.by)) || '—',
       skills: pp.skills.map(skillRow), revs: pp.reviews.map(revRow), guar: pp.guarantors.map((g) => [g.name, g.relation, 'general']),
       pf: (pp.portfolio || []).map((x) => [x.title, x.place || '', abs(x.url)]),
     });
@@ -515,7 +536,7 @@
     prev();
     if (!L.on) return;
     const t = modeType();
-    if (!L.loaded['ads:' + t] || Date.now() - L.loaded['ads:' + t] > 60000) {
+    if (!L.loaded['ads:' + t] || Date.now() - L.loaded['ads:' + t] > 15000) {
       loadAds(t).then(() => { if (S.cur === 'explore') prev(); }).catch((e) => { L.loaded['ads:' + t] = 0; err(e); });
     }
   });
@@ -554,7 +575,12 @@
     try {
       const d = await api('POST', '/ads', body);
       const a = mapAd(Object.assign({}, d.ad, { author: myAuthor() }));
-      ADS.unshift(a); S.w.newId = a.id; S.w.step = 4; renderWizard();
+      ADS.unshift(a); S.w.newId = a.id; S.w.step = 4;
+      L.loaded['ads:' + a.type] = Date.now();
+      const m = (typeof MODES !== 'undefined' && MODES.find((x) => x[2] === a.type)) || null;
+      if (m) S.mode = m[0];
+      renderWizard();
+      toast('آگهی منتشر شد؛ در کاوش، بخش «' + (m ? m[1] : 'آگهی‌ها') + '» دیده می‌شود');
     } catch (e) { err(e); }
   });
 
@@ -562,14 +588,26 @@
   const needFull = (id) => L.on && id && id !== 'me' && P[id] && P[id]._live && !P[id]._full;
   ['openProfile', 'openTrust'].forEach((fn) => wrap(fn, function (prev, id, ...rest) {
     if (!needFull(id)) return prev(id, ...rest);
-    api('GET', '/profiles/' + encodeURIComponent(P[id].code)).then((d) => { fillPerson(d.profile); prev(id, ...rest); }).catch(err);
+    let shown = false;
+    try { prev(id, ...rest); shown = true; } catch (e) {}
+    api('GET', '/profiles/' + encodeURIComponent(P[id].code))
+      .then((d) => { fillPerson(d.profile); if (!shown) prev(id, ...rest); else try { render(); } catch (e) {} })
+      .catch(err);
   }));
 
   /* ---- گفت‌وگو ---- */
   wrap('openChat', function (prev, id) {
     const c = S.convs.find((x) => x.id === id);
     if (!L.on || !c || !c._live || c._loaded) return prev(id);
-    loadMsgs(c).then(() => { prev(id); updNavBadge(); }).catch(err);
+    prev(id);
+    // پیامی که پیش از رسیدن تاریخچه فرستاده شد، بعد از بارگذاری حفظ شود
+    const before = c.msgs, n0 = before.length;
+    loadMsgs(c).then(() => {
+      const extra = before.slice(n0).filter((m) => m.me && !c.msgs.some((x) => x.id && x.id === m.id));
+      extra.forEach((m) => c.msgs.push(m));
+      if (S.cur === 'chat' && S.cid === id) renderChat();
+      updNavBadge();
+    }).catch(err);
   });
   wrap('openChatWith', function (prev, pid, adId) {
     if (!L.on) return prev(pid, adId);

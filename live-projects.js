@@ -92,7 +92,9 @@
   }
   wrap('openProjPage', function (prev, i) {
     if (!isLive(i)) return prev(i);
-    loadProjectPage(i).then(() => prev(i)).catch(err);
+    const k = 'pp:' + cur(i)._id;
+    if (L.loaded[k]) { prev(i); loadProjectPage(i).then(() => { L.loaded[k] = Date.now(); try { render(); } catch (e) {} }).catch(() => {}); return; }
+    loadProjectPage(i).then(() => { L.loaded[k] = Date.now(); prev(i); }).catch(err);
   });
   wrap('openProjByTitle', function (prev, t) {
     if (!on()) return prev(t);
@@ -245,6 +247,7 @@
   async function loadContract(i) { const d = await api('GET', '/projects/' + cur(i)._id + '/contract'); hydrateContract(i, d.contract); return d.contract; }
   wrap('openContract', function (prev, i) {
     if (!isLive(i)) return prev(i);
+    if (S.ctr[key(i)] && S.ctr[key(i)]._c) { prev(i); loadContract(i).then(() => { try { render(); } catch (e) {} }).catch(() => {}); return; }
     loadContract(i).then(() => prev(i)).catch(err);
   });
   wrap('renderCtr', function (prev) {
@@ -709,6 +712,7 @@
     });
     S.docs[S.role] = tpl;
   }
+  L.loadDocs = loadDocs;
   wrap('renderDocs', function (prev) {
     if (!on()) return prev();
     if (!S.docs[S.role]) S.docs[S.role] = [];

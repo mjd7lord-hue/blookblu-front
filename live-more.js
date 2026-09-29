@@ -487,4 +487,126 @@
       .then(() => { prev(i); L.loaded.visits = 0; })
       .catch(err);
   });
+
+  /* =================================================================
+   * بخش ۵: راهنمایی کاربر و فرم‌ها — شهر مثل استان، سال تولد، قدم‌های بالا بردن امتیاز،
+   *        راهنمای قرارداد، نشان قرمز مدارک ناقص، پیش‌بارگذاری بعد از ورود
+   * ================================================================= */
+  const jy = () => +new Intl.DateTimeFormat('en-u-ca-persian-nu-latn', { year: 'numeric' }).format(new Date()).replace(/\D/g, '');
+  const ageOf = (by) => { const y = +String(by || '').replace(/[۰-۹]/g, (x) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g, ''); return y > 1300 && y < jy() ? fa(jy() - y) + ' سال' : null; };
+  L.ageOf = ageOf;
+
+  // سال تولد در مرحلهٔ «اطلاعات پایه» (اختیاری؛ سن روی شناسنامهٔ کاری)
+  try {
+    Object.values(REG).forEach((steps) => steps.forEach((st) => {
+      const i = st.f.findIndex((f) => f.k === 'prov');
+      if (i > -1 && st.f.some((f) => f.k === 'ln') && !st.f.some((f) => f.k === 'by')) st.f.splice(i, 0, { k: 'by', t: 'text', label: 'سال تولد (اختیاری)', ph: 'مثلاً ۱۳۶۵', dir: 'ltr', hint: 'سنت روی شناسنامهٔ کاری نمایش داده می‌شود' });
+    }));
+  } catch (e) { console.warn(e); }
+  wrap('ME', function (prev) {
+    const m = prev();
+    const a = S.profile && S.profile.d && ageOf(S.profile.d.by);
+    if (m && a) m.age = a;
+    return m;
+  });
+
+  // شهر: فهرست کشویی مثل استان (+ «شهر دیگر» برای نوشتن)
+  wrap('fieldHTML', function (prev, f, d) {
+    if (f.t !== 'city') return prev(f, d);
+    const pr = d.prov, Lc = pr ? PCITY[pr] || [] : [], cur = d.city, other = !!cur && !Lc.includes(cur);
+    const lab = `<span class="label">${f.label}</span>`;
+    if (!pr) return lab + '<p class="hint" style="margin:0">اول استان را انتخاب کن؛ شهرهای همان استان این‌جا می‌آید.</p>';
+    const sel = other || d._cityOther ? '__o' : cur || '';
+    return lab + `<select class="field" id="rf_city" onchange="if(this.value==='__o'){S.reg.d._cityOther=1;S.reg.d.city=undefined}else{S.reg.d._cityOther=0;S.reg.d.city=this.value||undefined}renderRegStep()"><option value="">انتخاب شهر</option>${Lc.map((c) => `<option ${sel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}<option value="__o" ${sel === '__o' ? 'selected' : ''}>شهر یا روستای دیگر…</option></select>` +
+      (sel === '__o' ? `<div class="xadd" style="margin-top:8px"><input class="field" id="rf_cityx" placeholder="نام شهر یا روستا را بنویس" value="${other ? esc(cur) : ''}" oninput="S.reg.d.city=this.value.trim();updRegBtn()"></div>` : '');
+  });
+
+  // امتیاز بلوک: قدم‌های عملی برای خود کاربر
+  function trustSteps() {
+    const me = L.me && L.me.user, pub = L.pub || {}, t = pub.trust || {};
+    const miss = missingDocs();
+    const steps = [];
+    if (me && me.kycStatus !== 'verified') steps.push([me.kycStatus === 'pending' ? 'تأیید هویتت در حال بررسی است' : 'هویتت را تأیید کن (کارت ملی + سلفی)', me.kycStatus === 'pending' ? 'تا ۲۴ ساعت' : '+۱۰ امتیاز و نشان آبی', me.kycStatus === 'pending' ? '' : 'openKYC()']);
+    if (miss.length) steps.push(['مدارک لازم را بارگذاری کن: ' + miss.join('، '), 'نشان «مدرک‌دار» و اعتماد کارفرما', "go('docs')"]);
+    if (!(pub.portfolio || []).length) steps.push(['یک نمونه‌کار با عکس واقعی اضافه کن', 'پروفایلت کامل‌تر و در کاوش بالاتر دیده می‌شوی', "go('pf')"]);
+    if (!(pub.guarantors || []).length) steps.push(['یک معرف (قیم) معرفی کن', 'کسی که کارت را دیده، اعتبارت را تأیید می‌کند', typeof openAddGuar === 'function' ? 'openAddGuar()' : "openTrust('me',true)"]);
+    if ((t.projects || 0) < 25) steps.push(['پروژه‌ها را داخل بلوک ثبت و تمام کن', 'هر پروژهٔ تمام‌شده +۱ (تا ۲۵)', "go('proj')"]);
+    if ((t.reviews || 0) < 10) steps.push(['بعد از پایان هر کار، از طرف مقابل بخواه امتیاز بدهد', 'هر ۲ نظر +۱ (تا ۱۰) و امتیاز رضایت تا ۵۵', "go('proj')"]);
+    return steps;
+  }
+  wrap('renderTrust', function (prev) {
+    prev();
+    if (!on() || S.tid !== 'me') return;
+    const steps = trustSteps(), host = document.getElementById('s-trust');
+    if (!host || !steps.length) return;
+    const t = (L.pub && L.pub.trust) || {};
+    const html = `<div class="section" id="blkSteps"><div class="sec-head"><h3>برای بالا بردن امتیازت</h3><span class="num">امتیاز فعلی ${fa(t.total || 0)} از ۱۰۰</span></div><div class="card">${steps.map((s, i) => `<button class="need" ${s[2] ? `onclick="${s[2]}"` : 'disabled'} style="width:100%;text-align:right"><span class="nt-ic" style="background:var(--accent);color:#fff;font-weight:900">${fa(i + 1)}</span><div style="flex:1"><b style="display:block">${esc(s[0])}</b><span style="font-size:13px;color:var(--muted)">${esc(s[1])}</span></div>${s[2] ? '<span class="tag">انجام بده ‹</span>' : ''}</button>`).join('')}</div></div>`;
+    const first = host.querySelector('.section');
+    if (first) first.insertAdjacentHTML('beforebegin', html); else host.insertAdjacentHTML('beforeend', html);
+  });
+
+  // مدارک ناقص: نشان قرمز (مثل تنظیمات آیفون) روی «مدارک من»، دکمهٔ «من» و فهرست بالای صفحهٔ مدارک
+  function missingDocs() {
+    const need = (DOCS[S.role] || []).filter((x) => x[2]).map((x) => x[0]);
+    const have = S.docs[S.role];
+    if (!have) return [];
+    return need.filter((n) => { const d = have.find((x) => x.n === n); return !d || d.st === 'none'; });
+  }
+  function redBadge(n) { return `<i class="blk-red" style="display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-inline-start:6px;border-radius:9px;background:#EF4444;color:#fff;font:700 11px/1 inherit;font-style:normal">${fa(n)}</i>`; }
+  function paintDocBadges() {
+    if (!on()) return;
+    const n = missingDocs().length;
+    document.querySelectorAll('.blk-red').forEach((x) => x.remove());
+    const nav = document.querySelector('.nav [data-go="me"]');
+    if (nav) { nav.style.position = 'relative'; if (n) nav.insertAdjacentHTML('beforeend', '<i class="blk-red" style="position:absolute;top:4px;right:calc(50% - 16px);width:9px;height:9px;border-radius:50%;background:#EF4444"></i>'); }
+    if (!n) return;
+    const b = document.querySelector('button[onclick="go(\'docs\')"]');
+    if (b) b.insertAdjacentHTML('beforeend', redBadge(n));
+  }
+  wrap('renderMe', function (prev) {
+    prev();
+    if (!on()) return;
+    if (!S.docs[S.role] && L.loadDocs) L.loadDocs().then(paintDocBadges).catch(() => {});
+    paintDocBadges();
+  });
+  wrap('renderDocs', function (prev) {
+    prev();
+    if (!on()) return;
+    const miss = missingDocs(), host = document.getElementById('s-docs');
+    if (!host || !miss.length || host.querySelector('#blkDocNeed')) return;
+    const bar = host.querySelector('.section') || host.firstElementChild;
+    const html = `<div class="section" id="blkDocNeed"><div class="card" style="border:1px solid #EF4444"><b style="display:flex;align-items:center;gap:6px">برای تکمیل پروفایل ${redBadge(miss.length)}</b><p style="margin:6px 0 0;font-size:14px;color:var(--muted)">این مدارک لازم است: <b style="color:var(--ink)">${miss.map(esc).join('، ')}</b>. روی هر ردیف پایین بزن و عکس یا PDF خوانا بفرست؛ بررسی معمولاً کمتر از ۲۴ ساعت است.</p></div></div>`;
+    if (bar) bar.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html);
+  });
+
+  // راهنمای قرارداد: در «راهنما» و وقتی هنوز پروژه‌ای نیست
+  const CTR_STEPS = [
+    'در گفت‌وگوی آگهی یا پروفایل، دکمهٔ «پیشنهاد توافق» را بزن: کار، مقدار، مبلغ، روز شروع و مراحل پرداخت را بنویس.',
+    'طرف مقابل پیشنهاد را تأیید کند؛ پروژه خودکار در «پروژه‌های من» ساخته می‌شود.',
+    'در صفحهٔ پروژه، «قرارداد» را باز کن؛ متن قرارداد از همان توافق ساخته شده (با مادهٔ داوری).',
+    'هر دو طرف با کد پیامکی امضا می‌کنند؛ قرارداد فعال و نسخهٔ چاپی آماده می‌شود. هر تغییر = نسخهٔ تازه و امضای دوباره.',
+  ];
+  const ctrGuideHTML = () => `<ol style="margin:6px 0 0;padding-inline-start:20px;font-size:14px;line-height:1.9">${CTR_STEPS.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>`;
+  L.ctrGuide = () => { sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">قرارداد را چطور تنظیم کنم؟</h3>${ctrGuideHTML()}<button class="cta" onclick="closeSheet()">فهمیدم</button>`; show(); };
+  wrap('openHelp', function (prev) {
+    prev();
+    const box = document.querySelector('#sb .faq');
+    if (box && !document.getElementById('blkCtrQ')) box.insertAdjacentHTML('beforebegin', `<details class="faq" id="blkCtrQ"><summary>قرارداد را چطور تنظیم کنم؟</summary>${ctrGuideHTML()}</details>`);
+  });
+  wrap('renderProj', function (prev) {
+    prev();
+    const host = document.getElementById('s-proj');
+    if (!host || host.querySelector('#blkCtrHelp')) return;
+    const none = !(S.projs && S.projs[S.role] && S.projs[S.role].length);
+    const html = `<div class="section" id="blkCtrHelp"><div class="card"><b>${none ? 'هنوز پروژه‌ای نداری' : 'راهنمای قرارداد'}</b>${none ? ctrGuideHTML() : `<p style="margin:6px 0 0;font-size:14px;color:var(--muted)">قرارداد هر پروژه از توافق داخل چت ساخته و با کد پیامکی امضا می‌شود.</p><button class="ghost" style="margin-top:8px" onclick="LIVE.ctrGuide()">مراحل تنظیم قرارداد</button>`}</div></div>`;
+    host.insertAdjacentHTML(none ? 'beforeend' : 'beforeend', html);
+  });
+
+  // بعد از ورود: داده‌های پرکاربرد در پس‌زمینه گرفته شود تا صفحه‌ها فوری باز شوند
+  wrap('renderHome', function (prev) {
+    prev();
+    if (!on() || L._prefetched === (L.me && L.me.user && L.me.user.id)) return;
+    L._prefetched = L.me && L.me.user && L.me.user.id;
+    setTimeout(() => [L.loadDocs, L.loadVisits].forEach((f) => { if (typeof f === 'function') f().catch(() => {}); }), 400);
+  });
 })();
