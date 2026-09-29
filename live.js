@@ -87,10 +87,38 @@
     }).then((r) => (r.ok ? r.json() : null)).then((d) => { refreshing = null; if (!d) return false; setTok(d.accessToken, d.refreshToken); return true; })
       .catch(() => { refreshing = null; return false; }));
   }
+  /* ---------- کوچک کردن عکس پیش از ارسال: همان کیفیت دیدنی، حجم خیلی کمتر، ارسال و دانلود سریع‌تر ---------- */
+  const MAXPX = 1600, JPEGQ = 0.82;
+  async function shrinkImage(file) {
+    if (!(file instanceof Blob) || !/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 350 * 1024 || file._shrunk) return file;
+    try {
+      const bmp = await (window.createImageBitmap ? createImageBitmap(file) : new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); }));
+      const w0 = bmp.width, h0 = bmp.height, k = Math.min(1, MAXPX / Math.max(w0, h0));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(w0 * k); cv.height = Math.round(h0 * k);
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); // پس‌زمینهٔ سفید برای PNG شفاف
+      ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+      const out = await new Promise((res) => cv.toBlob(res, 'image/jpeg', JPEGQ));
+      if (!out || out.size >= file.size) return file;
+      const f = new File([out], (file.name || 'photo').replace(/\.[a-z0-9]+$/i, '') + '.jpg', { type: 'image/jpeg' });
+      f._shrunk = true;
+      return f;
+    } catch (e) { return file; }
+  }
+  async function shrinkForm(fd) {
+    const out = new FormData();
+    for (const [k, v] of fd.entries()) {
+      if (v instanceof Blob && typeof v !== 'string') { const f = await shrinkImage(v); out.append(k, f, f.name || v.name || 'file'); }
+      else out.append(k, v);
+    }
+    return out;
+  }
+  L.shrinkImage = shrinkImage;
   async function api(method, path, body, retried) {
     const h = {};
     let b;
-    if (body instanceof FormData) b = body;
+    if (body instanceof FormData) b = retried ? body : await shrinkForm(body);
     else if (body !== undefined) { h['Content-Type'] = 'application/json'; b = JSON.stringify(body); }
     if (L.tok && L.tok.a) h.Authorization = 'Bearer ' + L.tok.a;
     let res;
@@ -99,7 +127,7 @@
     catch (e) { throw { code: 'NETWORK', message: 'اتصال به سرور بلوک برقرار نشد؛ اینترنت را بررسی کن' }; }
     finally { busy(-1); }
     if (res.status === 401 && !retried && L.tok) {
-      if (await refresh()) return api(method, path, body, true);
+      if (await refresh()) return api(method, path, body instanceof FormData ? b : body, true);
       endSession(true);
     }
     const data = await res.json().catch(() => ({}));
@@ -191,8 +219,7 @@
   }
 
   /* ---------- حساب من ---------- */
-  async function loadMe() {
-    const d = await api('GET', '/me');
+  function applyMe(d, pub) {
     L.me = d;
     S.roles = d.profiles.map((p) => p.role);
     if (d.needsRegistration) { L.pub = null; return d; }
@@ -202,11 +229,54 @@
     S.profile = { d: Object.assign({}, pr.data), name: pr.displayName };
     profileSync();
     S.me.pub = pr.isPublic; S.me.phone = pr.showPhone;
-    S.me.pf = false;
-    try { L.pub = (await api('GET', '/me/profile')).profile; } catch (e) { L.pub = null; }
-    if (L.pub) S.me.pf = (L.pub.portfolio || []).length > 0;
+    L.pub = pub || null;
+    S.me.pf = !!(L.pub && (L.pub.portfolio || []).length);
     return d;
   }
+  async function loadMe() {
+    const d = await api('GET', '/me');
+    L.me = d;
+    let pub = null;
+    if (!d.needsRegistration) { try { pub = (await api('GET', '/me/profile')).profile; } catch (e) { pub = null; } }
+    return applyMe(d, pub);
+  }
+
+  /* ---------- نسخهٔ ذخیره‌شده روی گوشی: باز شدن فوری اپ با آخرین اطلاعات خودت ---------- */
+  const SNAP = 'blk-snap-v1';
+  function saveSnap() {
+    if (!L.on || !S.auth || !L.me || !L.me.user || L.me.needsRegistration) return;
+    try {
+      const clean = (m) => { const x = Object.assign({}, m); delete x._blob; delete x._pending; if (typeof x.src === 'string' && x.src.startsWith('blob:')) delete x.src; return x; };
+      const convs = (S.convs || []).filter((c) => c._live).slice(0, 40).map((c) => Object.assign({}, c, {
+        msgs: (c._loaded ? c.msgs.slice(-40) : c.msgs.slice(-1)).filter((m) => !m._pending).map(clean), _loaded: false, _cached: !!c._loaded,
+      }));
+      const ads = ADS.filter((a) => a._live).slice(0, 80);
+      const people = {};
+      convs.forEach((c) => { if (c.pid && c.pid !== 'me' && P[c.pid]) people[c.pid] = P[c.pid]; });
+      ads.forEach((a) => { if (a.who && a.who !== 'me' && P[a.who]) people[a.who] = P[a.who]; });
+      const js = JSON.stringify({ v: 1, uid: L.me.user.id, at: Date.now(), me: L.me, pub: L.pub, convs, notifs: (S.notifs || []).slice(0, 60), people, ads, mode: S.mode });
+      if (js.length < 2.5e6) store.set(SNAP, js);
+    } catch (e) {}
+  }
+  setInterval(() => { if (!document.hidden) saveSnap(); }, 5000);
+  addEventListener('pagehide', saveSnap);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveSnap(); });
+  function applySnap(snap) {
+    Object.assign(P, snap.people || {});
+    applyMe(snap.me, snap.pub);
+    (snap.ads || []).forEach((a) => ADS.push(a));
+    S.convs = snap.convs || [];
+    S.notifs = snap.notifs || [];
+    S.auth = true;
+    S.mode = snap.mode || ({ worker: 'jobs', specialist: 'jobs', engineer: 'consult' })[S.role] || 'workers';
+    S.roleF = 'all';
+    if (typeof userProv === 'function') S.provF = userProv();
+    S.hist = [];
+    L._fromSnap = true;
+    render();
+    if (typeof updNavBadge === 'function') updNavBadge();
+  }
+  L.saveSnap = saveSnap;
   function enterApp(silent) {
     S.auth = true;
     S.mode = ({ worker: 'jobs', specialist: 'jobs', engineer: 'consult' })[S.role] || 'workers';
@@ -223,6 +293,7 @@
   }
   function endSession(expired) {
     setTok(null);
+    store.set(SNAP, null);
     try { L.es && L.es.close(); } catch (e) {}
     L.es = null; L.me = null; L.pub = null;
     S.convs = []; S.notifs = []; S.profile = null; S.roles = [];
@@ -267,7 +338,10 @@
       pid, type: x.kind === 'support' ? 'support' : x.projectId ? 'project' : 'ad', unread: x.unread, pinned: x.pinned, muted: x.muted, arch: x.archived,
       stage: x.stage, ad: x.adId || null, projectId: x.projectId, ctx: x.title && label ? { label, title: x.title, meta: '' } : null, _at: x.lastMessageAt,
     });
-    if (!c._loaded) c.msgs = x.last ? [{ me: x.last.mine ? 1 : 0, k: 'text', t: x.last.text, time: hm(x.last.at) }] : [];
+    // پیام‌های ذخیره‌شده روی گوشی می‌مانند مگر پیام تازه‌تری آمده باشد (باز کردن گفت‌وگو همه را تازه می‌کند)
+    const cachedLast = c._cached && [...c.msgs].reverse().find((m) => m._at);
+    const stale = !cachedLast || (x.last && new Date(x.last.at) > new Date(cachedLast._at));
+    if (!c._loaded && stale) { c._cached = false; c.msgs = x.last ? [{ me: x.last.mine ? 1 : 0, k: 'text', t: x.last.text, time: hm(x.last.at) }] : []; }
     if (!c.pid) c.name = 'پشتیبانی بلوک';
     return c;
   }
@@ -783,16 +857,8 @@
   Object.assign(L, { upsertPerson, fillPerson, loadMe, loadConvs, mapAd, abs, rel, faDate, dayLabel, money, err, toEn, faPhone, fsize, isUuid, wrap, ini });
 
   /* =================== شروع =================== */
-  async function boot() {
-    if (!L.base) return;
-    try {
-      const r = await fetch(L.base + '/api/health', { signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
-      if (!r.ok) throw new Error('down');
-    } catch (e) {
-      console.warn('[بلوک] سرور در دسترس نیست؛ نسخهٔ نمایشی', L.base);
-      toast('سرور بلوک در دسترس نیست؛ نسخهٔ نمایشی');
-      return;
-    }
+  function goLive() {
+    if (L.on) return;
     L.on = true;
     document.documentElement.dataset.live = '1';
     // فایل‌های دیگر اتصال (live-projects.js) دادهٔ نمایشی خودشان را همین‌جا کنار می‌گذارند
@@ -800,12 +866,44 @@
     // دادهٔ نمایشی کنار می‌رود
     ADS.length = 0;
     S.convs = []; S.notifs = []; S._demoEv = 1; S.auth = false;
+  }
+  async function boot() {
+    if (!L.base) return;
     try { L.tok = JSON.parse(store.get('blk-tok') || 'null'); } catch (e) { L.tok = null; }
+    if (L.tok) {
+      // کاربر واردشده: بدون صبر برای سرور، دادهٔ نمایشی نشان داده نمی‌شود و آخرین اطلاعات خودش فوری می‌آید
+      await new Promise((r) => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', r, { once: true }) : r()));
+      goLive();
+      let snap = null;
+      try { snap = JSON.parse(store.get(SNAP) || 'null'); } catch (e) { snap = null; }
+      if (snap && snap.v === 1 && snap.me && snap.me.user && !snap.me.needsRegistration) { try { applySnap(snap); } catch (e) { console.warn(e); } }
+      else render();
+    }
+    try {
+      const r = await fetch(L.base + '/api/health', { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
+      if (!r.ok) throw new Error('down');
+    } catch (e) {
+      console.warn('[بلوک] سرور در دسترس نیست', L.base);
+      toast(L.on ? 'اتصال به سرور برقرار نشد؛ آخرین اطلاعات ذخیره‌شده را می‌بینی' : 'سرور بلوک در دسترس نیست؛ نسخهٔ نمایشی');
+      return;
+    }
+    goLive();
     if (L.tok) {
       try {
         await loadMe();
-        if (!L.me.needsRegistration) enterApp(true);
-      } catch (e) { if (e.status === 401 || e.status === 403) setTok(null); }
+        if (L.me.needsRegistration) { if (L._fromSnap) { S.auth = false; render(); } }
+        else if (L._fromSnap) {
+          // همان صفحه‌ای که کاربر هست بماند؛ فقط داده‌ها تازه شوند
+          connectSSE();
+          loadConvs().catch(() => {});
+          loadNotifs().catch(() => {});
+          const c = S.cur === 'chat' && S.convs.find((x) => x.id === S.cid);
+          if (c) loadMsgs(c).then(() => { if (S.cur === 'chat' && S.cid === c.id) renderChat(); }).catch(() => {});
+          render();
+        } else enterApp(true);
+      } catch (e) {
+        if (e.status === 401 || e.status === 403) { setTok(null); store.set(SNAP, null); if (L._fromSnap) { S.auth = false; S.convs = []; S.notifs = []; go('home'); } }
+      }
     }
     loadAds(modeType()).catch(() => {}).then(() => render());
     render();

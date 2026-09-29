@@ -898,6 +898,149 @@
   const loadCfg0 = L.loadCfg;
   L.loadCfg = () => loadCfg0().then(() => setTimeout(maybeWhatsNew, 300));
 
+  /* ---------- صفحهٔ آغاز (لوگو): برای کاربر واردشده کوتاه، برای بقیه کوتاه‌تر از ۳ ثانیه ---------- */
+  (function shortSplash() {
+    const sp = document.querySelector('.splash2');
+    if (!sp) return;
+    let returning = false;
+    try { returning = !!localStorage.getItem('blk-tok'); } catch (e) {}
+    setTimeout(() => sp.classList.add('gone'), returning ? 350 : 1600);
+    setTimeout(() => sp.remove(), returning ? 900 : 2300);
+  })();
+
+  /* =================================================================
+   * بخش ۸: استودیوی عکس پروفایل — قاب خط‌چین سر و شانه، دوربین جلو یا گالری، جابه‌جا و بزرگ‌نمایی،
+   *        پس‌زمینهٔ محو (خود شخص واضح) تا همهٔ عکس‌های پروفایل یک‌دست شوند
+   * ================================================================= */
+  const AV = 720; // اندازهٔ خروجی (مربع)
+  // شکل سر و شانه روی بوم ۱۰۰×۱۰۰ (همان قاب خط‌چین)
+  function silhouette(ctx, s) {
+    ctx.beginPath();
+    ctx.ellipse(50 * s, 38 * s, 17 * s, 21 * s, 0, 0, Math.PI * 2);
+    ctx.moveTo(8 * s, 100 * s);
+    ctx.bezierCurveTo(8 * s, 76 * s, 26 * s, 66 * s, 40 * s, 63 * s);
+    ctx.lineTo(42 * s, 56 * s); ctx.lineTo(58 * s, 56 * s); ctx.lineTo(60 * s, 63 * s);
+    ctx.bezierCurveTo(74 * s, 66 * s, 92 * s, 76 * s, 92 * s, 100 * s);
+    ctx.closePath();
+  }
+  const SIL_SVG = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><mask id="avm"><rect width="100" height="100" fill="#fff"/><ellipse cx="50" cy="38" rx="17" ry="21" fill="#000"/><path d="M8 100 C8 76 26 66 40 63 L42 56 L58 56 L60 63 C74 66 92 76 92 100 Z" fill="#000"/></mask></defs><rect width="100" height="100" fill="rgba(0,0,0,.35)" mask="url(#avm)"/><ellipse cx="50" cy="38" rx="17" ry="21" fill="none" stroke="#fff" stroke-width=".7" stroke-dasharray="2.2 1.6"/><path d="M8 100 C8 76 26 66 40 63 L42 56 L58 56 L60 63 C74 66 92 76 92 100" fill="none" stroke="#fff" stroke-width=".7" stroke-dasharray="2.2 1.6"/></svg>`;
+  const st8 = { src: null, img: null, zoom: 1, x: 0, y: 0, blur: true, stream: null, mirror: false };
+  function stopCam() { if (st8.stream) st8.stream.getTracks().forEach((t) => t.stop()); st8.stream = null; }
+  // تصویر در قاب: زوم و جابه‌جایی، «پوشاندن» کامل مربع
+  function drawTo(ctx, size) {
+    const im = st8.img; if (!im) return;
+    const iw = im.videoWidth || im.naturalWidth || im.width, ih = im.videoHeight || im.naturalHeight || im.height;
+    const base = Math.max(size / iw, size / ih) * st8.zoom;
+    const w = iw * base, h = ih * base;
+    ctx.save();
+    if (st8.mirror) { ctx.translate(size, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(im, (size - w) / 2 + (st8.mirror ? -st8.x : st8.x), (size - h) / 2 + st8.y, w, h);
+    ctx.restore();
+  }
+  // خروجی: پس‌زمینهٔ محو و روشن، شخص داخل قاب واضح با لبهٔ نرم
+  function renderAvatar() {
+    const cv = document.createElement('canvas'); cv.width = cv.height = AV;
+    const ctx = cv.getContext('2d');
+    drawTo(ctx, AV);
+    if (!st8.blur) return cv;
+    const sharp = document.createElement('canvas'); sharp.width = sharp.height = AV;
+    sharp.getContext('2d').drawImage(cv, 0, 0);
+    // محو کردن: کوچک و دوباره بزرگ (همه‌جا کار می‌کند، حتی آیفون قدیمی)
+    const tiny = document.createElement('canvas'); tiny.width = tiny.height = 36;
+    tiny.getContext('2d').drawImage(cv, 0, 0, 36, 36);
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(tiny, 0, 0, AV, AV);
+    ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(0, 0, AV, AV);
+    // ماسک سر و شانه با لبهٔ نرم
+    const m = document.createElement('canvas'); m.width = m.height = 90;
+    const mc = m.getContext('2d'); mc.fillStyle = '#fff'; silhouette(mc, 0.9); mc.fill();
+    const mask = document.createElement('canvas'); mask.width = mask.height = AV;
+    const mk = mask.getContext('2d'); mk.imageSmoothingQuality = 'high'; mk.drawImage(m, 0, 0, AV, AV);
+    const person = document.createElement('canvas'); person.width = person.height = AV;
+    const pc = person.getContext('2d'); pc.drawImage(sharp, 0, 0); pc.globalCompositeOperation = 'destination-in'; pc.drawImage(mask, 0, 0);
+    ctx.drawImage(person, 0, 0);
+    return cv;
+  }
+  function paintPreview() {
+    const cv = document.getElementById('avCv'); if (!cv) return;
+    const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
+    if (st8.img && !st8.live) ctx.drawImage(renderAvatar(), 0, 0, cv.width, cv.height);
+  }
+  function studioHTML() {
+    const live = !!st8.live;
+    return `<div class="grab"></div><h3 id="sheetTitle">عکس پروفایل</h3><p class="sub">سر و شانه‌ات را داخل قاب خط‌چین بگذار؛ همهٔ عکس‌ها یک‌دست و حرفه‌ای می‌شوند.</p>
+      <div id="avStage" style="position:relative;width:min(300px,78vw);aspect-ratio:1;margin:6px auto 12px;border-radius:24px;overflow:hidden;background:#0B1412;touch-action:none">
+        ${live ? '<video id="avVid" playsinline autoplay muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)"></video>' : '<canvas id="avCv" width="600" height="600" style="position:absolute;inset:0;width:100%;height:100%"></canvas>'}
+        ${SIL_SVG}
+        ${!st8.img && !live ? '<div style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:14px;text-align:center;padding:20px">با دوربین جلو عکس بگیر<br>یا از گالری انتخاب کن</div>' : ''}
+      </div>
+      ${live ? `<button class="cta" onclick="LIVE.avShot()">📸 گرفتن عکس</button><button class="ghost" style="width:100%" onclick="LIVE.avCancelCam()">انصراف</button>` : `
+      ${st8.img ? `<label class="label" style="margin-top:0">بزرگ‌نمایی</label><input type="range" min="1" max="3" step="0.01" value="${st8.zoom}" style="width:100%" oninput="LIVE.avZoom(this.value)">
+      <p class="hint" style="margin:4px 0 8px;text-align:center">برای جابه‌جا کردن، عکس را با انگشت بکش</p>
+      <button class="chip" aria-pressed="${st8.blur}" onclick="LIVE.avBlur()" style="margin:0 auto 10px;display:flex">پس‌زمینهٔ محو</button>` : ''}
+      <div style="display:flex;gap:8px"><button class="ghost" style="flex:1" onclick="LIVE.avCam()">دوربین جلو</button><label class="ghost" style="flex:1;display:grid;place-items:center;cursor:pointer">گالری<input type="file" accept="image/*" hidden onchange="LIVE.avPick(this)"></label></div>
+      ${st8.img ? '<button class="cta" onclick="LIVE.avSave()">ذخیرهٔ عکس پروفایل</button>' : ''}`}`;
+  }
+  function openStudio() {
+    stopCam(); Object.assign(st8, { live: false });
+    sb.innerHTML = studioHTML(); show(); bindStage(); paintPreview();
+  }
+  function rerenderStudio() { sb.innerHTML = studioHTML(); bindStage(); paintPreview(); }
+  function bindStage() {
+    const el = document.getElementById('avStage'); if (!el || st8.live) return;
+    let p0 = null;
+    el.onpointerdown = (e) => { if (!st8.img) return; p0 = { x: e.clientX, y: e.clientY, sx: st8.x, sy: st8.y }; el.setPointerCapture(e.pointerId); };
+    el.onpointermove = (e) => { if (!p0) return; const k = AV / el.clientWidth; st8.x = p0.sx + (e.clientX - p0.x) * k; st8.y = p0.sy + (e.clientY - p0.y) * k; paintPreview(); };
+    el.onpointerup = el.onpointercancel = () => (p0 = null);
+  }
+  Object.assign(L, {
+    avZoom(v) { st8.zoom = +v; paintPreview(); },
+    avBlur() { st8.blur = !st8.blur; rerenderStudio(); },
+    avPick(inp) {
+      const f = inp.files && inp.files[0]; if (!f) return;
+      const im = new Image();
+      im.onload = () => { Object.assign(st8, { img: im, zoom: 1, x: 0, y: 0, mirror: false }); rerenderStudio(); };
+      im.src = URL.createObjectURL(f);
+    },
+    avCam() {
+      if (!navigator.mediaDevices) { toast('این مرورگر دوربین ندارد؛ از گالری انتخاب کن'); return; }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false }).then((stream) => {
+        st8.stream = stream; st8.live = true; rerenderStudio();
+        const v = document.getElementById('avVid'); v.srcObject = stream; v.play().catch(() => {});
+      }).catch(() => toast('برای عکس گرفتن، به بلوک اجازهٔ دوربین بده'));
+    },
+    avCancelCam() { stopCam(); st8.live = false; rerenderStudio(); },
+    avShot() {
+      const v = document.getElementById('avVid'); if (!v || !v.videoWidth) return;
+      const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0);
+      stopCam();
+      Object.assign(st8, { live: false, img: c, zoom: 1, x: 0, y: 0, mirror: true });
+      rerenderStudio();
+    },
+    avSave() {
+      const cv = renderAvatar();
+      cv.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const h = document.getElementById('avH'); if (h) { h.style.background = 'url(' + url + ') center/cover'; h.textContent = ''; }
+        closeSheet();
+        if (!on()) { toast('عکس پروفایل عوض شد'); return; }
+        const fd = new FormData(); fd.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+        api('PUT', '/me/roles/' + S.role + '/avatar', fd).then(() => L.loadMe()).then(() => toast('عکس پروفایل ذخیره شد')).catch(err);
+      }, 'image/jpeg', 0.86);
+    },
+  });
+  // دکمهٔ عکس پروفایل (صفحهٔ ویرایش) ← استودیو، به‌جای انتخاب مستقیم فایل
+  document.addEventListener('click', (e) => {
+    const lab = e.target.closest && e.target.closest('.avup');
+    if (!lab) return;
+    e.preventDefault(); e.stopPropagation();
+    Object.assign(st8, { img: null, zoom: 1, x: 0, y: 0, blur: true, live: false });
+    openStudio();
+  }, true);
+  wrap('closeSheet', function (prev) { stopCam(); st8.live = false; return prev(); });
+
   /* ---------- بدون زوم و لرزش صفحه (مثل اپ‌های دیگر) ---------- */
   (function noZoom() {
     const st = document.createElement('style');
