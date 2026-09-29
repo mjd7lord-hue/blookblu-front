@@ -540,7 +540,9 @@
     const steps = trustSteps(), host = document.getElementById('s-trust');
     if (!host || !steps.length) return;
     const t = (L.pub && L.pub.trust) || {};
-    const html = `<div class="section" id="blkSteps"><div class="sec-head"><h3>برای بالا بردن امتیازت</h3><span class="num">امتیاز فعلی ${fa(t.total || 0)} از ۱۰۰</span></div><div class="card">${steps.map((s, i) => `<button class="need" ${s[2] ? `onclick="${s[2]}"` : 'disabled'} style="width:100%;text-align:right"><span class="nt-ic" style="background:var(--accent);color:#fff;font-weight:900">${fa(i + 1)}</span><div style="flex:1"><b style="display:block">${esc(s[0])}</b><span style="font-size:13px;color:var(--muted)">${esc(s[1])}</span></div>${s[2] ? '<span class="tag">انجام بده ‹</span>' : ''}</button>`).join('')}</div></div>`;
+    const row = (s, i) => `<div class="tstep ${s[2] ? '' : 'off'}" ${s[2] ? `role="button" tabindex="0" onclick="${s[2]}"` : ''}><span class="n num">${fa(i + 1)}</span><span class="t"><b>${esc(s[0])}</b><small>${esc(s[1])}</small></span>${s[2] ? '<span class="go">‹</span>' : ''}</div>`;
+    const more = steps.length > 3 ? `<div id="blkStepsMore" hidden>${steps.slice(3).map((s, i) => row(s, i + 3)).join('')}</div><button class="tsteps-more" onclick="const m=document.getElementById('blkStepsMore');m.hidden=!m.hidden;this.textContent=m.hidden?'همهٔ قدم‌ها (${fa(steps.length)})':'کمتر'">همهٔ قدم‌ها (${fa(steps.length)})</button>` : '';
+    const html = `<div class="section" id="blkSteps"><div class="sec-head"><h3>قدم بعدی برای امتیاز بیشتر</h3><span class="num">${fa(t.total || 0)} از ۱۰۰</span></div><div class="card">${steps.slice(0, 3).map(row).join('')}${more}</div></div>`;
     const first = host.querySelector('.section');
     if (first) first.insertAdjacentHTML('beforebegin', html); else host.insertAdjacentHTML('beforeend', html);
   });
@@ -608,5 +610,119 @@
     if (!on() || L._prefetched === (L.me && L.me.user && L.me.user.id)) return;
     L._prefetched = L.me && L.me.user && L.me.user.id;
     setTimeout(() => [L.loadDocs, L.loadVisits].forEach((f) => { if (typeof f === 'function') f().catch(() => {}); }), 400);
+  });
+
+  /* =================================================================
+   * بخش ۶: پروفایل و شناسنامهٔ کاری در یک صفحه (دو زبانه)، نوار بالای ثابت، کشیدن از لبه برای برگشت
+   *        (بدون سرور هم کار می‌کند)
+   * ================================================================= */
+  (function injectCss() {
+    const st = document.createElement('style');
+    st.textContent = `
+      /* نوار عنوان هر صفحه هنگام اسکرول بالا می‌ماند؛ دکمهٔ برگشت همیشه در دسترس */
+      .bar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding-bottom:10px;transition:box-shadow .2s}
+      .bar.stuck{box-shadow:0 1px 0 var(--line),0 6px 16px rgba(0,0,0,.05)}
+      /* نوارهای «امتیاز از کجا آمده؟» (قانون نمودار ستونی .bars رویشان افتاده بود) */
+      .brk .bars{display:block;height:10px;padding-top:0;margin-top:6px}
+      .brk .bars i{max-width:none;height:100%;width:0;border-radius:7px;animation:none;transform:none}
+      /* قدم‌های بالا بردن امتیاز: هم‌شکل فهرست‌های اپ */
+      .tstep{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+      .tstep:first-child{border-top:0;padding-top:4px}
+      .tstep .n{flex:none;width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-weight:800;font-size:13px}
+      .tstep .t{flex:1;min-width:0}
+      .tstep .t b{display:block;font-size:14.5px;line-height:1.5}
+      .tstep .t small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+      .tstep .go{flex:none;color:var(--muted);font-size:18px;line-height:1}
+      .tstep.off{cursor:default;opacity:.7}
+      .tsteps-more{display:block;width:100%;border:0;background:none;color:var(--accent);font:700 13.5px inherit;padding:10px 0 2px;cursor:pointer}
+      .pv-tabs{margin:4px 16px 0}
+      /* نشانگر کشیدن برای برگشت */
+      #blkSwipe{position:fixed;top:50%;width:40px;height:40px;margin-top:-20px;border-radius:50%;background:var(--surface,#fff);box-shadow:0 4px 14px rgba(0,0,0,.18);display:grid;place-items:center;z-index:9997;opacity:0;pointer-events:none;transition:opacity .15s;color:var(--ink,#111)}
+    `;
+    document.head.appendChild(st);
+  })();
+
+  // سایهٔ نوار وقتی صفحه اسکرول شده
+  addEventListener('scroll', () => {
+    const b = document.querySelector('.screen.on .bar, section.on .bar') || [...document.querySelectorAll('.bar')].find((x) => x.offsetParent);
+    document.querySelectorAll('.bar.stuck').forEach((x) => x !== b && x.classList.remove('stuck'));
+    if (b) b.classList.toggle('stuck', scrollY > 8);
+  }, { passive: true });
+
+  // کشیدن انگشت از لبهٔ راست یا چپ صفحه به سمت وسط = برگشت (مثل آیفون)
+  (function swipeBack() {
+    let x0 = 0, y0 = 0, edge = 0, active = false;
+    const ind = document.createElement('div');
+    ind.id = 'blkSwipe';
+    ind.setAttribute('aria-hidden', 'true');
+    ind.innerHTML = (typeof I === 'object' && I.back) || '‹';
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(ind));
+    if (document.body) document.body.appendChild(ind);
+    const canBack = () => S.hist && S.hist.length && !document.querySelector('.sheet.on, #sb.on, .sv.on');
+    addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      edge = t.clientX > innerWidth - 24 ? 1 : t.clientX < 24 ? -1 : 0;
+      active = !!edge && canBack();
+      x0 = t.clientX; y0 = t.clientY;
+    }, { passive: true });
+    addEventListener('touchmove', (e) => {
+      if (!active) return;
+      const t = e.touches[0], dx = (x0 - t.clientX) * edge, dy = Math.abs(t.clientY - y0);
+      if (dy > 60 && dy > dx) { active = false; ind.style.opacity = '0'; return; }
+      const p = Math.max(0, Math.min(1, dx / 90));
+      ind.style.opacity = String(p);
+      ind.style.top = t.clientY + 'px';
+      ind.style.right = edge === 1 ? 8 + p * 20 + 'px' : 'auto';
+      ind.style.left = edge === -1 ? 8 + p * 20 + 'px' : 'auto';
+      ind.style.transform = edge === -1 ? 'scaleX(-1)' : '';
+    }, { passive: true });
+    addEventListener('touchend', (e) => {
+      if (!active) return;
+      active = false;
+      const t = e.changedTouches[0], dx = (x0 - t.clientX) * edge;
+      ind.style.opacity = '0';
+      if (dx > 80 && canBack()) back();
+    }, { passive: true });
+  })();
+
+  /* ---------- پروفایل + شناسنامه در یک صفحه ---------- */
+  S.pview = S.pview || 'profile';
+  wrap('openProfile', function (prev, id) { S.pview = 'profile'; return prev(id); });
+  wrap('openTrust', function (prev, id, guide) {
+    S.tid = id; S.guide = !!guide;
+    if (S.cur === 'profile' && S.pid === id) { S.pview = 'card'; renderProfile(); scrollTo(0, 0); return; }
+    S.pid = id; S.ptab = 0; S.pview = 'card';
+    go('profile');
+  });
+  L.pview = (v) => { S.pview = v; renderProfile(); scrollTo(0, 0); };
+  wrap('renderProfile', function (prev) {
+    prev();
+    const host = document.getElementById('s-profile');
+    if (!host) return;
+    const p = person(S.pid);
+    const bar = host.querySelector('.bar');
+    const h1 = bar && bar.querySelector('h1');
+    if (h1) h1.textContent = p.me ? 'پروفایل من' : 'پروفایل';
+    // کارت خالی «درباره»
+    host.querySelectorAll('.section > .card > p').forEach((x) => { if (!x.textContent.trim()) x.closest('.section').remove(); });
+    const tabs = `<div class="pv-tabs"><div class="tabs" role="tablist"><button role="tab" aria-selected="${S.pview !== 'card'}" onclick="LIVE.pview('profile')">پروفایل</button><button role="tab" aria-selected="${S.pview === 'card'}" onclick="LIVE.pview('card')">شناسنامهٔ کاری</button></div></div>`;
+    if (bar) bar.insertAdjacentHTML('afterend', tabs);
+    if (S.pview !== 'card') return;
+    // زبانهٔ شناسنامه: همان صفحهٔ شناسنامه، بدون نوار عنوان دوم
+    S.tid = S.pid;
+    renderTrust();
+    const tr = document.getElementById('s-trust');
+    const tabEl = host.querySelector('.pv-tabs');
+    // محتوای زبانهٔ پروفایل پنهان می‌ماند (انیمیشن‌هایش به همین عنصرها نیاز دارند)
+    const hid = document.createElement('div'); hid.hidden = true;
+    while (tabEl.nextSibling) hid.appendChild(tabEl.nextSibling);
+    host.appendChild(hid);
+    [...tr.children].forEach((c) => { if (!c.classList.contains('bar')) host.appendChild(c); });
+    requestAnimationFrame(() => requestAnimationFrame(() => host.querySelectorAll('.brk .bars i').forEach((i) => (i.style.width = i.dataset.w + '%'))));
+  });
+  // گاهی render() صفحهٔ «trust» قدیمی را صدا می‌زند؛ همان را به پروفایل ببر
+  wrap('go', function (prev, name, noPush) {
+    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S.pview = 'card'; return prev('profile', noPush); }
+    return prev(name, noPush);
   });
 })();
