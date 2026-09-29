@@ -1,1 +1,4 @@
 push-to-github.bat
+
+# خروجی‌ها و پیش‌نمایش‌های کاری (zip، عکس صفحه)
+Claude outputs/
