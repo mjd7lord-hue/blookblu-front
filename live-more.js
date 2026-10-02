@@ -111,8 +111,8 @@
         L.loaded.req = 0;
         toast(status === 'accepted' ? 'انتخاب شد؛ در چت شرایط را نهایی کنید و «پیشنهاد توافق» بفرستید' : 'درخواست رد شد');
         if (adId && S.cur === 'myads') { closeSheet(); respList(adId); }
-        if (S.cur === 'req') loadRequests(true).then(renderReq);
-        if (S.cur === 'home') loadRequests(true).then(renderHome);
+        if (S.cur === 'req') L.loadRequests(true).then(renderReq);
+        if (S.cur === 'home') L.loadRequests(true).then(renderHome);
       })
       .catch(err);
   }
@@ -148,26 +148,26 @@
     if (!on()) return prev();
     if (!S.req[S.role]) S.req[S.role] = [];
     prev();
-    if (!fresh('req')) loadRequests().then(() => { if (S.cur === 'req') renderReq(); }).catch(err);
+    if (!fresh('req')) L.loadRequests().then(() => { if (S.cur === 'req') renderReq(); }).catch(err);
   });
   wrap('rqAns', function (prev, i, st) {
     if (!on()) return prev(i, st);
     const Lx = S.rtab === 'in' ? S.req[S.role] : S.out, r = Lx[i];
     if (r && r._visit) {
       const act = st === 'x' ? 'cancel' : st === 'ok' ? 'confirm' : 'decline';
-      api('POST', '/visits/' + r._visit + '/' + act, {}).then(() => { toast(act === 'confirm' ? 'بازدید تأیید شد؛ در میز کار امروزت می‌آید' : act === 'cancel' ? 'بازدید لغو شد' : 'درخواست بازدید رد شد'); return loadRequests(true); }).then(renderReq).catch(err);
+      api('POST', '/visits/' + r._visit + '/' + act, {}).then(() => { toast(act === 'confirm' ? 'بازدید تأیید شد؛ در میز کار امروزت می‌آید' : act === 'cancel' ? 'بازدید لغو شد' : 'درخواست بازدید رد شد'); return L.loadRequests(true); }).then(renderReq).catch(err);
       return;
     }
     if (!r || !r._id) return prev(i, st);
     if (st === 'x') {
-      api('POST', '/responses/' + r._id + '/withdraw').then(() => { toast('درخواست پس گرفته شد'); return loadRequests(true); }).then(renderReq).catch(err);
+      api('POST', '/responses/' + r._id + '/withdraw').then(() => { toast('درخواست پس گرفته شد'); return L.loadRequests(true); }).then(renderReq).catch(err);
       return;
     }
     answer(r._id, st === 'ok' ? 'accepted' : 'rejected');
   });
   wrap('ansReq', function (prev, role, i, st) {
     const r = (S.req[role] || [])[i];
-    if (on() && r && r._visit) { api('POST', '/visits/' + r._visit + '/' + (st === 'ok' ? 'confirm' : 'decline'), {}).then(() => loadRequests(true)).then(() => { toast(st === 'ok' ? 'بازدید تأیید شد' : 'درخواست بازدید رد شد'); render(); }).catch(err); return; }
+    if (on() && r && r._visit) { api('POST', '/visits/' + r._visit + '/' + (st === 'ok' ? 'confirm' : 'decline'), {}).then(() => L.loadRequests(true)).then(() => { toast(st === 'ok' ? 'بازدید تأیید شد' : 'درخواست بازدید رد شد'); render(); }).catch(err); return; }
     if (!on() || !r || !r._id) return prev(role, i, st);
     answer(r._id, st === 'ok' ? 'accepted' : 'rejected');
   });
@@ -176,7 +176,7 @@
   wrap('renderHome', function (prev) {
     if (on() && !S.req[S.role]) S.req[S.role] = [];
     prev();
-    if (on() && !fresh('req', 60000)) loadRequests().then(() => { if (S.cur === 'home') prev(); }).catch(() => {});
+    if (on() && !fresh('req', 60000)) L.loadRequests().then(() => { if (S.cur === 'home') prev(); }).catch(() => {});
   });
 
   /* ================= تقویم (ماه جاری شمسی) ================= */
@@ -461,8 +461,8 @@
       })
       .then((d) => {
         renderVisit();
-        sb.innerHTML = `<div class="grab"></div><h3 class="center" id="sheetTitle">درخواست بازدید فرستاده شد</h3><p class="sub center">${esc(p.name)} تأیید می‌کند و خبرش برایت می‌آید. ${esc(d.visit.dayLabel)} ساعت ${esc(d.visit.slot)}</p><button class="cta" onclick="closeSheet();openChatWith('${v.pid}')">هماهنگی در چت</button>`;
-        show();
+        L.loaded.req = 0;
+        L.visitDone();
       })
       .catch(err);
   });
@@ -524,6 +524,7 @@
   });
 
   // امتیاز بلوک: قدم‌های عملی برای خود کاربر
+  L.trustSteps = () => (on() ? trustSteps() : []);
   function trustSteps() {
     const me = L.me && L.me.user, pub = L.pub || {}, t = pub.trust || {};
     const miss = missingDocs();
@@ -687,44 +688,9 @@
     }, { passive: true });
   })();
 
-  /* ---------- پروفایل + شناسنامه در یک صفحه ---------- */
-  S.pview = S.pview || 'profile';
-  wrap('openProfile', function (prev, id) { S.pview = 'profile'; return prev(id); });
-  wrap('openTrust', function (prev, id, guide) {
-    S.tid = id; S.guide = !!guide;
-    if (S.cur === 'profile' && S.pid === id) { S.pview = 'card'; renderProfile(); scrollTo(0, 0); return; }
-    S.pid = id; S.ptab = 0; S.pview = 'card';
-    go('profile');
-  });
-  L.pview = (v) => { S.pview = v; renderProfile(); scrollTo(0, 0); };
-  wrap('renderProfile', function (prev) {
-    prev();
-    const host = document.getElementById('s-profile');
-    if (!host) return;
-    const p = person(S.pid);
-    const bar = host.querySelector('.bar');
-    const h1 = bar && bar.querySelector('h1');
-    if (h1) h1.textContent = p.me ? 'پروفایل من' : 'پروفایل';
-    // کارت خالی «درباره»
-    host.querySelectorAll('.section > .card > p').forEach((x) => { if (!x.textContent.trim()) x.closest('.section').remove(); });
-    const tabs = `<div class="pv-tabs"><div class="tabs" role="tablist"><button role="tab" aria-selected="${S.pview !== 'card'}" onclick="LIVE.pview('profile')">پروفایل</button><button role="tab" aria-selected="${S.pview === 'card'}" onclick="LIVE.pview('card')">شناسنامهٔ کاری</button></div></div>`;
-    if (bar) bar.insertAdjacentHTML('afterend', tabs);
-    if (S.pview !== 'card') return;
-    // زبانهٔ شناسنامه: همان صفحهٔ شناسنامه، بدون نوار عنوان دوم
-    S.tid = S.pid;
-    renderTrust();
-    const tr = document.getElementById('s-trust');
-    const tabEl = host.querySelector('.pv-tabs');
-    // محتوای زبانهٔ پروفایل پنهان می‌ماند (انیمیشن‌هایش به همین عنصرها نیاز دارند)
-    const hid = document.createElement('div'); hid.hidden = true;
-    while (tabEl.nextSibling) hid.appendChild(tabEl.nextSibling);
-    host.appendChild(hid);
-    [...tr.children].forEach((c) => { if (!c.classList.contains('bar')) host.appendChild(c); });
-    requestAnimationFrame(() => requestAnimationFrame(() => host.querySelectorAll('.brk .bars i').forEach((i) => (i.style.width = i.dataset.w + '%'))));
-  });
-  // گاهی render() صفحهٔ «trust» قدیمی را صدا می‌زند؛ همان را به پروفایل ببر
+  /* ---------- پروفایل + شناسنامه: یک صفحه (flow.js)؛ صفحهٔ قدیمی «trust» به همان پروفایل می‌رود ---------- */
   wrap('go', function (prev, name, noPush) {
-    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S.pview = 'card'; return prev('profile', noPush); }
+    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S._openScore = true; return prev('profile', noPush); }
     return prev(name, noPush);
   });
 
@@ -739,14 +705,10 @@
     if (!on()) return;
     if (!fresh('myads:' + S.role, 60000)) { loadMyAds().then(() => { if (S.cur === 'explore') renderResults(); }).catch(() => {}); return; }
     const t = modeType(), el = document.getElementById('results');
-    const mine = ADS.filter((a) => a.who === 'me' && (!a.st || a.st === 'active') && a.type !== t);
+    const mine = ADS.filter((a) => a.who === 'me' && (!a.st || a.st === 'active'));
     if (!el || !mine.length || el.querySelector('#blkMyAds')) return;
-    const byType = {};
-    mine.forEach((a) => (byType[a.type] = byType[a.type] || []).push(a));
-    el.insertAdjacentHTML('afterbegin', `<div class="section" id="blkMyAds">${Object.entries(byType).map(([ty, L2]) => {
-      const m = MODES.find((x) => x[2] === ty);
-      return `<div class="tstep" role="button" tabindex="0" onclick="setMode('${m[0]}')" style="background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px"><span class="n num">${fa(L2.length)}</span><span class="t"><b>${L2.length > 1 ? fa(L2.length) + ' آگهی تو' : 'آگهی تو «' + esc(L2[0].title) + '»'}</b><small>در بخش «${m[1]}» نمایش داده می‌شود</small></span><span class="go">‹</span></div>`;
-    }).join('')}</div>`);
+    // آگهی‌های خودم در فهرست کاوش نمی‌آیند؛ فقط این ردیف که به «آگهی‌های من» می‌برد
+    el.insertAdjacentHTML('afterbegin', `<div class="section" id="blkMyAds"><div class="tstep" role="button" tabindex="0" onclick="go('myads')" style="background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow)"><span class="n num">${fa(mine.length)}</span><span class="t"><b>${mine.length > 1 ? fa(mine.length) + ' آگهی فعال داری' : 'آگهی تو «' + esc(mine[0].title) + '» فعال است'}</b><small>آگهی‌های خودت در کاوش نمی‌آیند؛ در «آگهی‌های من» ببین</small></span><span class="go">‹</span></div></div>`);
   });
 
   /* =================================================================
@@ -1090,7 +1052,7 @@
   async function loadAnswers(adId) {
     ansLoaded[adId] = Date.now();
     const d = await api('GET', '/ads/' + adId + '/answers');
-    S.ans[adId] = d.items.map((x) => ({ who: L.upsertPerson(Object.assign({}, x.author, { avatarUrl: x.author.avatarUrl })), t: x.message, up: 0, time: L.rel(x.createdAt), best: x.best, _id: x.id }));
+    S.ans[adId] = d.items.map((x) => ({ who: L.upsertPerson(Object.assign({}, x.author, { avatarUrl: x.author.avatarUrl })), t: x.message, up: x.up || 0, down: x.down || 0, my: x.myVote || 0, time: L.rel(x.createdAt), best: x.best, _id: x.id }));
   }
   wrap('renderQA', function (prev) {
     const a = ADS.find((x) => x.id === S.adId);
@@ -1234,4 +1196,268 @@
     const all = prev();
     return S.auth ? all.filter((x) => x._id) : all;
   });
+
+  /* =================================================================
+   * بخش ۱۱: اتصال جریان‌های دور ۲۷ (flow.js) به سرور
+   *   برگشت گوشی، درخواست همکاری (invites)، معرف‌ها، مرکز درخواست‌ها، رأی پاسخ‌ها، جست‌وجوی افراد،
+   *   آگهی رایگان، ویرایش آگهی، «نیروی این پروژه»، وضعیت امضای قرارداد در چت، خانه
+   * ================================================================= */
+  const byId = (id) => document.getElementById(id);
+  // ۳) دکمهٔ برگشت گوشی/مرورگر = back() اپ
+  (function history2() {
+    let skip = 0;
+    const NAVR = { home: 1, explore: 1, msg: 1, me: 1 };
+    try { history.replaceState({ blk: 0 }, ''); } catch (e) {}
+    wrap('go', function (prev, name, noPush) {
+      const from = S.cur;
+      const r = prev(name, noPush);
+      if (!noPush && name !== from && !(NAVR[name] && NAVR[from])) { try { history.pushState({ blk: 1 }, ''); } catch (e) {} }
+      return r;
+    });
+    wrap('back', function (prev) {
+      if (history.state && history.state.blk) { skip++; try { history.back(); } catch (e) { skip--; } }
+      return prev();
+    });
+    addEventListener('popstate', () => {
+      if (skip) { skip--; return; }
+      const sh = byId('sheet');
+      if (sh && sh.classList.contains('on')) { closeSheet(); try { history.pushState({ blk: 1 }, ''); } catch (e) {} return; }
+      if (S.hist && S.hist.length) { const p = S.hist.pop(); go(p, true); }
+    });
+  })();
+
+  L.onLive = (L.onLive || []).concat(() => { if (S.me) { S.me.guar = []; S.me.guarReq = []; } S.alerts = []; S.ctrSt = {}; });
+
+  // ۵) درخواست همکاری ← /invites
+  wrap('collabSend', function (prev) {
+    if (!on()) return prev();
+    const x = collabData();
+    if (x.title.length < 3) { toast('بنویس برای چه کاری درخواست می‌دهی'); return; }
+    if (!x.p || !x.p.code) { toast('این کاربر در نسخهٔ واقعی نیست'); return; }
+    const b = document.querySelector('#sb .cta'); if (b) b.disabled = true;
+    api('POST', '/invites', { profileCode: x.p.code, adId: x.adId && L.isUuid(x.adId) ? x.adId : null, title: x.title, startWhen: x.startWhen, offer: x.offer || null, message: x.message || null })
+      .then((d) => { L.loaded.req = 0; L.loadConvs().catch(() => {}); collabDone(x, d.items[0] && d.items[0].conversationId); })
+      .catch((e) => { if (b) b.disabled = false; err(e); });
+  });
+
+  // ۶) مرکز درخواست‌ها: همکاری مستقیم، معرف‌ها و امضای قرارداد هم بیایند
+  const IV_ST = { pending: null, accepted: 'ok', rejected: 'no' };
+  const loadReq0 = L.loadRequests;
+  async function loadRequests2(force) {
+    if (!force && fresh('req')) return;
+    await loadReq0(true);
+    const [ii, io, gg] = await Promise.all([
+      api('GET', '/invites?dir=in').catch(() => ({ items: [] })),
+      api('GET', '/invites?dir=out').catch(() => ({ items: [] })),
+      api('GET', '/guarantees').catch(() => ({ mine: [], incoming: [] })),
+    ]);
+    const inv = (r, dir) => ({ t: 'درخواست همکاری: ' + r.title, [dir === 'in' ? 'from' : 'to']: L.upsertPerson(dir === 'in' ? r.from : r.to), d: [r.startWhen, r.offer].filter(Boolean).join(' · ') || L.rel(r.createdAt), st: IV_ST[r.status], _inv: r.id, _cid: r.conversationId, kind: 'collab' });
+    S.req[S.role] = ii.items.map((r) => inv(r, 'in')).concat(S.req[S.role] || []);
+    S.out = io.items.map((r) => inv(r, 'out')).concat(S.out || []);
+    if (S.me) {
+      S.me.guar = gg.mine.map((g) => [g.name, g.relation, g.status === 'accepted' ? 'ok' : g.status === 'rejected' ? 'no' : 'wait', g.id]);
+      S.me.guarReq = gg.incoming.map((g) => ({ n: g.from.name, rel: g.relation, st: g.status === 'accepted' ? 'ok' : g.status === 'rejected' ? 'no' : null, _g: g.id, pid: L.upsertPerson(g.from) }));
+    }
+    await loadCtrPending().catch(() => {});
+  }
+  L.loadRequests = loadRequests2;
+  wrap('renderReq', function (prev) {
+    if (!on()) return prev();
+    prev();
+    if (!fresh('req')) loadRequests2().then(() => { if (S.cur === 'req') prev(); }).catch(err);
+  });
+  wrap('rqAns', function (prev, i, st) {
+    const Lx = S.rtab === 'in' ? S.req[S.role] : S.out, r = Lx && Lx[i];
+    if (!on() || !r || !r._inv) return prev(i, st);
+    const call = st === 'x' ? api('POST', '/invites/' + r._inv + '/withdraw') : api('PATCH', '/invites/' + r._inv, { status: st === 'ok' ? 'accepted' : 'rejected' });
+    call.then(() => {
+      toast(st === 'ok' ? 'قبول شد؛ در چت شرایط را نهایی کنید و «ثبت قرارداد» را بزنید' : st === 'x' ? 'درخواست پس گرفته شد' : 'درخواست رد شد');
+      L.loaded.req = 0;
+      if (st === 'ok' && r._cid) { L.loadConvs().then(() => L.openConv(r._cid)).catch(() => {}); return; }
+      return loadRequests2(true).then(() => { if (S.cur === 'req') renderReq(); });
+    }).catch(err);
+  });
+  // معرف (قیم): ثبت، تأیید و رد
+  wrap('guarAns', function (prev, i, st) {
+    const r = S.me && S.me.guarReq[i];
+    if (!on() || !r || !r._g) return prev(i, st);
+    api('PATCH', '/guarantees/' + r._g, { status: st === 'ok' ? 'accepted' : 'rejected' })
+      .then(() => { r.st = st; toast(st === 'ok' ? 'تأیید تو به اعتبار هر دو نفر اضافه شد' : 'درخواست رد شد'); render(); })
+      .catch(err);
+  });
+  function guarDone(n, invited) {
+    reqDone({ title: 'درخواست معرف فرستاده شد', who: 'برای ' + n, where: 'درخواست‌ها ← ارسالی (تأیید و معرف)',
+      steps: [invited ? n + ' هنوز در بلوک نیست؛ وقتی با همین شماره ثبت‌نام کند، درخواست را می‌بیند.' : n + ' درخواست را در «درخواست‌ها» می‌بیند.', 'اگر تأیید کند، در شناسنامهٔ کاری تو «معرف» می‌شود و اعتبارت بالا می‌رود.'] });
+  }
+  wrap('saveGuar', function (prev) {
+    const n = (byId('gN') && byId('gN').value.trim()) || '', rel = (byId('gR') && byId('gR').value.trim()) || 'آشنا', ph = (byId('gP') && byId('gP').value.trim()) || '';
+    if (!on()) { prev(); if (n && ph) guarDone(n); return; }
+    if (!n) { toast('نام معرف را بنویس'); return; }
+    if (!ph) { toast('شمارهٔ موبایل معرف را بنویس'); return; }
+    api('POST', '/guarantees', { name: n, relation: rel, phone: L.toEn(ph) })
+      .then((d) => { L.loaded.req = 0; closeSheet(); if (S.cur === 'guar') renderGuar(); guarDone(n, d.invited); })
+      .catch(err);
+  });
+
+  // ۴) وضعیت امضای قرارداد: در کارت توافق داخل چت و در «درخواست‌ها»
+  S.ctrSt = S.ctrSt || {};
+  async function ctrStatus(pid) {
+    const d = await api('GET', '/projects/' + pid + '/contract');
+    const c = d.contract, mine = !!c.signatures[c.mySide], theirs = !!c.signatures[c.mySide === 'client' ? 'provider' : 'client'];
+    S.ctrSt[pid] = { mine, theirs, active: c.status === 'active', at: Date.now() };
+    return S.ctrSt[pid];
+  }
+  // پروژه‌ها برای خانه و «درخواست‌ها» گرفته می‌شود ولی صفحهٔ پروژه‌ها باز هم خودش تازه می‌کند
+  async function peekProjects() {
+    const k = 'projs:' + S.role;
+    if (!L.loadProjects || fresh(k) || fresh('ph:' + S.role, 60000)) return;
+    L.loaded['ph:' + S.role] = Date.now();
+    try { await L.loadProjects(true); } finally { L.loaded[k] = 0; }
+  }
+  async function loadCtrPending() {
+    await peekProjects().catch(() => {});
+    const L2 = (S.projs[S.role] || []).filter((p) => p._live && p.stage < 3);
+    await Promise.all(L2.map((p) => (S.ctrSt[p._id] && Date.now() - S.ctrSt[p._id].at < 30000 ? null : ctrStatus(p._id).catch(() => null))));
+  }
+  window.ctrPending = function () {
+    if (!on()) return [];
+    return (S.projs[S.role] || []).filter((p) => p._live && S.ctrSt[p._id] && !S.ctrSt[p._id].active).map((p) => {
+      const c = S.ctrSt[p._id];
+      return { dir: c.mine ? 'out' : 'in', t: 'قرارداد: ' + p.t, who: p.who, d: c.mine ? 'امضای تو ثبت شد؛ منتظر امضای طرف مقابل' : c.theirs ? 'طرف مقابل امضا کرد؛ نوبت توست' : 'منتظر امضای تو', open: `LIVE.openDealProject('${p._id}','ctr')` };
+    });
+  };
+  const sigLbl = (c) => (!c ? 'قرارداد: دیدن و امضا' : c.active ? 'قرارداد امضا شد · دیدن' : c.mine ? 'امضای تو ثبت شد · منتظر امضای طرف مقابل' : c.theirs ? 'طرف مقابل امضا کرد · نوبت امضای توست' : 'قرارداد آماده است · امضا با کد پیامکی');
+  wrap('dealCtrBtn', function (prev, c, m, i) {
+    const h = prev(c, m, i);
+    if (!L.on || !m || !m.projectId) return h;
+    const st = S.ctrSt[m.projectId];
+    if (!st || Date.now() - st.at > 30000) {
+      S.ctrSt[m.projectId] = Object.assign({}, st || {}, { at: Date.now() }); // یک درخواست در هر ۳۰ ثانیه
+      ctrStatus(m.projectId).then(() => { if (S.cur === 'chat' && byId('m' + i)) rerenderMsg(i); }).catch(() => {});
+    }
+    return h.replace('توافق‌نامه (قرارداد): دیدن و امضا', sigLbl(st && st.mine !== undefined ? st : null));
+  });
+  // بعد از امضا وضعیت تازه شود
+  wrap('renderCtr', function (prev) { const r = prev(); const p = (S.projs[S.role] || [])[S.pi]; if (on() && p && p._id) delete S.ctrSt[p._id]; return r; });
+
+  // ۱۳) رأی «مفید بود / نبود»
+  window.voteAnsLive = function (aid, x, v) {
+    if (!on() || !x._id) return;
+    api('POST', '/responses/' + x._id + '/vote', { value: v }).then((d) => { x.up = d.up; x.down = d.down; x.my = d.myVote; if (S.cur === 'qa') renderQA(); }).catch(err);
+  };
+
+  // ۱۲) جست‌وجوی افراد با نام یا کد کاربری از سرور
+  let pq = '';
+  wrap('renderResults', function (prev, first) {
+    const r = prev(first);
+    const q = (S.q || '').trim();
+    if (!L.on || q.length < 2 || q === pq) return r;
+    pq = q;
+    blkDeb('ppl', () => {
+      api('GET', '/profiles?q=' + encodeURIComponent(q) + '&limit=12')
+        .then((d) => { d.items.forEach((x) => L.upsertPerson(x, x.city)); if (S.cur === 'explore' && (S.q || '').trim() === q) renderResults(); })
+        .catch(() => {});
+    }, 250);
+    return r;
+  });
+
+  // ۹) آگهی رایگان: آگهی‌های خودم پیش از باز شدن فرم گرفته شود
+  wrap('openWizard', function (prev, ...a) {
+    const r = prev(...a); // فرم فوری باز شود؛ آگهی‌های من پشت صحنه
+    if (!on() || S._skipLimit || fresh('myads:' + S.role, 60000) || fresh('mp:' + S.role, 30000)) return r;
+    L.loaded['mp:' + S.role] = Date.now(); // صفحهٔ «آگهی‌های من» باز هم خودش تازه می‌کند
+    api('GET', '/ads/mine').then((d) => {
+      for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].who === 'me') ADS.splice(i, 1);
+      d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: { code: L.pub && L.pub.code, role: S.role, name: (L.pub && L.pub.name) || '' } })), { who: 'me', st: x.status, views: x.views })));
+      // هنوز در قدم اول فرم است و آگهی فعال دارد ← همان پیام محدودیت (پیش از پر کردن فرم)
+      if (S.cur === 'new' && S.w && (S.w.step || 0) <= 1 && myActiveAds().length >= ((L.cfg && L.cfg.limits && L.cfg.limits.freeAds) || FREE_AD_LIMIT)) adLimitSheet();
+    }).catch(() => {});
+    return r;
+  });
+  const limitErr = (e) => !!e && e.code === 'FREE_AD_LIMIT';
+  L.limitErr = limitErr;
+  wrap('adEditSave', function (prev, id) {
+    const a = ADS.find((x) => x.id === id);
+    if (!on() || !a || !a._live) return prev(id);
+    const t = byId('aeT').value.trim();
+    if (t.length < 4) { toast('عنوان حداقل ۴ حرف'); return; }
+    const body = { title: t, description: byId('aeD').value.trim() || null };
+    if (byId('aeW')) { const n = +L.toEn(byId('aeW').value).replace(/[^\d]/g, ''); body.wageAmount = n || null; if (!n) body.wageType = 'توافقی'; }
+    api('PATCH', '/ads/' + id, body).then((d) => { Object.assign(a, L.mapAd(Object.assign({}, d.ad, { author: { code: L.pub.code, role: S.role, name: L.pub.name } })), { who: 'me', st: d.ad.status }); closeSheet(); toast('آگهی ویرایش شد'); render(); }).catch(err);
+  });
+
+  // ۱۸) «نیروی این پروژه»: افراد واقعی هر نقش، انتشار آگهی و ارسال درخواست‌ها
+  wrap('estGo', function (prev) {
+    prev();
+    if (!on()) return;
+    Promise.all(S.eg.roles.map((r) => api('GET', '/profiles?role=' + r + '&limit=12').then((d) => d.items.forEach((x) => L.upsertPerson(x, x.city))).catch(() => {})))
+      .then(() => { if (S.cur === 'estgo') renderEstGo(); });
+  });
+  wrap('estPublish', async function (prev) {
+    if (!on()) return prev();
+    const { g, draft, descFull } = egPayload();
+    if (g.title.length < 4) { toast('عنوان آگهی را بنویس'); return; }
+    if (!g.roles.length) { toast('حداقل یک نقش انتخاب کن'); return; }
+    if (!peValid()) return;
+    const b = document.querySelector('#s-estgo .cta'); if (b) b.disabled = true;
+    const aud = g.roles.filter((r) => ['worker', 'specialist', 'engineer', 'contractor', 'company'].includes(r)).slice(0, 3);
+    const codes = [...g.picks].map((id) => P[id] && P[id].code).filter(Boolean);
+    let adId = null;
+    try {
+      const d = await api('POST', '/ads', { type: 'job', title: g.title.slice(0, 120), description: descFull.slice(0, 2000), province: CITY_PROV[g.place] || 'هرمزگان', city: g.place, wageType: 'پروژه‌ای', wageAmount: null, startWhen: 'با هماهنگی', range: 'province', audience: aud, needCount: 1, skills: g.skills.slice(0, 5) });
+      adId = d.ad.id;
+      ADS.unshift(Object.assign(L.mapAd(Object.assign({}, d.ad, { author: { code: L.pub.code, role: S.role, name: L.pub.name } })), { who: 'me', st: 'active' }));
+      saveCtrDraft(adId, draft);
+    } catch (e) {
+      if (b) b.disabled = false;
+      if (!limitErr(e)) { err(e); return; }
+      if (!codes.length) { adLimitSheet(); return; }
+      toast('آگهی فعال دیگری داری؛ درخواست‌ها بدون آگهی تازه فرستاده می‌شود');
+    }
+    try {
+      let cid = null;
+      if (codes.length) {
+        const r = await api('POST', '/invites', { profileCodes: codes, adId, title: g.title.slice(0, 160), startWhen: 'با هماهنگی', offer: g.budget.slice(0, 120), message: `پیش‌نویس قرارداد: مدت ${fa(g.days)} روز · پرداخت: ${planTxt(PE.ms)}`.slice(0, 1000) });
+        cid = r.items.length === 1 ? r.items[0].conversationId : null;
+        if (!adId) r.items.forEach((x) => saveCtrDraft('c:' + x.conversationId, draft));
+      }
+      L.loaded.req = 0; L.loadConvs().catch(() => {});
+      estDone(codes.length, cid, !adId);
+    } catch (e) { if (b) b.disabled = false; err(e); }
+  });
+  // پیش‌نویس قرارداد در گفت‌وگوهای بدون آگهی
+  wrap('ctrWizard', function (prev) {
+    const c = S.convs.find((x) => x.id === S.cid);
+    if (c && !c.ad && S.ctrDrafts['c:' + c.id]) { c.ad = 'c:' + c.id; try { return prev(); } finally { c.ad = null; } }
+    return prev();
+  });
+
+  // ۱۵) خانه: پروژه‌ها، بازدیدهای امروز و پیشنهادها از سرور
+  window.todayVisits = function () {
+    if (!on() || S.role !== 'engineer') return [];
+    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran' }).format(new Date());
+    return (L.visits || []).filter((v) => v.as === 'engineer' && v.day === today && v.status === 'confirmed').map((v) => ({ t: v.typeName + ' · ساعت ' + v.slot, w: (v.client ? v.client.name : '') + (v.address ? ' · ' + v.address : '') }));
+  };
+  wrap('renderHome', function (prev) {
+    prev();
+    if (!on()) return;
+    const t = homeSuggestType(), jobs = [];
+    if (!fresh('ph:' + S.role, 60000)) jobs.push(peekProjects());
+    if (L.loadAds && !fresh('ads:' + t, 60000)) jobs.push(L.loadAds(t));
+    if (!fresh('req', 60000)) jobs.push(loadRequests2());
+    if (jobs.length) Promise.all(jobs.map((j) => j.catch(() => {}))).then(() => { if (S.cur === 'home') prev(); });
+  });
+  // بازدید (نسخهٔ نمایشی): همان صفحهٔ تأیید یکسان؛ نسخهٔ سرور در vConfirm بخش ۴
+  wrap('vConfirm', function (prev) {
+    const r = prev();
+    const t = byId('sheetTitle');
+    if (!L.on && t && /بازدید فرستاده شد/.test(t.textContent)) visitDone();
+    return r;
+  });
+  function visitDone() {
+    const p = P[S.visit.pid];
+    reqDone({ title: 'درخواست بازدید فرستاده شد', who: p ? 'برای ' + p.name : '', pid: S.visit.pid, name: p && p.name, where: 'درخواست‌ها ← ارسالی (بازدید)',
+      steps: ['مهندس روز و ساعت را تأیید یا رد می‌کند؛ با اعلان خبرت می‌کنیم.', 'بعد از بازدید، گزارش مکتوب می‌رسد و هزینه را مستقیم می‌پردازی.', 'تا ۱۲ ساعت قبل، لغو رایگان است.'] });
+  }
+  L.visitDone = visitDone;
 })();

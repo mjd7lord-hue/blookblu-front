@@ -2410,7 +2410,7 @@ function renderExplore(){
     ${S.exView==='map'?`<div class="island" id="heroMap">${exploreMap(list)}</div>`:''}
   </div>
   <div class="search">
-    <label class="sbox">${I.search}<input id="q" type="search" placeholder="${ph}" value="${esc(S.q)}" oninput="S.q=this.value;renderResults()" aria-label="جست‌وجو"></label>
+    <label class="sbox">${I.search}<input id="q" type="search" placeholder="${ph}" value="${esc(S.q)}" oninput="S.q=this.value;blkDeb('q',()=>renderResults())" aria-label="جست‌وجو"></label>
     <button class="fbtn" aria-label="فیلتر و مرتب‌سازی" onclick="openFilters()">${I.filter}${fc?`<span class="badge">${fa(fc)}</span>`:''}</button>
   </div>
   <div class="rail" role="group" aria-label="فیلتر نقش">${roleChips.map(([k,n,c])=>`<button class="chip" aria-pressed="${S.roleF===k}" onclick="S.roleF='${k}';renderExplore()">${k!=='all'?`<i style="background:${ROLES[k].c}"></i>`:''}${n} <small>${fa(c)}</small></button>`).join('')}</div>
@@ -3283,7 +3283,7 @@ function renderMsgs(){
   <div class="inbox-hero"><div class="t"><b>${waiting?fa(waiting)+' گفت‌وگو منتظر جواب توست':'همهٔ پیام‌ها را خوانده‌ای'}</b><span>${u?fa(u)+' پیام خوانده‌نشده':'صندوق کارگاه خلوت است'}</span></div>
     <svg viewBox="0 0 64 54" aria-hidden="true"><rect x="22" y="14" width="20" height="36" rx="5" fill="#F97316"/><rect x="26" y="20" width="12" height="8" rx="2" fill="#0B1412"/><circle cx="32" cy="38" r="4" fill="#0B1412"/><path d="M36 14V4" stroke="#C9D1DC" stroke-width="2.5" stroke-linecap="round"/>
       ${u?'<path class="radio-w" d="M44 6a8 8 0 0 1 0 12"/><path class="radio-w" style="animation-delay:.3s" d="M48 2a14 14 0 0 1 0 20"/><path class="radio-w" style="animation-delay:.6s" d="M52 -2a20 20 0 0 1 0 28"/>':''}</svg></div>
-  <div class="search" style="margin-top:12px"><label class="sbox">${I.search}<input type="search" placeholder="جست‌وجوی نام، پروژه یا متن" value="${esc(S.mq)}" oninput="S.mq=this.value;renderMsgList()" aria-label="جست‌وجو در پیام‌ها"></label></div>
+  <div class="search" style="margin-top:12px"><label class="sbox">${I.search}<input type="search" placeholder="جست‌وجوی نام، پروژه یا متن" value="${esc(S.mq)}" oninput="S.mq=this.value;blkDeb('mq',()=>renderMsgList())" aria-label="جست‌وجو در پیام‌ها"></label></div>
   <div class="rail" role="group" aria-label="فیلتر گفت‌وگوها">${F.map(([k,n])=>{const c=k==='unread'?S.convs.filter(x=>!x.arch&&x.unread).length:k==='arch'?S.convs.filter(x=>x.arch).length:0;return `<button class="chip" aria-pressed="${S.mf===k}" onclick="S.mf='${k}';renderMsgs()">${n}${c?` <small>${fa(c)}</small>`:''}</button>`}).join('')}</div>
   <div class="section" style="margin-top:12px" id="clist"></div>`;
   renderMsgList(L);
@@ -8290,6 +8290,7 @@ go('home',true);</script>
 /* ۸ گروه‌های صفحهٔ «من» */
 .me-grp .sec-head{margin-bottom:6px}
 </style>
+<script src="flow.js"></script>
 <script src="live.js"></script>
 <script src="live-projects.js"></script>
 <script src="live-more.js"></script>

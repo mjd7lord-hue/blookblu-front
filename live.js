@@ -607,7 +607,7 @@
     Object.assign(m, {
       code: p.code, name: p.name, ini: ini(p.name), title: p.title || m.title, place: p.city, born: p.city,
       rating: p.rating, done: p.doneCount, revN: p.reviewsCount, verified: !!p.identityVerified, docVerified: !!p.verified,
-      phone: p.phone ? faPhone(p.phone) : null, since: monthYear(p.since), resp: '', bio: p.bio || '', age: '—',
+      phone: p.phone ? faPhone(p.phone) : null, since: monthYear(p.since), resp: '', bio: p.bio || '', age: '—', exp: (p.data && p.data.exp) || '—',
       week: p.week, stars: p.stars, revs: p.reviews.map(revRow), guar: p.guarantors.map((g) => [g.name, g.relation, 'general']),
       pf: (p.portfolio || []).map((x) => [x.title, x.place || '', abs(x.url)]), avatar: abs(p.avatarUrl),
     });
@@ -670,8 +670,8 @@
       const m = (typeof MODES !== 'undefined' && MODES.find((x) => x[2] === a.type)) || null;
       if (m) S.mode = m[0];
       renderWizard();
-      toast('آگهی منتشر شد؛ در کاوش، بخش «' + (m ? m[1] : 'آگهی‌ها') + '» دیده می‌شود');
-    } catch (e) { err(e); }
+      toast('آگهی منتشر شد؛ در «آگهی‌های من» و برای دیگران در کاوش، بخش «' + (m ? m[1] : 'آگهی‌ها') + '» دیده می‌شود');
+    } catch (e) { if (e && e.code === 'FREE_AD_LIMIT' && window.adLimitSheet) adLimitSheet(); else err(e); }
   });
 
   /* ---- پروفایل دیگران ---- */
@@ -869,7 +869,7 @@
   });
 
   /* ابزار مشترک برای live-projects.js */
-  Object.assign(L, { upsertPerson, fillPerson, loadMe, loadConvs, mapAd, abs, rel, faDate, dayLabel, money, err, toEn, faPhone, fsize, isUuid, wrap, ini });
+  Object.assign(L, { upsertPerson, fillPerson, loadMe, loadConvs, mapAd, loadAds, abs, rel, faDate, dayLabel, money, err, toEn, faPhone, fsize, isUuid, wrap, ini });
 
   /* =================== شروع =================== */
   function goLive() {
