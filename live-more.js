@@ -1438,15 +1438,7 @@
     const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran' }).format(new Date());
     return (L.visits || []).filter((v) => v.as === 'engineer' && v.day === today && v.status === 'confirmed').map((v) => ({ t: v.typeName + ' · ساعت ' + v.slot, w: (v.client ? v.client.name : '') + (v.address ? ' · ' + v.address : '') }));
   };
-  wrap('renderHome', function (prev) {
-    prev();
-    if (!on()) return;
-    const t = homeSuggestType(), jobs = [];
-    if (!fresh('ph:' + S.role, 60000)) jobs.push(peekProjects());
-    if (L.loadAds && !fresh('ads:' + t, 60000)) jobs.push(L.loadAds(t));
-    if (!fresh('req', 60000)) jobs.push(loadRequests2());
-    if (jobs.length) Promise.all(jobs.map((j) => j.catch(() => {}))).then(() => { if (S.cur === 'home') prev(); });
-  });
+  // (خانه دست‌نخورده می‌ماند)
   // بازدید (نسخهٔ نمایشی): همان صفحهٔ تأیید یکسان؛ نسخهٔ سرور در vConfirm بخش ۴
   wrap('vConfirm', function (prev) {
     const r = prev();

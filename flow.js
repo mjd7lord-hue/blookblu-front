@@ -674,20 +674,7 @@
     return `<div class="section"><div class="sec-head"><h3>${title}</h3><button onclick="exploreMode('${mode}')">همه ‹</button></div>${L.length ? L.map((x, k) => adCard(x.a, x.p, k)).join('') : `<div class="empty">فعلاً موردی نیست؛ بعداً سر بزن یا در کاوش بگرد.</div>`}</div>`;
   }
   window.homeSuggestType = () => (CLIENT.includes(S.role) ? 'work' : S.role === 'engineer' ? 'consult' : 'job');
-  window.renderHome = function () {
-    if (!S.auth) return renderGuestHome();
-    const me = ME(), nm = esc(((S.profile && S.profile.name) || me.name || '').split(' ')[0]);
-    const sto = (typeof storyList === 'function' && (!window.LIVE || !LIVE.on || (LIVE.cfg && (LIVE.cfg.stories || []).length))) ? storyList() : [];
-    const items = scFor();
-    $('s-home').innerHTML = `<header class="top"><div class="avatar" aria-hidden="true" style="${avBg(me).slice(1)}">${esc((me.ini || 'م')[0])}</div>
-      <div class="hello"><b>${greet()}، ${nm}</b>${staticRole()}</div>
-      <button class="icon-btn" aria-label="تغییر حالت روشن و تیره" onclick="toggleTheme()">${I.moon}</button>
-      <button class="icon-btn" aria-label="اعلان‌ها" onclick="go('notif')"><svg class="ico" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>${(S.notifs || []).some((n) => !n.read) ? '<span class="bell-dot"></span>' : ''}</button></header>
-      ${todayCard()}
-      ${reqSummary('home')}
-      <div class="section"><div class="qa ${sto.length ? 'hs' : ''}">${sto.map((s, i) => `<button onclick="openStory(${i})"><span class="ic" style="--c:var(--accent)">${s.ic || QI.search}</span>${esc(s.n)}</button>`).join('')}${items.map(([n, c, ic, fn]) => `<button onclick="${fn}"><span class="ic" style="--c:${c}">${QI[ic]}</span>${n}</button>`).join('')}</div></div>
-      ${suggest()}`;
-  };
+  // خانه: همان نسخهٔ قبلی (به خواست مجید برگردانده شد)
   // استوری نمایشی شخصی (مثل «امتیاز تو ۹۷») حذف؛ فقط استوری‌های واقعی
   wrapW('storyList', function (prev) { return prev().filter((s) => s.k !== 'trust'); });
 
