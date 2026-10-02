@@ -51,13 +51,13 @@ html.dk .dk-side{display:flex;flex-direction:column;position:fixed;top:0;bottom:
 .dk-brand .brand{display:inline-flex;align-items:center;gap:8px}
 .dk-brand .brand .blk-logo{width:34px;height:36px}
 .dk-brand .brand .wm{font-size:24px}
-.dk-brand small{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.dk-brand small{font-size:12px;color:var(--muted);white-space:nowrap}
 .dk-brand .dk-mark{display:none}
 .dk-post{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border:0;border-radius:16px;background:var(--accent,var(--gold));color:#fff;
   font:inherit;font-weight:800;font-size:15px;margin:2px 4px 14px;cursor:pointer;box-shadow:0 6px 18px color-mix(in srgb,var(--accent,#0F9C88) 30%,transparent);transition:transform .15s,filter .15s}
 .dk-post:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .dk-post svg{width:20px;height:20px;stroke-width:2.4}
-.dk-grp{font-size:11.5px;color:var(--muted);margin:14px 12px 6px;font-weight:700;letter-spacing:.2px}
+.dk-grp{font-size:12px;color:var(--muted);margin:14px 12px 6px;font-weight:700;letter-spacing:.2px}
 .dk-it{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;border:0;background:none;border-radius:13px;padding:0 12px;margin:1px 0;
   font:inherit;font-size:14.5px;color:var(--muted);text-align:right;cursor:pointer;position:relative;transition:background .15s,color .15s}
 .dk-it svg{width:21px;height:21px;flex:none}
@@ -65,7 +65,7 @@ html.dk .dk-side{display:flex;flex-direction:column;position:fixed;top:0;bottom:
 .dk-it:hover{background:var(--soft);color:var(--ink)}
 .dk-it[aria-current="page"]{background:color-mix(in srgb,var(--accent,#0F9C88) 12%,transparent);color:var(--accent,var(--ink));font-weight:800}
 .dk-it[aria-current="page"]::before{content:"";position:absolute;right:-12px;top:10px;bottom:10px;width:4px;border-radius:4px 0 0 4px;background:var(--accent,var(--gold))}
-.dk-it .dk-nb{min-width:20px;height:20px;border-radius:10px;background:var(--bad,#C63D3D);color:#fff;font-size:11.5px;font-weight:900;display:grid;place-items:center;padding:0 6px;flex:none}
+.dk-it .dk-nb{min-width:20px;height:20px;border-radius:10px;background:var(--bad,#C63D3D);color:#fff;font-size:12px;font-weight:900;display:grid;place-items:center;padding:0 6px;flex:none}
 .dk-sp{flex:1;min-height:12px}
 .dk-me{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:10px;font:inherit;color:inherit;text-align:right;cursor:pointer;margin-top:8px;transition:border-color .15s}
 .dk-me:hover{border-color:var(--accent,var(--gold))}
@@ -92,7 +92,7 @@ html.dk .dk-side{display:flex;flex-direction:column;position:fixed;top:0;bottom:
   html.dk .dk-grp{display:block;height:1px;background:var(--line);margin:10px 8px;font-size:0;width:40px}
   html.dk .dk-it{justify-content:center;width:52px;padding:0}
   html.dk .dk-it[aria-current="page"]::before{right:-10px}
-  html.dk .dk-it .dk-nb{position:absolute;top:4px;left:4px;min-width:17px;height:17px;font-size:10px;padding:0 4px}
+  html.dk .dk-it .dk-nb{position:absolute;top:4px;left:4px;min-width:17px;height:17px;font-size:12px;padding:0 4px}
   html.dk .dk-me{width:auto;padding:6px;border-radius:14px}
   html.dk .dk-login{width:52px;font-size:12px}
   html.dk .dk-login .l{display:none}html.dk .dk-login .s{display:inline}

@@ -556,7 +556,7 @@
     if (!have) return [];
     return need.filter((n) => { const d = have.find((x) => x.n === n); return !d || d.st === 'none'; });
   }
-  function redBadge(n) { return `<i class="blk-red" style="display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-inline-start:6px;border-radius:9px;background:#EF4444;color:#fff;font:700 11px/1 inherit;font-style:normal">${fa(n)}</i>`; }
+  function redBadge(n) { return `<i class="blk-red" style="display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-inline-start:6px;border-radius:9px;background:#EF4444;color:#fff;font:700 12px/1 inherit;font-style:normal">${fa(n)}</i>`; }
   function paintDocBadges() {
     if (!on()) return;
     const n = missingDocs().length;
@@ -1159,4 +1159,79 @@
   try {
     Object.keys(DOCS).forEach((r) => { DOCS[r] = DOCS[r].filter((d) => !/تأمین اجتماعی/.test(d[0])); });
   } catch (e) {}
+
+  /* =================================================================
+   * بخش ۱۰: بازبینی رابط (با یا بدون سرور)
+   * ================================================================= */
+  // ۴) مهمان: درخواست‌ها، پروژه‌ها و اعلان‌ها = صفحهٔ قفل داخل صفحه (پنجرهٔ ورود خودکار باز نمی‌شود)
+  const LOCKED = {
+    req: ['درخواست‌ها', 'درخواست‌های همکاری که می‌فرستی و می‌گیری اینجا جمع می‌شود.'],
+    proj: ['پروژه‌ها', 'پروژه‌ها، قراردادها و پرداخت‌هایت بعد از ورود اینجاست.'],
+    notif: ['اعلان‌ها', 'پیام‌ها، درخواست‌ها و خبر کارگاه‌هایت اینجا می‌آید.'],
+  };
+  wrap('go', function (prev, name, noPush) {
+    if (S.auth || !LOCKED[name] || !document.getElementById('s-' + name)) return prev(name, noPush);
+    if (!noPush && S.cur !== name) S.hist.push(S.cur);
+    S.cur = name;
+    document.querySelectorAll('.screen').forEach((x) => x.classList.toggle('on', x.id === 's-' + name));
+    document.getElementById('navwrap').hidden = true;
+    scrollTo(0, 0);
+    const t = LOCKED[name];
+    document.getElementById('s-' + name).innerHTML = `${pageBar(t[0])}
+      <div class="section"><div class="card locked"><div class="lock-art" aria-hidden="true"><svg viewBox="0 0 80 80"><rect x="18" y="36" width="44" height="34" rx="8" fill="var(--accent)"/><path class="shackle" d="M28 36V26a12 12 0 0 1 24 0v10" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="52" r="5" fill="#fff"/></svg></div>
+      <b>${t[0]} بعد از ورود باز می‌شود</b><p>${t[1]}</p><button class="cta" onclick="startAuth()">ورود یا ثبت‌نام</button><button class="ghost" onclick="go('explore')">دیدن آگهی‌ها</button></div></div>`;
+  });
+
+  // ۸) صفحهٔ «من»: کاشی‌ها در ۴ گروه (پرکاربردترین اول)
+  const ME_GROUPS = [
+    ['کار من', ["go('req')", "go('proj')", "go('myads')", "go('cal')", "go('disp')"]],
+    ['پروفایل و اعتبار', ['trust', "go('pf')", "go('guar')", "go('team')", "go('docs')"]],
+    ['ابزارها', ["go('est')", "go('learn')", "go('stats')", "go('safe')", "go('saved')"]],
+    ['تنظیمات', ["go('set')", "go('notif')", "go('invite')", "go('about')"]],
+  ];
+  wrap('renderMe', function (prev) {
+    const r = prev();
+    if (!S.auth) return r;
+    const grid = document.querySelector('#s-me .mygrid');
+    if (!grid || grid.dataset.grouped) return r;
+    const sec = grid.closest('.section');
+    const tiles = [...grid.children];
+    const used = new Set();
+    const take = (key) => {
+      if (key === 'trust') {
+        const b = document.createElement('button');
+        b.setAttribute('onclick', "openTrust('me')");
+        b.innerHTML = `<span class="ic" style="--c:var(--gold)">${(typeof QI === 'object' && QI.card) || ''}</span>شناسنامهٔ کاری`;
+        return [b];
+      }
+      return tiles.filter((t) => !used.has(t) && (t.getAttribute('onclick') || '') === key).map((t) => (used.add(t), t));
+    };
+    const frag = document.createDocumentFragment();
+    const groups = ME_GROUPS.map(([title, keys]) => [title, keys.flatMap(take)]);
+    tiles.filter((t) => !used.has(t)).forEach((t) => groups[2][1].push(t)); // بقیه در «ابزارها»
+    groups.forEach(([title, items]) => {
+      if (!items.length) return;
+      const s2 = document.createElement('div');
+      s2.className = 'section me-grp';
+      s2.innerHTML = `<div class="sec-head"><h3>${title}</h3></div>`;
+      const g2 = document.createElement('div');
+      g2.className = grid.className; g2.dataset.grouped = '1';
+      items.forEach((t) => g2.appendChild(t));
+      s2.appendChild(g2);
+      frag.appendChild(s2);
+    });
+    sec.replaceWith(frag);
+    return r;
+  });
+
+  // ۸) خانهٔ کاربر واردشده: یک ردیف میان‌بر — ردیف دایره‌ای فقط وقتی مدیر استوری منتشر کرده باشد
+  wrap('storiesRail', function (prev) {
+    if (!S.auth) return prev();
+    const admin = L.cfg && (L.cfg.stories || []).length;
+    return admin ? prev() : '';
+  });
+  wrap('storyList', function (prev) {
+    const all = prev();
+    return S.auth ? all.filter((x) => x._id) : all;
+  });
 })();
