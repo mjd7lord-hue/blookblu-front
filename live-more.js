@@ -507,6 +507,8 @@
     const m = prev();
     const a = S.profile && S.profile.d && ageOf(S.profile.d.by);
     if (m && a) m.age = a;
+    // عکس پروفایل خودم (همه‌جای اپ)
+    if (m && L.pub && L.pub.avatarUrl) m.avatar = L.abs(L.pub.avatarUrl);
     return m;
   });
 
@@ -916,14 +918,14 @@
   // شکل سر و شانه روی بوم ۱۰۰×۱۰۰ (همان قاب خط‌چین)
   function silhouette(ctx, s) {
     ctx.beginPath();
-    ctx.ellipse(50 * s, 38 * s, 17 * s, 21 * s, 0, 0, Math.PI * 2);
-    ctx.moveTo(8 * s, 100 * s);
-    ctx.bezierCurveTo(8 * s, 76 * s, 26 * s, 66 * s, 40 * s, 63 * s);
-    ctx.lineTo(42 * s, 56 * s); ctx.lineTo(58 * s, 56 * s); ctx.lineTo(60 * s, 63 * s);
-    ctx.bezierCurveTo(74 * s, 66 * s, 92 * s, 76 * s, 92 * s, 100 * s);
+    ctx.ellipse(50 * s, 40 * s, 20 * s, 25 * s, 0, 0, Math.PI * 2);
+    ctx.moveTo(4 * s, 100 * s);
+    ctx.bezierCurveTo(4 * s, 82 * s, 22 * s, 72 * s, 40 * s, 70 * s);
+    ctx.lineTo(42 * s, 62 * s); ctx.lineTo(58 * s, 62 * s); ctx.lineTo(60 * s, 70 * s);
+    ctx.bezierCurveTo(78 * s, 72 * s, 96 * s, 82 * s, 96 * s, 100 * s);
     ctx.closePath();
   }
-  const SIL_SVG = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><mask id="avm"><rect width="100" height="100" fill="#fff"/><ellipse cx="50" cy="38" rx="17" ry="21" fill="#000"/><path d="M8 100 C8 76 26 66 40 63 L42 56 L58 56 L60 63 C74 66 92 76 92 100 Z" fill="#000"/></mask></defs><rect width="100" height="100" fill="rgba(0,0,0,.35)" mask="url(#avm)"/><ellipse cx="50" cy="38" rx="17" ry="21" fill="none" stroke="#fff" stroke-width=".7" stroke-dasharray="2.2 1.6"/><path d="M8 100 C8 76 26 66 40 63 L42 56 L58 56 L60 63 C74 66 92 76 92 100" fill="none" stroke="#fff" stroke-width=".7" stroke-dasharray="2.2 1.6"/></svg>`;
+  const SIL_SVG = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><mask id="avm"><rect width="100" height="100" fill="#fff"/><ellipse cx="50" cy="40" rx="20" ry="25" fill="#000"/><path d="M4 100 C4 82 22 72 40 70 L42 62 L58 62 L60 70 C78 72 96 82 96 100 Z" fill="#000"/></mask></defs><rect width="100" height="100" fill="rgba(0,0,0,.5)" mask="url(#avm)"/><g fill="none" stroke="#fff" stroke-width="1.1" stroke-dasharray="3 2" stroke-linecap="round" style="filter:drop-shadow(0 0 1.5px rgba(0,0,0,.6))"><ellipse cx="50" cy="40" rx="20" ry="25"/><path d="M4 100 C4 82 22 72 40 70 L42 62 L58 62 L60 70 C78 72 96 82 96 100"/></g><g stroke="#fff" stroke-width=".6" opacity=".55"><line x1="50" y1="12" x2="50" y2="17"/><line x1="26" y1="40" x2="31" y2="40"/><line x1="69" y1="40" x2="74" y2="40"/></g><text x="50" y="8.5" text-anchor="middle" font-size="4.2" fill="#fff" style="font-family:inherit">صورت داخل بیضی · شانه‌ها روی خط</text></svg>`;
   const st8 = { src: null, img: null, zoom: 1, x: 0, y: 0, blur: true, stream: null, mirror: false };
   function stopCam() { if (st8.stream) st8.stream.getTracks().forEach((t) => t.stop()); st8.stream = null; }
   // تصویر در قاب: زوم و جابه‌جایی، «پوشاندن» کامل مربع
@@ -969,7 +971,7 @@
   function studioHTML() {
     const live = !!st8.live;
     return `<div class="grab"></div><h3 id="sheetTitle">عکس پروفایل</h3><p class="sub">سر و شانه‌ات را داخل قاب خط‌چین بگذار؛ همهٔ عکس‌ها یک‌دست و حرفه‌ای می‌شوند.</p>
-      <div id="avStage" style="position:relative;width:min(300px,78vw);aspect-ratio:1;margin:6px auto 12px;border-radius:24px;overflow:hidden;background:#0B1412;touch-action:none">
+      <div id="avStage" style="position:relative;width:100%;max-width:440px;aspect-ratio:1;margin:6px auto 12px;border-radius:24px;overflow:hidden;background:#0B1412;touch-action:none">
         ${live ? '<video id="avVid" playsinline autoplay muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)"></video>' : '<canvas id="avCv" width="600" height="600" style="position:absolute;inset:0;width:100%;height:100%"></canvas>'}
         ${SIL_SVG}
         ${!st8.img && !live ? '<div style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:14px;text-align:center;padding:20px">با دوربین جلو عکس بگیر<br>یا از گالری انتخاب کن</div>' : ''}
@@ -1027,7 +1029,7 @@
         closeSheet();
         if (!on()) { toast('عکس پروفایل عوض شد'); return; }
         const fd = new FormData(); fd.append('file', new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
-        api('PUT', '/me/roles/' + S.role + '/avatar', fd).then(() => L.loadMe()).then(() => toast('عکس پروفایل ذخیره شد')).catch(err);
+        api('PUT', '/me/roles/' + S.role + '/avatar', fd).then(() => L.loadMe()).then(() => { try { render(); } catch (e) {} if (L.saveSnap) L.saveSnap(); toast('عکس پروفایل ذخیره شد'); }).catch(err);
       }, 'image/jpeg', 0.86);
     },
   });
@@ -1055,4 +1057,106 @@
     // زوم دو ضربه‌ای را touch-action: manipulation بالا می‌بندد (بدون کند کردن لمس‌های پشت‌سرهم)
     document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
   })();
+
+  /* =================================================================
+   * بخش ۹: توافق در چت ← پروژه و قرارداد واقعی؛ مدارک بدون بیمهٔ تأمین اجتماعی
+   * ================================================================= */
+  // زیر پیشنهاد توافقِ پذیرفته‌شده: «دیدن و امضای قرارداد» و «رفتن به پروژه» (پروژهٔ واقعی سرور)
+  wrap('linkDeal', function (prev, c, m) {
+    if (L.on && m && m.k === 'deal') { if (m.projectId) { m.proj = { live: true }; m.projRole = S.role; } return; }
+    return prev(c, m);
+  });
+  wrap('dealCtrBtn', function (prev, c, m, i) {
+    if (!L.on || !m || !m.projectId) return prev(c, m, i);
+    const ic = (typeof QI === 'object' && QI.doc ? QI.doc.replace('class="ico"', 'class="ico" style="width:18px;height:18px"') : '');
+    return `<button class="dl-ctr s0" onclick="LIVE.openDealProject('${m.projectId}','ctr')">${ic}<span>توافق‌نامه (قرارداد): دیدن و امضا</span><b>›</b></button>
+      <button class="dl-prj" onclick="LIVE.openDealProject('${m.projectId}','page')">رفتن به پروژه در «پروژه‌های من»</button>`;
+  });
+  L.openDealProject = async (pid, where) => {
+    try {
+      let i = (S.projs[S.role] || []).findIndex((p) => p._id === pid);
+      if (i < 0 && L.loadProjects) { await L.loadProjects(true); i = (S.projs[S.role] || []).findIndex((p) => p._id === pid); }
+      if (i < 0) { toast('این پروژه در نقش دیگرت است؛ نقش را عوض کن'); return; }
+      S.pi = i;
+      if (where === 'ctr') openContract(i); else openProjPage(i);
+    } catch (e) { err(e); }
+  };
+  // پیام‌های تازه: اگر پیشنهاد پذیرفته شد، دکمه‌ها فوری بیایند
+  const mapDealProj = () => (S.convs || []).forEach((c) => (c.msgs || []).forEach((m) => { if (m.k === 'deal' && m.st === 'ok' && m.projectId && !m.proj) { m.proj = { live: true }; m.projRole = S.role; } }));
+  wrap('renderChat', function (prev) { if (L.on) mapDealProj(); return prev(); });
+
+  /* ---------- پرسش تخصصی: پاسخ‌ها روی سرور و برای همه ---------- */
+  const ansLoaded = {};
+  async function loadAnswers(adId) {
+    ansLoaded[adId] = Date.now();
+    const d = await api('GET', '/ads/' + adId + '/answers');
+    S.ans[adId] = d.items.map((x) => ({ who: L.upsertPerson(Object.assign({}, x.author, { avatarUrl: x.author.avatarUrl })), t: x.message, up: 0, time: L.rel(x.createdAt), best: x.best, _id: x.id }));
+  }
+  wrap('renderQA', function (prev) {
+    const a = ADS.find((x) => x.id === S.adId);
+    if (!L.on || !a || !a._live) return prev();
+    if (!S.ans[a.id]) S.ans[a.id] = [];
+    prev();
+    if (!ansLoaded[a.id] || Date.now() - ansLoaded[a.id] > 15000) loadAnswers(a.id).then(() => { if (S.cur === 'qa' && S.adId === a.id) prev(); }).catch(() => {});
+  });
+  wrap('answerQA', function (prev, aid) {
+    prev(aid);
+    const a = ADS.find((x) => x.id === aid);
+    if (!L.on || !a || !a._live) return;
+    const b = document.querySelector('#sb .cta');
+    if (!b || !document.getElementById('ansT')) return;
+    b.removeAttribute('onclick');
+    b.onclick = () => {
+      const t = document.getElementById('ansT').value.trim();
+      if (t.length < 10) { toast('پاسخ کوتاه است'); return; }
+      b.disabled = true;
+      api('POST', '/ads/' + aid + '/responses', { message: t })
+        .then(() => loadAnswers(aid))
+        .then(() => { closeSheet(); renderQA(); toast('پاسخ تو منتشر شد؛ همه می‌بینند'); })
+        .catch((e) => { b.disabled = false; err(e); });
+    };
+  });
+
+  /* ---------- بازدید آگهی (برای آمار آگهی‌دهنده) ---------- */
+  const seenAd = new Set();
+  wrap('openAd', function (prev, id) {
+    const r = prev(id);
+    const a = ADS.find((x) => x.id === id);
+    if (L.on && a && a._live && a.who !== 'me' && !seenAd.has(id)) { seenAd.add(id); api('GET', '/ads/' + id).catch(() => {}); }
+    return r;
+  });
+
+  /* ---------- آمار عملکرد واقعی ---------- */
+  let statsData = null;
+  wrap('renderStats', function (prev) {
+    if (!on()) return prev();
+    const host = document.getElementById('s-stats');
+    const d = statsData;
+    const nf = (v, u) => (v == null ? '—' : fa(v) + (u || ''));
+    if (!d) host.innerHTML = `${pageBar('آمار عملکرد')}<div class="section"><div class="card" style="text-align:center;color:var(--muted)">در حال گرفتن آمار…</div></div>`;
+    else {
+      const bars = (vals, cls) => { const mx = Math.max(1, ...vals); return `<div class="bars">${vals.map((v, k) => `<div><b class="num">${fa(v)}</b><i style="--h:${(v / mx) * 100}%;--k:${k}" class="${k === vals.length - 1 ? 'cur' : ''}"></i><small>${d.months[k].slice(0, 3)}</small></div>`).join('')}</div>`; };
+      const inc = d.income.monthly.map((v) => Math.round(v / 1e5) / 10);
+      const dmx = Math.max(1, ...d.demand.map((x) => x.n));
+      host.innerHTML = `${pageBar('آمار عملکرد')}
+      <div class="section" style="margin-top:6px"><div class="kpis">${[
+        ['بازدید پروفایل', nf(d.profileViews.total)],
+        ['بازدید آگهی‌ها', nf(d.adViews.total)],
+        d.responses.received ? ['نرخ پاسخ به درخواست‌ها', nf(d.responses.answerRate, '٪')] : ['درخواست‌های فرستاده', nf(d.responses.sent)],
+        d.responses.avgAnswerMinutes != null ? ['میانگین زمان پاسخ', nf(d.responses.avgAnswerMinutes, ' دقیقه')] : ['تبدیل به همکاری', nf(d.responses.conversion, '٪')],
+      ].map((x, k) => `<div class="kpi" style="animation-delay:${k * 70}ms"><small>${x[0]}</small><b class="num">${x[1]}</b></div>`).join('')}</div></div>
+      <div class="section"><div class="card"><div class="sec-head" style="margin:0 0 6px"><h3>بازدید پروفایل</h3><span>۶ ماه اخیر</span></div>${bars(d.profileViews.monthly)}</div></div>
+      ${d.adViews.total || d.adViews.activeAds ? `<div class="section"><div class="card"><div class="sec-head" style="margin:0 0 6px"><h3>بازدید آگهی‌هایم</h3><span>${fa(d.adViews.activeAds)} آگهی فعال</span></div>${bars(d.adViews.monthly)}</div></div>` : ''}
+      ${S.role !== 'general' ? `<div class="section"><div class="card"><div class="sec-head" style="margin:0 0 6px"><h3>درآمد ثبت‌شده در بلوک</h3><span>میلیون تومان</span></div>${bars(inc)}
+        <p class="est-note" style="margin:6px 0 0">فقط پرداخت‌هایی که در دفترچهٔ پرداخت پروژه‌ها ثبت و تأیید شده حساب می‌شود.</p></div></div>` : ''}
+      <div class="section"><div class="card"><div class="sec-head" style="margin:0 0 6px"><h3>${d.responses.received ? 'درخواست‌های دریافتی' : 'درخواست‌های فرستاده'}</h3><span>${fa(d.projects.total)} پروژه · ${fa(d.projects.done)} تمام‌شده</span></div>${bars(d.responses.received ? d.responses.receivedMonthly : d.responses.sentMonthly)}</div></div>
+      <div class="section"><div class="sec-head"><h3>پرتقاضاترین مهارت‌ها در ${esc(d.province || 'استان تو')}</h3><span>۳۰ روز اخیر</span></div><div class="card">${d.demand.length ? d.demand.map((x, k) => `<div class="est-leg"><span>${esc(x.skill)}</span><div class="hbar"><i style="--w:${(x.n / dmx) * 100}%;--k:${k}"></i></div><b class="num">${fa(x.n)}</b></div>`).join('') : '<p style="margin:0;color:var(--muted)">هنوز آگهی کافی در استان نیست.</p>'}</div></div>`;
+    }
+    api('GET', '/me/stats').then((x) => { const first = !statsData; statsData = x; if (S.cur === 'stats' && first) renderStats(); else if (S.cur === 'stats') { statsData = x; } }).catch(err);
+  });
+
+  // مدارک: بیمهٔ تأمین اجتماعی لازم نیست (درخواست مجید)
+  try {
+    Object.keys(DOCS).forEach((r) => { DOCS[r] = DOCS[r].filter((d) => !/تأمین اجتماعی/.test(d[0])); });
+  } catch (e) {}
 })();

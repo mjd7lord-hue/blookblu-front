@@ -80,12 +80,24 @@
   /* ---------- درخواست به API ---------- */
   function setTok(a, r) { L.tok = a ? { a, r } : null; store.set('blk-tok', a ? JSON.stringify(L.tok) : null); }
   let refreshing = null;
+  // نتیجه: true تمدید شد · 'net' اینترنت/سرور در دسترس نبود (نشست می‌ماند) · false نشست واقعاً تمام شده
+  function refreshOnce() {
+    return fetch(L.base + '/api/auth/refresh', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: L.tok.r }),
+    }).then(async (r) => {
+      if (r.ok) { const d = await r.json(); setTok(d.accessToken, d.refreshToken); return true; }
+      return r.status === 401 || r.status === 403 ? false : 'net';
+    }).catch(() => 'net');
+  }
   function refresh() {
     if (!L.tok || !L.tok.r) return Promise.resolve(false);
-    return (refreshing = refreshing || fetch(L.base + '/api/auth/refresh', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken: L.tok.r }),
-    }).then((r) => (r.ok ? r.json() : null)).then((d) => { refreshing = null; if (!d) return false; setTok(d.accessToken, d.refreshToken); return true; })
-      .catch(() => { refreshing = null; return false; }));
+    return (refreshing = refreshing || (async () => {
+      let r = await refreshOnce();
+      // اینترنت لحظه‌ای قطع شد: یک بار دیگر
+      if (r === 'net') { await new Promise((x) => setTimeout(x, 1500)); r = await refreshOnce(); }
+      refreshing = null;
+      return r;
+    })());
   }
   /* ---------- کوچک کردن عکس پیش از ارسال: همان کیفیت دیدنی، حجم خیلی کمتر، ارسال و دانلود سریع‌تر ---------- */
   const MAXPX = 1600, JPEGQ = 0.82;
@@ -127,7 +139,9 @@
     catch (e) { throw { code: 'NETWORK', message: 'اتصال به سرور بلوک برقرار نشد؛ اینترنت را بررسی کن' }; }
     finally { busy(-1); }
     if (res.status === 401 && !retried && L.tok) {
-      if (await refresh()) return api(method, path, body instanceof FormData ? b : body, true);
+      const r = await refresh();
+      if (r === true) return api(method, path, body instanceof FormData ? b : body, true);
+      if (r === 'net') throw { code: 'NETWORK', message: 'اتصال به سرور بلوک برقرار نشد؛ اینترنت را بررسی کن' };
       endSession(true);
     }
     const data = await res.json().catch(() => ({}));
@@ -262,7 +276,8 @@
   addEventListener('pagehide', saveSnap);
   document.addEventListener('visibilitychange', () => { if (document.hidden) saveSnap(); });
   function applySnap(snap) {
-    Object.assign(P, snap.people || {});
+    // افراد ذخیره‌شده: با باز کردن دوباره از سرور تازه شوند (بازدید هم شمرده شود)
+    Object.entries(snap.people || {}).forEach(([k, v]) => { P[k] = Object.assign(v, { _full: false }); });
     applyMe(snap.me, snap.pub);
     (snap.ads || []).forEach((a) => ADS.push(a));
     S.convs = snap.convs || [];
