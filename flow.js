@@ -405,70 +405,16 @@
   });
 
   /* ================= ج-۷) پروفایل و شناسنامهٔ کاری در یک صفحه ================= */
-  window.openTrust = function (id, guide) {
-    S.tid = id; S.guide = !!guide;
-    if (S.cur === 'profile' && S.pid === id) { openScore(); return; }
-    S.pid = id; S.ptab = 0; S._openScore = true;
-    go('profile');
-  };
-  function openScore() {
-    const d = $('pvScore');
-    if (!d) return;
-    d.open = true;
-    requestAnimationFrame(() => d.scrollIntoView({ behavior: 'auto', block: 'start' }));
-  }
-  const svcRows = () => {
-    const V = (window.LIVE && LIVE.cfg && LIVE.cfg.visitTypes) ? LIVE.cfg.visitTypes.map((x) => [x.n, x.d, x.p]) : VTYPE;
-    return V.map((x) => `<div><span>${esc(x[0])} · ${esc(x[1])}</span><b class="num">${fa((x[2] / 1e6).toFixed(1).replace(/\.0$/, ''))} میلیون</b></div>`).join('');
-  };
-  window.renderProfile = function () {
-    const p = person(S.pid);
-    if (!p) return;
-    const tr = trustOf(p), me = !!p.me, pro = !!(p.skills && p.skills.length), saved = S.saved.has(S.pid);
-    const rating = String(p.rating || 0).replace('.', '٫');
-    const parts = [['رضایت همکاری‌ها', 55, tr.c, 'var(--gold)', 'میانگین ' + fa(rating) + ' از ۵'], ['پروژه‌های تمام‌شده', 25, tr.pr, 'var(--steel)', fa(p.done || 0) + ' پروژه'], ['تعداد نظرها', 10, tr.r, '#5EA8FF', fa(p.revN || 0) + ' نظر'], ['تأیید هویت', 10, tr.id, 'var(--ok)', p.verified ? 'تأیید شده' : 'هنوز تأیید نشده']];
-    const steps = me && window.LIVE && LIVE.trustSteps ? LIVE.trustSteps() : [];
-    const tot = (p.stars || []).reduce((a, b) => a + b, 0);
-    const needAd = !pro && (p.needs || []).find((n) => n[3]);
-    $('s-profile').innerHTML = `
-    <div class="bar"><button class="icon-btn" aria-label="بازگشت" onclick="back()">${I.back}</button><h1>${me ? 'پروفایل و شناسنامهٔ کاری من' : 'پروفایل و شناسنامهٔ کاری'}</h1>
-      ${me ? '' : `<button class="icon-btn" aria-label="${saved ? 'حذف از ذخیره‌ها' : 'ذخیره پروفایل'}" onclick="togSave('${S.pid}')">${saved ? I.saved : I.save}</button>`}</div>
-    ${me && S.me && !S.me.pub ? `<div class="section" style="margin-top:8px"><div class="note">${I.warn}<span>پروفایل عمومی تو خاموش است؛ دیگران این صفحه را نمی‌بینند.</span></div></div>` : ''}
-    <div class="pv-head">${hexA(p)}<div class="t"><h2>${esc(p.name)}${p.verified ? I.verified : ''}</h2><div class="rl"><span style="color:${ROLES[p.role].c};font-weight:700">${ROLES[p.role].n}</span>${p.title ? ' · ' + esc(String(p.title).replace(new RegExp('^' + ROLES[p.role].n + '\s*·\s*'), '')) : ''}</div>
-      <div class="pv-code">کد کاربری <b>${esc(p.code || '')}</b><button onclick="copyCode('${esc(p.code || '')}')">کپی</button></div></div>
-      <div class="ring-sc" aria-label="اعتبار ${fa(tr.t)} از ۱۰۰" role="button" tabindex="0" onclick="openTrust('${S.pid}')">${ringSm(tr.t, 'var(--gold)', 58, 6)}<b class="num">${fa(tr.t)}<small>اعتبار</small></b></div></div>
-    <p class="pv-why">${p.verified ? '<b>هویت تأیید شده.</b> ' : '<b>هویت هنوز تأیید نشده.</b> '}امتیاز اعتبار ${fa(tr.t)} از ۱۰۰ از رضایت همکاری‌ها، پروژه‌های تمام‌شده، تعداد نظرها و تأیید هویت ساخته می‌شود.</p>
-    ${me ? reqSummary('profile') : ''}
-    <div class="section" style="margin-top:12px"><div class="stats" style="grid-template-columns:repeat(4,1fr)">
-      <div><b class="num">${fa(p.done || 0)}</b><span>همکاری تمام‌شده</span></div>
-      <div><b>${esc(String(p.exp || '—').replace(' سال', ''))}</b><span>${/سال/.test(p.exp || '') ? 'سال سابقه' : 'سابقه'}</span></div>
-      <div><b class="num">${fa(rating)}</b><span>میانگین ستاره</span></div>
-      <div><b class="num">${fa((p.guar || []).length)}</b><span>معرف</span></div></div></div>
-    ${p.bio ? `<div class="section"><div class="card"><p style="font-size:15px;margin:0">${esc(p.bio)}</p></div></div>` : ''}
-    <div class="section"><details class="pv-score" id="pvScore" ${S.guide ? 'open' : ''}><summary>امتیاز از کجا آمده؟</summary><div class="pv-bars">
-      ${parts.map((x) => `<div class="pv-bar"><div class="h"><b>${x[0]}</b><span class="num">${fa(x[2])} از ${fa(x[1])} · ${esc(x[4])}</span></div><div class="tr"><i style="width:${Math.round((x[2] / x[1]) * 100)}%;background:${x[3]}"></i></div></div>`).join('')}
-      ${steps.length ? `<b style="display:block;margin:14px 0 4px;font-size:14px">قدم بعدی برای امتیاز بیشتر</b>${steps.slice(0, 4).map((s, i) => `<div class="tstep ${s[2] ? '' : 'off'}" ${s[2] ? `role="button" tabindex="0" onclick="${s[2]}"` : ''}><span class="n num">${fa(i + 1)}</span><span class="t"><b>${esc(s[0])}</b><small>${esc(s[1])}</small></span>${s[2] ? '<span class="go">‹</span>' : ''}</div>`).join('')}` : ''}
-    </div></details></div>
-    ${pro ? `<div class="section"><div class="sec-head"><h3>مهارت‌ها و تعرفه</h3></div><div class="card">${p.skills.map((s) => `<div class="skill"><div class="h"><b>${esc(s[0])}</b><span>${esc(s[4] || '')}</span></div><div class="s"><span>سابقه: ${esc(s[1] || '—')}</span><span>${s[3] && s[3] !== s[4] ? esc(s[3]) : ''}</span></div></div>`).join('')}</div></div>`
-      : (p.needs || []).length ? `<div class="section"><div class="sec-head"><h3>نیازهای فعال</h3></div><div class="card">${p.needs.map((n) => `<div class="need"><div style="flex:1"><b style="display:block">${esc(n[0])}</b><span style="font-size:13px;color:var(--muted)">${esc(n[1] || '')} · ${esc(n[2] || '')}</span></div>${n[3] ? `<button class="chip" onclick="openAd('${n[3]}')">دیدن آگهی</button>` : ''}</div>`).join('')}</div></div>` : ''}
-    ${p.role === 'engineer' ? `<div class="section" id="pvSvc"><div class="sec-head"><h3>خدمات</h3><span>بازدید حضوری از کارگاه</span></div><div class="card"><div class="pv-svc">${svcRows()}</div>
-      ${me ? '' : `<button class="cta" style="margin-top:10px" onclick="openVisit('${S.pid}')">رزرو بازدید کارگاه</button>`}</div></div>` : ''}
-    <div class="section"><div class="sec-head"><h3>نمونه‌کارها</h3>${me ? `<button onclick="go('pf')">مدیریت ‹</button>` : ''}</div>${(p.pf || []).length ? `<div class="pf">${p.pf.map((x) => `<div>${pfArt(x[2], ROLES[p.role].c)}<p>${esc(x[0])}<span>${esc(x[1] || '')}</span></p></div>`).join('')}</div>` : `<div class="empty">هنوز نمونه‌کاری ثبت نشده.</div>`}</div>
-    <div class="section"><div class="sec-head"><h3>نظرها</h3><span class="num">${fa(p.revN || 0)} نظر</span></div>
-      ${tot ? `<div class="card"><div class="hist">${p.stars.map((n, i) => `<div><b class="num" style="font-weight:500">${fa(5 - i)}★</b><span><i style="width:${(n / tot) * 100}%"></i></span><b class="num" style="font-weight:500">${fa(n)}</b></div>`).join('')}</div></div>` : ''}
-      ${(p.revs || []).length ? `<div class="card" style="margin-top:10px">${p.revs.map((r) => `<div class="rev"><div class="h"><b>${esc(r[0])}</b><span>${esc(r[3] || '')}</span></div><div class="starsr" aria-label="${fa(r[1])} ستاره">${[1, 2, 3, 4, 5].map((i) => I.star(i <= r[1] ? 'var(--gold)' : 'var(--line)')).join('')}</div><p>${esc(r[2] || '')}</p></div>`).join('')}</div>` : `<div class="empty">هنوز نظری ثبت نشده؛ نظر فقط بعد از پایان همکاری در بلوک ثبت می‌شود.</div>`}</div>
-    ${(p.guar || []).length ? `<div class="section"><div class="sec-head"><h3>معرف‌ها</h3><span class="num">${fa(p.guar.length)} نفر</span></div><div class="card">${p.guar.map((g) => `<div class="need"><div style="flex:1"><b style="display:block">${esc(g[0])}</b><span style="font-size:13px;color:var(--muted)">${esc(g[1] || '')}</span></div><span class="tag ok">تأیید کرد</span></div>`).join('')}</div></div>` : ''}
-    ${pro ? `<div class="section"><div class="sec-head"><h3>روزهای آزاد این هفته</h3>${me ? `<button onclick="go('cal')">ویرایش ‹</button>` : '<span>روز سبز را بزن تا درخواست بدهی</span>'}</div>
-      <div class="days">${(p.week || []).map((d, i) => `<button class="day ${d}${i === 0 ? ' today' : ''}" ${d === 'a' && !me ? `onclick="collabReq('${S.pid}',${i})"` : 'disabled'} aria-label="${DAYF[i]} ${DAYS[i][1]} مهر: ${d === 'a' ? 'آزاد' : d === 'b' ? 'رزرو شده' : 'تعطیل'}">${DAYS[i][0]}<b class="num">${DAYS[i][1]}</b>${d === 'a' ? 'آزاد' : d === 'b' ? 'رزرو' : 'تعطیل'}</button>`).join('')}</div></div>` : ''}
-    <div class="section"><div class="sec-head"><h3>محل فعالیت</h3><span>${esc(provOf(p.place) ? 'استان ' + provOf(p.place) : '')}</span></div>
-      <div class="mapcard">${islandSVG({ zoom: provOf(p.place) === 'هرمزگان' ? 'qeshm' : undefined, hl: provOf(p.place), pins: [{ id: 'pp', place: p.place, color: ROLES[p.role].c, sel: true }] })}<span class="cap">${esc(placeLbl(p.place))}</span></div></div>
-    ${me ? '' : `<div class="section"><button class="linkrow" style="color:var(--bad)" onclick="openReport()"><span class="ic" style="color:var(--bad)">${I.flag}</span><span>گزارش یا مسدود کردن این کاربر</span></button></div>`}
-    <div style="height:${me ? 20 : 96}px"></div>
-    ${me ? '' : `<div class="sticky"><div class="sticky-in" style="flex-wrap:wrap"><button class="sq" aria-label="گفت‌وگو" onclick="openChatWith('${S.pid}')">${I.chat}</button>
-      ${pro || !needAd ? `<button class="cta" onclick="collabReq('${S.pid}')">درخواست همکاری</button><p class="collab-hint">درخواست همکاری یعنی دعوت این فرد به کار تو؛ اگر قبول کند، چت و قرارداد باز می‌شود.</p>` : `<button class="cta" onclick="openAd('${needAd[3]}')">دیدن نیاز فعال</button>`}</div></div>`}`;
-    if (S._openScore) { S._openScore = false; openScore(); }
-  };
-  window.renderPTab = function () {};
+  // پروفایل و شناسنامهٔ کاری: همان نسخهٔ قبلی (دو زبانه در live-more بخش ۶)؛ فقط توضیح «درخواست همکاری» زیر دکمه
+  wrapW('renderProfile', function (prev) {
+    const r = prev();
+    const p = person(S.pid), cta = document.querySelector('#s-profile .sticky .cta');
+    if (p && !p.me && p.skills && cta && !document.querySelector('#s-profile .collab-hint')) {
+      cta.parentElement.style.flexWrap = 'wrap';
+      cta.insertAdjacentHTML('afterend', '<p class="collab-hint">درخواست همکاری یعنی دعوت این فرد به کار تو؛ اگر قبول کند، چت و قرارداد باز می‌شود.</p>');
+    }
+    return r;
+  });
 
   /* ================= ج-۸) رزرو بازدید: نه در آگهی؛ در پروفایل مهندس و صفحهٔ پروژه ================= */
   wrapW('renderAd', function (prev) {

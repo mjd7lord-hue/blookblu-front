@@ -688,9 +688,44 @@
     }, { passive: true });
   })();
 
-  /* ---------- پروفایل + شناسنامه: یک صفحه (flow.js)؛ صفحهٔ قدیمی «trust» به همان پروفایل می‌رود ---------- */
+  /* ---------- پروفایل + شناسنامه در یک صفحه ---------- */
+  S.pview = S.pview || 'profile';
+  wrap('openProfile', function (prev, id) { S.pview = 'profile'; return prev(id); });
+  wrap('openTrust', function (prev, id, guide) {
+    S.tid = id; S.guide = !!guide;
+    if (S.cur === 'profile' && S.pid === id) { S.pview = 'card'; renderProfile(); scrollTo(0, 0); return; }
+    S.pid = id; S.ptab = 0; S.pview = 'card';
+    go('profile');
+  });
+  L.pview = (v) => { S.pview = v; renderProfile(); scrollTo(0, 0); };
+  wrap('renderProfile', function (prev) {
+    prev();
+    const host = document.getElementById('s-profile');
+    if (!host) return;
+    const p = person(S.pid);
+    const bar = host.querySelector('.bar');
+    const h1 = bar && bar.querySelector('h1');
+    if (h1) h1.textContent = p.me ? 'پروفایل من' : 'پروفایل';
+    // کارت خالی «درباره»
+    host.querySelectorAll('.section > .card > p').forEach((x) => { if (!x.textContent.trim()) x.closest('.section').remove(); });
+    const tabs = `<div class="pv-tabs"><div class="tabs" role="tablist"><button role="tab" aria-selected="${S.pview !== 'card'}" onclick="LIVE.pview('profile')">پروفایل</button><button role="tab" aria-selected="${S.pview === 'card'}" onclick="LIVE.pview('card')">شناسنامهٔ کاری</button></div></div>`;
+    if (bar) bar.insertAdjacentHTML('afterend', tabs);
+    if (S.pview !== 'card') return;
+    // زبانهٔ شناسنامه: همان صفحهٔ شناسنامه، بدون نوار عنوان دوم
+    S.tid = S.pid;
+    renderTrust();
+    const tr = document.getElementById('s-trust');
+    const tabEl = host.querySelector('.pv-tabs');
+    // محتوای زبانهٔ پروفایل پنهان می‌ماند (انیمیشن‌هایش به همین عنصرها نیاز دارند)
+    const hid = document.createElement('div'); hid.hidden = true;
+    while (tabEl.nextSibling) hid.appendChild(tabEl.nextSibling);
+    host.appendChild(hid);
+    [...tr.children].forEach((c) => { if (!c.classList.contains('bar')) host.appendChild(c); });
+    requestAnimationFrame(() => requestAnimationFrame(() => host.querySelectorAll('.brk .bars i').forEach((i) => (i.style.width = i.dataset.w + '%'))));
+  });
+  // گاهی render() صفحهٔ «trust» قدیمی را صدا می‌زند؛ همان را به پروفایل ببر
   wrap('go', function (prev, name, noPush) {
-    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S._openScore = true; return prev('profile', noPush); }
+    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S.pview = 'card'; return prev('profile', noPush); }
     return prev(name, noPush);
   });
 
