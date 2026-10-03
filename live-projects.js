@@ -153,9 +153,14 @@
     if (paySec) {
       const rows = paySec.querySelectorAll('.card .need');
       S.pays[k].forEach((x, n) => {
-        if (!x._x.can.respond || !rows[n]) return;
-        rows[n].insertAdjacentHTML('beforeend', `<span style="display:flex;gap:6px"><button class="mini yes" data-pay="${x._x.id}" data-act="confirm">تأیید</button><button class="mini" data-pay="${x._x.id}" data-act="dispute">اعتراض</button></span>`);
+        const y = x._x, row = rows[n];
+        if (!row) return;
+        const info = [y.documented ? '<span class="tag ok">مستند ✓</span>' : '', y.receiptUrl ? `<button class="mini" data-rc="${esc(y.receiptUrl)}">رسید</button>` : '', y.trackingNo ? `<small class="num" dir="ltr" style="color:var(--muted)">#${esc(y.trackingNo)}</small>` : '', y.can.receipt && !y.receiptUrl ? `<button class="mini" data-addrc="${y.id}">+ رسید</button>` : ''].filter(Boolean).join('');
+        if (info) row.insertAdjacentHTML('beforeend', `<span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${info}</span>`);
+        if (y.can.respond) row.insertAdjacentHTML('beforeend', `<span style="display:flex;gap:6px"><button class="mini yes" data-pay="${y.id}" data-act="confirm">بررسی و تأیید</button><button class="mini" data-pay="${y.id}" data-act="dispute">اعتراض</button></span>`);
       });
+      paySec.querySelectorAll('[data-rc]').forEach((b) => (b.onclick = () => window.open(L.abs(b.dataset.rc), '_blank')));
+      paySec.querySelectorAll('[data-addrc]').forEach((b) => (b.onclick = () => receiptSheet(b.dataset.addrc)));
       paySec.querySelectorAll('[data-pay]').forEach((b) => (b.onclick = () => answerPay(b.dataset.pay, b.dataset.act)));
       const s = p._pays && p._pays.summary;
       if (s && s.total) paySec.querySelector('.card').insertAdjacentHTML('afterbegin', `<div class="est-leg"><span>تأییدشده از ${faNum(s.total)}</span><b class="num">${faNum(s.confirmed)} تومان</b></div>`);
@@ -196,21 +201,63 @@
       $('pdGo').onclick = () => { const r = $('pdR').value.trim(); if (r.length < 3) { toast('دلیل را بنویس'); return; } api('POST', '/payments/' + id + '/dispute', { reason: r }).then(() => { closeSheet(); toast('اعتراض ثبت شد'); return refreshPdet(); }).catch(err); };
       return;
     }
-    api('POST', '/payments/' + id + '/confirm').then(() => { toast('پرداخت تأیید شد'); return refreshPdet(); }).catch(err);
+    const y = ((cur() && cur()._pays && cur()._pays.items) || []).find((x) => x.id === id);
+    if (!y) { api('POST', '/payments/' + id + '/confirm').then(() => { toast('پرداخت تأیید شد'); return refreshPdet(); }).catch(err); return; }
+    const WARN = { NO_RECEIPT: 'رسید واریز پیوست نشده', NO_TRACKING: 'شمارهٔ پیگیری ثبت نشده', AMOUNT_MISMATCH: 'مبلغ با مرحلهٔ پرداخت قرارداد فرق دارد', BEFORE_PROJECT: 'تاریخ پرداخت قبل از شروع پروژه است' };
+    const warns = (y.checks || []).map((c) => WARN[c]).filter(Boolean);
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">تأیید دریافت پول</h3><p class="sub">${faNum(y.amount)} تومان · ${esc(y.label)} · ${esc(fDate(y.paidOn + 'T12:00:00Z'))}</p>
+      ${y.receiptUrl ? (/pdf/.test(y.receiptMime || '') ? `<button class="ghost" style="width:100%" onclick="window.open('${esc(L.abs(y.receiptUrl))}','_blank')">دیدن رسید (PDF)</button>` : `<img src="${esc(L.abs(y.receiptUrl))}" alt="رسید واریز" style="width:100%;max-height:320px;object-fit:contain;border-radius:14px;background:var(--soft)" onclick="window.open(this.src,'_blank')">`) : ''}
+      ${y.trackingNo ? `<div class="est-leg" style="margin-top:8px"><span>شمارهٔ پیگیری${y.bank ? ' · ' + esc(y.bank) : ''}</span><b class="num" dir="ltr">${esc(y.trackingNo)}</b></div>` : ''}
+      ${warns.length ? `<div class="note" style="margin-top:10px">${I.warn}<span>${warns.map(esc).join('، ')}.</span></div>` : ''}
+      <p class="hint">پیش از تأیید، پیامک بانک یا صورت‌حساب حسابت را نگاه کن. تأیید تو یعنی این پول واقعاً به دستت رسیده و در قرارداد «مستند» ثبت می‌شود.</p>
+      <label class="agree"><input type="checkbox" id="pyOk"><span>این مبلغ به حسابم رسیده است</span></label>
+      <button class="cta" id="pyGo">تأیید دریافت</button><button class="ghost" style="width:100%;margin-top:8px" onclick="closeSheet()">بعداً</button>`;
+    show();
+    $('pyGo').onclick = () => { if (!$('pyOk').checked) { toast('اول رسیدن پول را با بانک چک کن و تیک بزن'); return; } api('POST', '/payments/' + id + '/confirm').then(() => { closeSheet(); toast('دریافت پول تأیید شد؛ در قرارداد مستند شد'); return refreshPdet(); }).catch(err); };
+  }
+  // رسید برای پرداختی که قبلاً بدون رسید ثبت شده
+  function receiptSheet(id) {
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">افزودن رسید واریز</h3><p class="sub">اسکرین‌شات یا عکس رسید بانک؛ فقط طرف مقابل می‌بیند.</p>${RC_FIELDS}<button class="cta" id="rcGo">ثبت رسید</button>`;
+    show(); bindRcPick();
+    $('rcGo').onclick = async () => {
+      const f = $('payR').files[0]; if (!f) { toast('عکس رسید را انتخاب کن'); return; }
+      $('rcGo').disabled = true;
+      try { await uploadReceipt(id, f); closeSheet(); toast('رسید ثبت شد؛ طرف مقابل بررسی و تأیید می‌کند'); await refreshPdet(); }
+      catch (e) { err(e); $('rcGo').disabled = false; }
+    };
+  }
+  const RC_FIELDS = `<span class="label">رسید واریز (اسکرین‌شات یا عکس)</span><label class="upl" style="margin:0"><span class="upl-ic">${typeof MI === 'object' ? MI.img : ''}</span><span id="payRN">انتخاب رسید از گالری</span><input type="file" hidden accept="image/*,.pdf" id="payR"></label>
+    <span class="label">شمارهٔ پیگیری یا مرجع (از پیامک بانک)</span><input class="field" id="payT" dir="ltr" inputmode="numeric" placeholder="مثلاً 1234567890">
+    <p class="hint">هر رسید و هر شمارهٔ پیگیری فقط یک بار در بلوک قبول می‌شود و طرف مقابل باید رسیدن پول را تأیید کند؛ رسید جعلی یعنی مسدود شدن حساب.</p>`;
+  function bindRcPick() { const i = $('payR'); if (i) i.onchange = () => { const f = i.files[0]; if (f) { $('payRN').textContent = '✓ ' + f.name; i.parentElement.classList.add('has'); } }; }
+  async function uploadReceipt(id, f) {
+    const fd = new FormData(); fd.append('file', f);
+    const t = $('payT') && $('payT').value.trim(); if (t) fd.append('trackingNo', t);
+    return api('POST', '/payments/' + id + '/receipt', fd);
   }
   wrap('addPay', function (prev, k) {
     prev(k);
     const i = +String(k).split(':')[1];
-    if (!isLive(i)) return;
     const b = document.querySelector('#sb .cta'); if (!b) return;
+    const sub = document.querySelector('#sb .sub'); if (sub) sub.textContent = 'بلوک پول جابه‌جا نمی‌کند؛ پرداختت را با رسید ثبت کن تا بعد از تأیید طرف مقابل، در قرارداد مستند شود.';
+    b.insertAdjacentHTML('beforebegin', RC_FIELDS); bindRcPick();
+    if (!isLive(i)) return;
     b.removeAttribute('onclick');
     b.onclick = async () => {
       const a = $('payA').value.trim(); if (!a) { toast('مبلغ را بنویس'); return; }
+      const f = $('payR').files[0], t = $('payT').value.trim();
+      if (!f && !t && !confirm('رسید یا شمارهٔ پیگیری نگذاشته‌ای؛ این پرداخت «مستند» حساب نمی‌شود. ادامه می‌دهی؟')) return;
       b.disabled = true;
+      let pay = null;
       try {
-        await api('POST', '/projects/' + cur(i)._id + '/payments', { amount: a, label: (chosen() || {}).textContent || 'سایر' });
-        closeSheet(); toast('پرداخت ثبت شد؛ طرف مقابل تأیید می‌کند'); await refreshPdet();
-      } catch (e) { err(e); b.disabled = false; }
+        pay = (await api('POST', '/projects/' + cur(i)._id + '/payments', { amount: a, label: (chosen() || {}).textContent || 'سایر', trackingNo: t || null })).payment;
+        if (f) await uploadReceipt(pay.id, f);
+        closeSheet(); toast('پرداخت ثبت شد؛ طرف مقابل رسید را بررسی و تأیید می‌کند'); await refreshPdet();
+      } catch (e) {
+        // رسید تکراری یا خطا: پرداخت نیمه‌کاره حذف شود تا دوباره ثبت شود
+        if (pay && f) await api('DELETE', '/payments/' + pay.id).catch(() => {});
+        err(e); b.disabled = false;
+      }
     };
   });
   wrap('addDaily', function (prev, k) {

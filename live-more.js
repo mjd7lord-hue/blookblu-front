@@ -688,16 +688,29 @@
     }, { passive: true });
   })();
 
-  /* ---------- پروفایل + شناسنامه در یک صفحه ---------- */
-  S.pview = S.pview || 'profile';
-  wrap('openProfile', function (prev, id) { S.pview = 'profile'; return prev(id); });
+  /* ---------- پروفایل + شناسنامهٔ کاری: یک صفحه، شناسنامه بالای صفحه ---------- */
+  (function () {
+    const st = document.createElement('style');
+    st.textContent = `
+      #s-profile .pv-hidden{display:none}
+      #s-profile .flip{margin-top:6px}
+      #s-profile details.pv-sc{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:0 14px}
+      #s-profile details.pv-sc>summary{list-style:none;display:flex;align-items:center;min-height:48px;font-weight:700;font-size:15px;cursor:pointer}
+      #s-profile details.pv-sc>summary::-webkit-details-marker{display:none}
+      #s-profile details.pv-sc>summary::after{content:'‹';margin-inline-start:auto;color:var(--muted);transform:rotate(-90deg);transition:transform .2s}
+      #s-profile details.pv-sc[open]>summary::after{transform:rotate(90deg)}
+      #s-profile details.pv-sc .card{box-shadow:none;padding:0 0 12px;background:none}
+      #s-profile details.pv-sc details.guide{margin-bottom:12px}`;
+    document.head.appendChild(st);
+  })();
   wrap('openTrust', function (prev, id, guide) {
     S.tid = id; S.guide = !!guide;
-    if (S.cur === 'profile' && S.pid === id) { S.pview = 'card'; renderProfile(); scrollTo(0, 0); return; }
-    S.pid = id; S.ptab = 0; S.pview = 'card';
+    const open = () => { const d = document.querySelector('#s-profile details.pv-sc'); if (d) { if (guide) d.open = true; (guide ? d : document.getElementById('flip') || d).scrollIntoView({ block: 'start' }); } };
+    if (S.cur === 'profile' && S.pid === id) { open(); return; }
+    S.pid = id; S.ptab = 0;
     go('profile');
+    if (guide) requestAnimationFrame(open);
   });
-  L.pview = (v) => { S.pview = v; renderProfile(); scrollTo(0, 0); };
   wrap('renderProfile', function (prev) {
     prev();
     const host = document.getElementById('s-profile');
@@ -708,24 +721,40 @@
     if (h1) h1.textContent = p.me ? 'پروفایل من' : 'پروفایل';
     // کارت خالی «درباره»
     host.querySelectorAll('.section > .card > p').forEach((x) => { if (!x.textContent.trim()) x.closest('.section').remove(); });
-    const tabs = `<div class="pv-tabs"><div class="tabs" role="tablist"><button role="tab" aria-selected="${S.pview !== 'card'}" onclick="LIVE.pview('profile')">پروفایل</button><button role="tab" aria-selected="${S.pview === 'card'}" onclick="LIVE.pview('card')">شناسنامهٔ کاری</button></div></div>`;
-    if (bar) bar.insertAdjacentHTML('afterend', tabs);
-    if (S.pview !== 'card') return;
-    // زبانهٔ شناسنامه: همان صفحهٔ شناسنامه، بدون نوار عنوان دوم
+    // سربرگ و آمار پروفایل همان چیزی است که شناسنامه نشان می‌دهد (پنهان می‌ماند؛ انیمیشن‌هایش به آن‌ها نیاز دارند)
+    const hero = host.querySelector('.phero');
+    if (hero) { hero.classList.add('pv-hidden'); const stt = host.querySelector('.stats'); if (stt) stt.closest('.section').classList.add('pv-hidden'); }
+    // شناسنامهٔ کاری، اول صفحه
     S.tid = S.pid;
     renderTrust();
     const tr = document.getElementById('s-trust');
-    const tabEl = host.querySelector('.pv-tabs');
-    // محتوای زبانهٔ پروفایل پنهان می‌ماند (انیمیشن‌هایش به همین عنصرها نیاز دارند)
-    const hid = document.createElement('div'); hid.hidden = true;
-    while (tabEl.nextSibling) hid.appendChild(tabEl.nextSibling);
-    host.appendChild(hid);
-    [...tr.children].forEach((c) => { if (!c.classList.contains('bar')) host.appendChild(c); });
+    const frag = document.createDocumentFragment();
+    [...tr.children].forEach((c) => { if (!c.classList.contains('bar')) frag.appendChild(c); });
+    // «امتیاز از کجا آمده» و «نحوهٔ محاسبه» در یک بخش بازشونده؛ معرف‌ها در زبانه‌های پروفایل هست
+    const secs = [...frag.children];
+    const brk = secs.find((x) => x.querySelector && x.querySelector('.brk'));
+    const guide = secs.find((x) => x.querySelector && x.querySelector('details.guide'));
+    const chainSec = secs.find((x) => x.querySelector && x.querySelector('.sec-head h3') && /معرف‌ها/.test(x.querySelector('.sec-head h3').textContent));
+    if (chainSec) chainSec.remove();
+    if (brk) {
+      const h = brk.querySelector('.sec-head h3');
+      const d = document.createElement('details');
+      d.className = 'pv-sc';
+      if (S.guide) d.open = true;
+      d.innerHTML = `<summary>${h ? h.textContent : 'امتیاز از کجا آمده؟'}</summary>`;
+      const card = brk.querySelector('.card');
+      if (card) d.appendChild(card);
+      if (guide) { const g = guide.querySelector('details.guide'); if (g) d.appendChild(g); guide.remove(); }
+      brk.innerHTML = '';
+      brk.appendChild(d);
+      d.addEventListener('toggle', () => { if (d.open) d.querySelectorAll('.brk .bars i').forEach((i) => (i.style.width = i.dataset.w + '%')); });
+    }
+    if (bar) bar.after(frag); else host.prepend(frag);
     requestAnimationFrame(() => requestAnimationFrame(() => host.querySelectorAll('.brk .bars i').forEach((i) => (i.style.width = i.dataset.w + '%'))));
   });
   // گاهی render() صفحهٔ «trust» قدیمی را صدا می‌زند؛ همان را به پروفایل ببر
   wrap('go', function (prev, name, noPush) {
-    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; S.pview = 'card'; return prev('profile', noPush); }
+    if (name === 'trust') { S.pid = S.tid; S.ptab = 0; return prev('profile', noPush); }
     return prev(name, noPush);
   });
 
@@ -908,21 +937,19 @@
   })();
 
   /* =================================================================
-   * بخش ۸: استودیوی عکس پروفایل — قاب خط‌چین سر و شانه، دوربین جلو یا گالری، جابه‌جا و بزرگ‌نمایی،
+   * بخش ۸: استودیوی عکس پروفایل — قاب خط‌چین سر، دوربین جلو یا گالری، جابه‌جا و بزرگ‌نمایی،
    *        پس‌زمینهٔ محو (خود شخص واضح) تا همهٔ عکس‌های پروفایل یک‌دست شوند
    * ================================================================= */
   const AV = 720; // اندازهٔ خروجی (مربع)
-  // شکل سر و شانه روی بوم ۱۰۰×۱۰۰ (همان قاب خط‌چین)
+  // قاب فقط سر روی بوم ۱۰۰×۱۰۰ (همان قاب خط‌چین)
+  // فقط سر: بیضی بزرگ وسط قاب (همان قاب خط‌چین؛ در آواتار گرد/شش‌ضلعی صورت کامل دیده شود)
+  const HEAD = { cx: 50, cy: 50, rx: 31, ry: 39 };
   function silhouette(ctx, s) {
     ctx.beginPath();
-    ctx.ellipse(50 * s, 40 * s, 20 * s, 25 * s, 0, 0, Math.PI * 2);
-    ctx.moveTo(4 * s, 100 * s);
-    ctx.bezierCurveTo(4 * s, 82 * s, 22 * s, 72 * s, 40 * s, 70 * s);
-    ctx.lineTo(42 * s, 62 * s); ctx.lineTo(58 * s, 62 * s); ctx.lineTo(60 * s, 70 * s);
-    ctx.bezierCurveTo(78 * s, 72 * s, 96 * s, 82 * s, 96 * s, 100 * s);
+    ctx.ellipse(HEAD.cx * s, HEAD.cy * s, HEAD.rx * s, HEAD.ry * s, 0, 0, Math.PI * 2);
     ctx.closePath();
   }
-  const SIL_SVG = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><mask id="avm"><rect width="100" height="100" fill="#fff"/><ellipse cx="50" cy="40" rx="20" ry="25" fill="#000"/><path d="M4 100 C4 82 22 72 40 70 L42 62 L58 62 L60 70 C78 72 96 82 96 100 Z" fill="#000"/></mask></defs><rect width="100" height="100" fill="rgba(0,0,0,.5)" mask="url(#avm)"/><g fill="none" stroke="#fff" stroke-width="1.1" stroke-dasharray="3 2" stroke-linecap="round" style="filter:drop-shadow(0 0 1.5px rgba(0,0,0,.6))"><ellipse cx="50" cy="40" rx="20" ry="25"/><path d="M4 100 C4 82 22 72 40 70 L42 62 L58 62 L60 70 C78 72 96 82 96 100"/></g><g stroke="#fff" stroke-width=".6" opacity=".55"><line x1="50" y1="12" x2="50" y2="17"/><line x1="26" y1="40" x2="31" y2="40"/><line x1="69" y1="40" x2="74" y2="40"/></g><text x="50" y="8.5" text-anchor="middle" font-size="4.2" fill="#fff" style="font-family:inherit">صورت داخل بیضی · شانه‌ها روی خط</text></svg>`;
+  const SIL_SVG = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><mask id="avm"><rect width="100" height="100" fill="#fff"/><ellipse cx="${HEAD.cx}" cy="${HEAD.cy}" rx="${HEAD.rx}" ry="${HEAD.ry}" fill="#000"/></mask></defs><rect width="100" height="100" fill="rgba(0,0,0,.5)" mask="url(#avm)"/><ellipse cx="${HEAD.cx}" cy="${HEAD.cy}" rx="${HEAD.rx}" ry="${HEAD.ry}" fill="none" stroke="#fff" stroke-width="1.1" stroke-dasharray="3 2" stroke-linecap="round" style="filter:drop-shadow(0 0 1.5px rgba(0,0,0,.6))"/><g stroke="#fff" stroke-width=".6" opacity=".55"><line x1="50" y1="${HEAD.cy - HEAD.ry - 1}" x2="50" y2="${HEAD.cy - HEAD.ry + 4}"/><line x1="${HEAD.cx - 6}" y1="${HEAD.cy - 4}" x2="${HEAD.cx + 6}" y2="${HEAD.cy - 4}" stroke-dasharray="1 2"/></g><text x="50" y="7.5" text-anchor="middle" font-size="4.2" fill="#fff" style="font-family:inherit">صورت را داخل بیضی بگذار · چانه نزدیک لبهٔ پایین</text></svg>`;
   const st8 = { src: null, img: null, zoom: 1, x: 0, y: 0, blur: true, stream: null, mirror: false };
   function stopCam() { if (st8.stream) st8.stream.getTracks().forEach((t) => t.stop()); st8.stream = null; }
   // تصویر در قاب: زوم و جابه‌جایی، «پوشاندن» کامل مربع
@@ -950,7 +977,7 @@
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(tiny, 0, 0, AV, AV);
     ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fillRect(0, 0, AV, AV);
-    // ماسک سر و شانه با لبهٔ نرم
+    // ماسک سر با لبهٔ نرم
     const m = document.createElement('canvas'); m.width = m.height = 90;
     const mc = m.getContext('2d'); mc.fillStyle = '#fff'; silhouette(mc, 0.9); mc.fill();
     const mask = document.createElement('canvas'); mask.width = mask.height = AV;
@@ -967,7 +994,7 @@
   }
   function studioHTML() {
     const live = !!st8.live;
-    return `<div class="grab"></div><h3 id="sheetTitle">عکس پروفایل</h3><p class="sub">سر و شانه‌ات را داخل قاب خط‌چین بگذار؛ همهٔ عکس‌ها یک‌دست و حرفه‌ای می‌شوند.</p>
+    return `<div class="grab"></div><h3 id="sheetTitle">عکس پروفایل</h3><p class="sub">صورتت را داخل بیضی خط‌چین بگذار؛ با کشیدن جابه‌جا و با نوار «بزرگ‌نمایی» اندازه‌اش را درست کن.</p>
       <div id="avStage" style="position:relative;width:100%;max-width:440px;aspect-ratio:1;margin:6px auto 12px;border-radius:24px;overflow:hidden;background:#0B1412;touch-action:none">
         ${live ? '<video id="avVid" playsinline autoplay muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)"></video>' : '<canvas id="avCv" width="600" height="600" style="position:absolute;inset:0;width:100%;height:100%"></canvas>'}
         ${SIL_SVG}
@@ -984,6 +1011,7 @@
     stopCam(); Object.assign(st8, { live: false });
     sb.innerHTML = studioHTML(); show(); bindStage(); paintPreview();
   }
+  L.openStudio = () => openStudio();
   function rerenderStudio() { sb.innerHTML = studioHTML(); bindStage(); paintPreview(); }
   function bindStage() {
     const el = document.getElementById('avStage'); if (!el || st8.live) return;
@@ -1487,4 +1515,24 @@
       steps: ['مهندس روز و ساعت را تأیید یا رد می‌کند؛ با اعلان خبرت می‌کنیم.', 'بعد از بازدید، گزارش مکتوب می‌رسد و هزینه را مستقیم می‌پردازی.', 'تا ۱۲ ساعت قبل، لغو رایگان است.'] });
   }
   L.visitDone = visitDone;
+
+  /* ================= بخش ۱۲: خانهٔ متخصص با دادهٔ واقعی ================= */
+  L.missingDocs = () => (on() ? missingDocs() : []);
+  L.onEnd = (L.onEnd || []).concat(() => { window.SPEC = null; });
+  wrap('renderHome', function (prev) {
+    prev();
+    if (!on() || !['specialist', 'engineer'].includes(S.role)) return;
+    const jobs = [];
+    if (S.role === 'engineer') jobs.push(peekProjects());
+    if (S.role === 'specialist' && !fresh('spec', 60000)) {
+      L.loaded.spec = Date.now();
+      jobs.push(api('GET', '/me/stats').then((d) => {
+        const n = d.profileViews.monthly.length;
+        window.SPEC = { views: d.profileViews.total, viewsMonth: d.profileViews.monthly[n - 1] || 0, demand: d.demand, income: d.income.total, incomeMonth: d.income.monthly[n - 1] || 0, province: d.province };
+      }));
+    }
+    ['job', 'consult'].forEach((t) => { if (L.loadAds && !fresh('ads:' + t, 60000)) jobs.push(L.loadAds(t)); });
+    if (!S.docs[S.role] && L.loadDocs) jobs.push(L.loadDocs());
+    if (jobs.length) Promise.all(jobs.map((j) => j.catch(() => {}))).then(() => { if (S.cur === 'home' && ['specialist', 'engineer'].includes(S.role)) { prev(); } });
+  });
 })();

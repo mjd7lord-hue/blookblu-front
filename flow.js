@@ -808,4 +808,254 @@
   };
   wrapW('render', function (prev) { if (S.cur === 'estgo') return renderEstGo(); return prev(); });
   wrapW('go', function (prev, name, noPush) { if (name === 'estgo') ensureScreen(); return prev(name, noPush); });
+
+  /* ================= خانهٔ متخصص: پر از اطلاعات کاربردی (با دادهٔ واقعی؛ بدون سرور نمونه) ================= */
+  // window.SPEC را live-more (بخش ۱۲) از /me/stats پر می‌کند: { views, viewsMonth, demand:[{skill,n}], income, incomeMonth, province }
+  const specCss = document.createElement('style');
+  specCss.textContent = `
+  .sp-dem{display:grid;gap:8px;margin-top:12px;position:relative}
+  .sp-dem div{display:grid;grid-template-columns:96px 1fr 34px;align-items:center;gap:8px;font-size:13px;color:var(--concrete)}
+  .sp-dem i{display:block;height:8px;border-radius:5px;background:rgba(255,255,255,.14);overflow:hidden}
+  .sp-dem i b{display:block;height:100%;width:0;border-radius:5px;background:var(--gold);transition:width .8s cubic-bezier(.3,1.2,.5,1)}
+  .sp-dem span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sp-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sp-kpi button{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:12px 8px;font-family:inherit;color:var(--ink);text-align:center;cursor:pointer}
+  .sp-kpi b{display:block;font-size:18px}.sp-kpi small{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5}
+  .sp-week{display:flex;gap:6px}.sp-week span{flex:1;text-align:center;border-radius:12px;padding:8px 0;font-size:12px;background:var(--soft);color:var(--muted)}
+  .sp-week span b{display:block;font-size:15px;color:var(--ink)}.sp-week span.a{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+  .sp-week span.b{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)}
+  .sp-job{display:flex;align-items:center;gap:12px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:14px;width:100%;border:0;font-family:inherit;color:var(--ink);text-align:right;cursor:pointer}
+  .sp-job .t{flex:1;min-width:0}.sp-job b{display:block;font-size:15px}.sp-job small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+  .sp-job .go{color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}`;
+  document.head.appendChild(specCss);
+  const DEMO_SPEC = { views: 31, viewsMonth: 12, demand: [{ skill: 'جوشکاری', n: 18 }, { skill: 'آرماتوربندی', n: 11 }, { skill: 'قالب‌بندی', n: 7 }], income: 41200000, incomeMonth: 9500000, province: 'هرمزگان' };
+  const moneyM = (n) => (n >= 1e6 ? fa(String(Math.round(n / 1e5) / 10).replace('.', '٫')) + ' میلیون' : faNum(n));
+  window.homeSpecialist = function () {
+    const me = ME(), sp = window.SPEC || (live() ? null : DEMO_SPEC);
+    const mySkills = (me.skills || []).map((s) => s[0]);
+    const dem = sp && sp.demand && sp.demand.length ? sp.demand : [];
+    const mx = Math.max(1, ...dem.map((d) => d.n));
+    const projs = (S.projs[S.role] || []).map((p, i) => [p, i]).filter(([p]) => p.stage >= 1 && p.stage < 3);
+    const week = me.week || ['o', 'o', 'o', 'o', 'o', 'o', 'o'];
+    const free = week.filter((d) => d === 'a').length;
+    const steps = window.LIVE && LIVE.trustSteps ? LIVE.trustSteps() : [];
+    const miss = window.LIVE && LIVE.missingDocs ? LIVE.missingDocs() : [];
+    const tr = trustOf(me);
+    const jobs = ADS.filter((a) => a.type === 'job' && a.who !== 'me' && (a.st || 'active') === 'active' && (!a.aud || a.aud.includes('specialist')))
+      .map((a) => ({ a, p: P[a.who], m: (a.skills || []).some((s) => mySkills.some((k) => s.includes(k) || k.includes(s))) }))
+      .filter((x) => x.p).sort((x, y) => y.m - x.m || trustOf(y.p).t - trustOf(x.p).t).slice(0, 3);
+    const qs = ADS.filter((a) => a.type === 'consult' && a.who !== 'me' && (a.st || 'active') === 'active').slice(0, 2);
+    return `${head()}${storiesRail()}
+    <div class="hcard"><div class="stars"></div>
+      <div class="tb" style="position:relative"><div><small>تقاضا در استان ${esc((sp && sp.province) || 'تو')} · ۳۰ روز اخیر</small>
+        <h2>${dem.length ? `«${esc(dem[0].skill)}» <span style="color:var(--gold-2)">${fa(dem[0].n)} آگهی</span> داشت` : 'هنوز آگهی کافی برای آمار نیست'}</h2>
+        ${sp ? `<div class="pillg"><i></i>${fa(sp.viewsMonth || 0)} بازدید پروفایل در این ماه</div>` : ''}</div>
+        <svg viewBox="0 0 130 130" aria-hidden="true" style="width:96px">
+          <g class="tool" style="animation-delay:.9s"><path d="M40 80V30l-6-8h12l-6 8" stroke="#C9D1DC" stroke-width="4" fill="none" stroke-linejoin="round"/></g>
+          <g class="tool" style="animation-delay:1.05s"><rect x="58" y="36" width="10" height="44" rx="3" fill="#F97316"/><path d="M63 36V22l8-6" stroke="#5EA8FF" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+          <g class="tool" style="animation-delay:1.2s"><path d="M86 80l14-38 10 4-10 34" fill="#B9C0CA"/></g>
+          <rect x="16" y="78" width="104" height="44" rx="8" fill="#F97316"/><rect x="16" y="92" width="104" height="4" fill="#C2410C"/><rect class="lid" x="16" y="68" width="104" height="12" rx="5" fill="#FDBA74"/></svg></div>
+      ${dem.length ? `<div class="sp-dem" aria-label="مهارت‌های پرتقاضا">${dem.map((d) => `<div><span>${esc(d.skill)}${mySkills.some((k) => d.skill.includes(k) || k.includes(d.skill)) ? ' ✓' : ''}</span><i><b data-w="${(d.n / mx) * 100}"></b></i><small class="num">${fa(d.n)}</small></div>`).join('')}</div>` : ''}
+    </div>
+    <div class="section"><div class="sp-kpi">
+      <button onclick="go('stats')"><b class="num">${sp ? moneyM(sp.incomeMonth || 0) : '—'}</b><small>درآمد تأییدشدهٔ این ماه</small></button>
+      <button onclick="go('proj')"><b class="num">${fa(projs.length)}</b><small>کار در جریان</small></button>
+      <button onclick="openTrust('me')"><b class="num">${fa(tr.t)}</b><small>امتیاز اعتبار از ۱۰۰</small></button></div></div>
+    <div class="section"><div class="sec-head"><h3>کار در جریان</h3>${projs.length > 1 ? `<button onclick="go('proj')">همه ‹</button>` : ''}</div>
+      ${projs.length ? (() => { const [p, i] = projs[0], w = p.who && person(p.who); return `<button class="sp-job" onclick="openProjPage(${i})"><span class="nt-ic">${QI.helmet}</span><span class="t"><b>${esc(p.t)}</b><small>${w ? esc(w.name) + ' · ' : ''}${esc(CSTG[p.stage] || '')}${p.amt ? ' · ' + esc(p.amt) : ''}</small></span><span class="go">گزارش امروز ‹</span></button>`; })()
+        : `<button class="sp-job" onclick="exploreMode('jobs')"><span class="nt-ic">${QI.search}</span><span class="t"><b>الان کار فعالی نداری</b><small>کارهای مناسب مهارتت را ببین و اعلام آمادگی کن</small></span><span class="go">پیدا کردن کار ‹</span></button>`}</div>
+    ${qa([['فرصت‌های کاری', 'var(--r-specialist)', 'search', "exploreMode('jobs')"], ['تعرفه‌هایم', 'var(--concrete-2)', 'doc', "go('edit')"], ['شناسنامهٔ کاری', 'var(--gold)', 'card', "openTrust('me')"], ['آگهی آمادگی', 'var(--r-contractor)', 'plus', "postWith('work','',['contractor','company','general'])"]])}
+    <div class="section"><div class="sec-head"><h3>روزهای آزاد این هفته</h3><button onclick="go('cal')">ویرایش ‹</button></div>
+      <div class="sp-week">${week.map((d, i) => `<span class="${d}">${DAYS[i][0]}<b class="num">${DAYS[i][1]}</b>${d === 'a' ? 'آزاد' : d === 'b' ? 'رزرو' : 'تعطیل'}</span>`).join('')}</div>
+      <p class="hint">${free ? `${fa(free)} روز آزاد؛ کارفرماها فقط روزهای سبز را برای درخواست می‌بینند.` : 'هیچ روز آزادی نداری؛ کارفرماها نمی‌توانند برایت درخواست بفرستند.'}</p></div>
+    ${reqCard('specialist')}
+    ${steps.length || miss.length ? `<div class="section"><div class="sec-head"><h3>برای کار بیشتر</h3><span>کارفرماها به این‌ها نگاه می‌کنند</span></div><div class="card">
+      ${miss.length ? `<div class="tstep" role="button" tabindex="0" onclick="go('docs')"><span class="n num" style="background:#FEE2E2;color:#B91C1C">${fa(miss.length)}</span><span class="t"><b>مدرک لازم: ${esc(miss.join('، '))}</b><small>نشان «مدرک‌دار» کنار نامت می‌آید</small></span><span class="go">‹</span></div>` : ''}
+      ${steps.filter((s) => !/مدارک/.test(s[0])).slice(0, 2).map((s, i) => `<div class="tstep" ${s[2] ? `role="button" tabindex="0" onclick="${s[2]}"` : ''}><span class="n num">${fa(i + 1)}</span><span class="t"><b>${esc(s[0])}</b><small>${esc(s[1])}</small></span>${s[2] ? '<span class="go">‹</span>' : ''}</div>`).join('')}</div></div>` : ''}
+    <div class="section"><div class="sec-head"><h3>کار مناسب مهارت‌هایت</h3><button onclick="exploreMode('jobs')">همه ‹</button></div>${jobs.length ? jobs.map((x, k) => adCard(x.a, x.p, k)).join('') : '<div class="empty">فعلاً آگهی تازه‌ای برای مهارت تو نیست؛ «آگهی آمادگی» بگذار تا کارفرماها پیدایت کنند.</div>'}</div>
+    ${qs.length ? `<div class="section"><div class="sec-head"><h3>پرسش‌هایی که شاید بلدی</h3><span>جواب خوب، اعتبار می‌آورد</span></div>${qs.map((a, k) => adCard(a, P[a.who] || ME(), k)).join('')}</div>` : ''}`;
+  };
+  window.afterSpecialist = function () {
+    requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll('#s-home .sp-dem b').forEach((b) => (b.style.width = b.dataset.w + '%'))));
+  };
+
+  /* ================= مهندس: خانه و پروفایل بر اساس رشتهٔ انتخابی در ثبت‌نام ================= */
+  const FIELD_K = { 'عمران': ['civil', 'struct'], 'معماری': ['arch'], 'تأسیسات برقی': ['elec'], 'تأسیسات مکانیکی': ['mech'], 'نقشه‌برداری': ['civil'], 'شهرسازی': ['arch'], 'ترافیک': ['civil'] };
+  // خدمات هر رشته (در پروفایل مهندس، بخش «تخصص و خدمات»)
+  const FIELD_SVC = {
+    civil: ['نظارت عالیهٔ ساختمان', 'کنترل آرماتور پیش از بتن‌ریزی', 'بازدید و گزارش ترک و نشست', 'تحویل مرحله‌ای کار'],
+    struct: ['محاسبات و طراحی سازه', 'کنترل نقشهٔ سازه', 'طرح مقاوم‌سازی', 'برآورد بتن و آرماتور'],
+    arch: ['طراحی پلان و نما', 'نقشهٔ پروانه و پایان‌کار', 'طراحی داخلی', 'مشاورهٔ بازسازی'],
+    elec: ['طراحی نقشهٔ برق', 'کنترل سیم‌کشی پیش از گچ', 'محاسبهٔ بار و انشعاب', 'ارت و حفاظت'],
+    mech: ['طراحی لوله‌کشی و تأسیسات', 'تست فشار لوله‌کشی', 'موتورخانه و گرمایش/سرمایش', 'سیستم اطفای حریق'],
+  };
+  function engFields(p) {
+    const d = (p && p.data) || (window.LIVE && LIVE.pub && LIVE.pub.data) || {};
+    const f = [].concat(d.field || []);
+    const ks = [...new Set(f.flatMap((x) => FIELD_K[x] || []))];
+    return { names: f, ks };
+  }
+  window.engFields = engFields;
+  // دادهٔ واقعی (پروژه‌ها، درخواست‌ها و پرسش‌ها) جای نمونه‌های رشته
+  function syncEF() {
+    const { ks } = engFields();
+    if (ks.length) { S.efields = ks; if (!ks.includes(S.efield)) S.efield = ks[0]; }
+    if (!live() || typeof EF !== 'object') return;
+    const prj = (S.projs[S.role] || []).filter((p) => p.stage < 3 && p.who && P[p.who]).map((p) => [p.t, p.who, Math.min(4, p.stage + 1), p.amt || CSTG[p.stage] || '']);
+    const leads = ADS.filter((a) => a.type === 'job' && a.who !== 'me' && (a.st || 'active') === 'active' && (!a.aud || a.aud.includes('engineer')) && P[a.who]).slice(0, 4).map((a) => [a.title, a.who, a.place, a.wage || 'توافقی', a.id]);
+    const qs = ADS.filter((a) => a.type === 'consult' && a.who !== 'me' && (a.st || 'active') === 'active' && P[a.who]).slice(0, 4).map((a) => [a.title, a.who, a.id]);
+    Object.values(EF).forEach((F) => { F.prj = prj; F.leads = leads; F.qs = qs; });
+  }
+  wrapW('homeEngineer', function (prev) {
+    syncEF();
+    let h = prev();
+    // فقط یک رشته: زبانه‌های رشته لازم نیست
+    if ((S.efields || []).length < 2) h = h.replace(/<div class="section" style="margin-top:6px"><div class="ef-tabs"[\s\S]*?<\/div><\/div>/, '');
+    return h;
+  });
+  // پرسش واقعی ← صفحهٔ همان پرسش
+  wrapW('efAnswer', function (prev, i) { const q = EF[S.efield] && EF[S.efield].qs[i]; if (q && q[2]) { openAd(q[2]); return; } return prev(i); });
+  // پروفایل مهندس: «تخصص و خدمات» بر اساس رشته
+  wrapW('renderProfile', function (prev) {
+    const r = prev();
+    const p = person(S.pid), host = $('s-profile');
+    if (!p || p.role !== 'engineer' || !host || host.querySelector('#engField')) return r;
+    const { names, ks } = engFields(p.me ? null : p);
+    if (!ks.length) return r;
+    const svc = [...new Set(ks.flatMap((k) => FIELD_SVC[k] || []))];
+    const html = `<div class="section" id="engField"><div class="sec-head"><h3>تخصص و خدمات</h3><span>${esc(names.join('، '))}</span></div><div class="card">
+      ${ks.map((k) => `<p style="margin:0 0 8px;font-size:14px"><b style="color:${EF[k].c}">${EF[k].n}</b> · <span style="color:var(--muted)">${EF[k].d}</span></p>`).join('')}
+      <div class="chips">${svc.map((x) => `<span class="chip" style="min-height:36px;font-size:13.5px">${esc(x)}</span>`).join('')}</div></div></div>`;
+    const anchor = host.querySelector('.vis-link') ? host.querySelector('.vis-link').closest('.section') : host.querySelector('.pv-sc') ? host.querySelector('.pv-sc').closest('.section') : null;
+    if (anchor) anchor.insertAdjacentHTML('afterend', html); else { const b = host.querySelector('.bar'); if (b) b.insertAdjacentHTML('afterend', html); }
+    return r;
+  });
+
+  /* ================= نقش: فقط یک بار هنگام ثبت‌نام؛ تغییر با درخواست به پشتیبانی ================= */
+  window.openRoles = function () {
+    const r = ROLES[S.role];
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">نقش تو</h3><p class="sub">نقش هنگام ثبت‌نام انتخاب شده و ثابت است.</p>
+    <div class="card" style="box-shadow:none;background:var(--bg);display:flex;gap:12px;align-items:center"><div class="hex" style="background:${r.c}">${r.n[0]}</div><div><b style="display:block">${S.role === 'general' ? 'کارفرما' : r.n}</b><span style="font-size:13px;color:var(--muted)">${esc(r.d || '')}</span></div></div>
+    <p class="hint">اگر نقشت را اشتباه انتخاب کرده‌ای یا کارت عوض شده، پشتیبانی بررسی و تغییرش می‌دهد.</p>
+    <button class="cta" onclick="roleChangeReq()">درخواست تغییر نقش</button><button class="ghost" style="width:100%;margin-top:8px" onclick="closeSheet()">بستن</button>`;
+    show();
+  };
+  window.roleChangeReq = function () {
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">تغییر نقش به…</h3><p class="sub">درخواست برای پشتیبانی بلوک فرستاده می‌شود.</p>
+    <div class="chips">${Object.keys(ROLES).filter((k) => k !== S.role).map((k) => `<button class="chip" onclick="roleReqSend('${k}')"><i style="background:${ROLES[k].c}"></i>${k === 'general' ? 'کارفرما' : ROLES[k].n}</button>`).join('')}</div>`;
+    show();
+  };
+  window.roleReqSend = function (k) {
+    closeSheet();
+    const txt = `درخواست تغییر نقشم از «${ROLES[S.role].n}» به «${ROLES[k].n}» را دارم.`;
+    openChat('c-support');
+    let n = 0;
+    const fill = () => { const i = $('cIn'); if (S.cur === 'chat' && i) { i.value = txt; i.dispatchEvent(new Event('input')); toast('متن درخواست آماده است؛ «فرستادن» را بزن'); } else if (n++ < 20) setTimeout(fill, 150); };
+    setTimeout(fill, 100);
+  };
+  window.addRole = (k) => roleReqSend(k);
+  window.renderRoles = function () {
+    const r = ROLES[S.role];
+    $('s-roles').innerHTML = `${pageBar('نقش من')}
+    <div class="section" style="margin-top:8px"><div class="card" style="display:flex;gap:12px;align-items:center"><div class="hex" style="background:${r.c}">${r.n[0]}</div><div style="flex:1"><b style="display:block">${S.role === 'general' ? 'کارفرما' : r.n}</b><span style="font-size:13px;color:var(--muted)">نقش هنگام ثبت‌نام انتخاب شده</span></div></div>
+    <p class="hint">برای تغییر نقش، درخواست به پشتیبانی می‌رود و بعد از بررسی انجام می‌شود.</p><button class="cta" onclick="roleChangeReq()">درخواست تغییر نقش</button></div>`;
+  };
+  // نشانهٔ «فهرست بازشونده» کنار نقش در سربرگ‌ها حذف (نقش یکی است)
+  ['renderHome', 'renderExplore', 'renderMe'].forEach((fn) => wrapW(fn, function (prev, ...a) {
+    const r = prev(...a);
+    document.querySelectorAll('.role-pill').forEach((b) => { b.querySelectorAll('svg').forEach((s) => s.remove()); b.childNodes.forEach((n) => { if (n.nodeType === 3) n.textContent = n.textContent.replace(/\s*·\s*تغییر نقش/, ''); }); });
+    return r;
+  }));
+
+  /* ================= کاوش: نقشه پیش‌فرض، راهنمای روشن محل، صفحهٔ خلوت‌تر ================= */
+  S.exView = 'map';
+  const exCss = document.createElement('style');
+  exCss.textContent = `
+  #s-explore .vtog,#s-explore .alertbar{display:none!important}
+  #s-explore .island{position:relative}
+  .ex-where{display:flex;align-items:center;gap:10px;margin:10px 16px 0;padding:10px 12px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font-size:13.5px;line-height:1.6}
+  .ex-where .pin{flex:none;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+  .ex-where .t{flex:1;min-width:0}.ex-where b{display:block;font-size:14px}.ex-where small{display:block;color:var(--muted);font-size:12.5px}
+  .ex-where button{flex:none;border:1px solid var(--accent);background:none;color:var(--accent);border-radius:12px;min-height:40px;padding:0 12px;font:700 13px inherit;font-family:inherit;white-space:nowrap}
+  .ex-where.on{background:color-mix(in srgb,var(--accent) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+  .ex-tip{position:absolute;inset:auto 10px 10px 10px;background:rgba(11,20,18,.92);color:#fff;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.7;display:flex;gap:10px;align-items:flex-start;z-index:2}
+  .ex-tip button{flex:none;border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:8px;min-width:32px;min-height:32px;font-size:16px}`;
+  document.head.appendChild(exCss);
+  const TIP_K = 'blk-extip';
+  window.exTipOff = () => { try { localStorage.setItem(TIP_K, '1'); } catch (e) {} const t = document.querySelector('.ex-tip'); if (t) t.remove(); };
+  window.exAll = () => { S.provF = null; S.mapAll = false; renderExplore(); };
+  function whereBar() {
+    const all = listFor(true).length, list = listFor().length;
+    const inQ = (x) => provOf(x.a.place) === 'هرمزگان';
+    if (S.provF) {
+      const others = listFor(true).filter((x) => provOf(x.a.place) !== S.provF).length;
+      return `<div class="ex-where on" role="status"><span class="pin">${I.pin}</span><span class="t"><b>فقط استان ${esc(S.provF)}</b><small>${fa(list)} آگهی اینجا${others ? ' · ' + fa(others) + ' آگهی در جاهای دیگر پنهان است' : ''}</small></span><button onclick="exAll()">همهٔ آگهی‌ها</button></div>`;
+    }
+    const out = listFor(true).filter((x) => !inQ(x)).length;
+    if (!S.mapAll && out) return `<div class="ex-where" role="status"><span class="pin">${I.pin}</span><span class="t"><b>همهٔ ${fa(all)} آگهی پایین آمده</b><small>نقشه قشم را نشان می‌دهد؛ ${fa(out)} آگهی بیرون از این نقشه است</small></span><button onclick="S.mapAll=true;renderExplore()">همهٔ ایران</button></div>`;
+    return `<div class="ex-where" role="status"><span class="pin">${I.pin}</span><span class="t"><b>همهٔ ${fa(all)} آگهی پایین آمده</b><small>برای دیدن آگهی‌های یک استان، روی همان استان در نقشه بزن</small></span></div>`;
+  }
+  wrapW('renderExplore', function (prev) {
+    S.exView = 'map';
+    const r = prev();
+    const host = $('s-explore');
+    if (!host) return r;
+    host.querySelectorAll('.ex-where').forEach((x) => x.remove());
+    const hero = host.querySelector('.hero');
+    if (hero) hero.insertAdjacentHTML('afterend', whereBar());
+    let seen = false; try { seen = !!localStorage.getItem(TIP_K); } catch (e) {}
+    const map = $('heroMap');
+    if (map && !seen) map.insertAdjacentHTML('beforeend', `<div class="ex-tip"><span>${S.mapAll || S.provF ? 'روی عدد هر استان بزن تا فقط آگهی‌های همان‌جا بیاید؛ با «همهٔ آگهی‌ها» برمی‌گردی.' : 'نقشه، محل آگهی‌ها را نشان می‌دهد. با «همهٔ ایران» کل کشور را ببین و روی هر استان بزن تا فقط همان‌جا بیاید.'}</span><button aria-label="فهمیدم" onclick="event.stopPropagation();exTipOff()">×</button></div>`);
+    return r;
+  });
+  // نوار محل با هر تغییر نتیجه به‌روز بماند؛ ردیف «پیشنهادها» (تکرار همان آگهی‌ها) حذف
+  wrapW('renderResults', function (prev, first) {
+    const r = prev(first);
+    const el = $('results');
+    if (el) el.querySelectorAll('.sugg').forEach((x) => x.closest('.section').remove());
+    const w = document.querySelector('#s-explore .ex-where');
+    if (w && !first) w.outerHTML = whereBar();
+    return r;
+  });
+  // «هشدار آگهی تازه» از بالای کاوش به برگهٔ فیلتر رفت
+  wrapW('openFilters', function (prev) {
+    const r = prev();
+    const cta = document.querySelector('#sb .cta');
+    if (cta && typeof saveSearch === 'function') cta.insertAdjacentHTML('afterend', `<button class="ghost" style="width:100%;margin-top:8px" onclick="closeSheet();saveSearch()">${MI.bell.replace('<svg', '<svg style="width:16px;height:16px;vertical-align:-3px"')} وقتی آگهی تازه آمد خبرم کن</button>`);
+    return r;
+  });
+
+  /* ================= «درخواست همکاری» = گفت‌وگو با پیام آماده (هماهنگی در چت، بعد «ثبت قرارداد») ================= */
+  window.collabReq = function (pid, day) {
+    const p = person(pid);
+    if (!p) return;
+    const di = typeof day === 'number' && day >= 0 ? day : (p.week || []).indexOf('a');
+    const mine = ADS.find((a) => a.who === 'me' && (a.st || 'active') === 'active' && a.type === 'job');
+    const sk = p.skills && p.skills[0] ? p.skills[0][0] : ROLES[p.role].n;
+    const when = di >= 0 ? `از ${DAYF[di]} ${DAYS[di][1]} مهر` : 'این هفته';
+    S._chatDraft = { pid, t: `سلام ${p.name.split(' ')[0]}، برای ${mine ? '«' + mine.title + '»' : 'کار ' + sk} ${when} وقت داری؟ محل و شرایط را می‌گویم.` };
+    openChatWith(pid);
+  };
+  window.dayReq = (i) => collabReq(S.pid, i);
+  wrapW('renderChat', function (prev) {
+    const r = prev();
+    const c = S.convs.find((x) => x.id === S.cid), d = S._chatDraft, inp = $('cIn');
+    if (d && c && c.pid === d.pid && inp && !inp.value) {
+      S._chatDraft = null;
+      inp.value = d.t; inp.dispatchEvent(new Event('input'));
+      const host = $('s-chat'), ci = host && host.querySelector('.composer-in');
+      if (ci && !host.querySelector('.cr-tip')) ci.insertAdjacentHTML('afterbegin', `<p class="cr-tip hint" style="margin:0 4px 6px">پیام آماده است؛ ویرایش کن و بفرست. بعد از توافق، «ثبت قرارداد» را بزن.</p>`);
+    }
+    return r;
+  });
+  wrapW('renderProfile', function (prev) {
+    const r = prev();
+    const cta = document.querySelector('#s-profile .sticky .cta');
+    if (cta && /درخواست همکاری/.test(cta.textContent)) {
+      cta.textContent = 'پیشنهاد کار در چت';
+      const h = document.querySelector('#s-profile .collab-hint');
+      if (h) h.textContent = 'در چت روز و مبلغ را هماهنگ کنید؛ بعد از توافق، «ثبت قرارداد» را بزن.';
+    }
+    return r;
+  });
 })();
