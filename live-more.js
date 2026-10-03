@@ -82,7 +82,13 @@
     const a = ADS.find((x) => x.id === id);
     if (!on() || !a || !a._live) return prev(id, st);
     api('PATCH', '/ads/' + id, { status: st })
-      .then(() => { a.st = st; L.loaded['ads:' + a.type] = 0; renderMyAds(); toast({ active: 'آگهی دوباره فعال شد (۳۰ روز)', paused: 'آگهی متوقف شد؛ در کاوش دیده نمی‌شود', closed: 'آگهی بسته شد' }[st]); })
+      .then(() => {
+        // همهٔ نسخه‌های این آگهی (کاوش و «آگهی‌های من») و بارگذاری تازه بعد از تغییر
+        ADS.forEach((x) => { if (x.id === id) x.st = st; });
+        L.loaded['ads:' + a.type] = 0; L.loaded['myads:' + S.role] = 0;
+        if (S.cur === 'myads') renderMyAds();
+        toast({ active: 'آگهی دوباره فعال شد (۳۰ روز)', paused: 'آگهی متوقف شد؛ در کاوش دیده نمی‌شود', closed: 'آگهی بسته شد' }[st]);
+      })
       .catch(err);
   });
   const RS_ST = { pending: null, accepted: 'پذیرفتی', rejected: 'رد کردی' };
