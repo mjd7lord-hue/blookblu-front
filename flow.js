@@ -570,7 +570,10 @@
     document.querySelectorAll('#s-roles .rolepick button').forEach((b) => { const o = b.getAttribute('onclick') || ''; if (o.startsWith('addRole')) { const n = b.querySelector('.rp-n'), s = b.querySelector('small'); if (n) n.textContent = 'درخواست'; if (s) s.textContent = 'با تأیید پشتیبانی'; } });
     return r;
   });
-  const staticRole = () => `<span class="role-tag"><i style="background:${ROLES[S.role].c}"></i>${S.role === 'general' ? 'کارفرما' : ROLES[S.role].n}</span>`;
+  // چند نقش: برچسب نقش دکمهٔ رفتن به «نقش‌های من» است
+  const staticRole = () => ((S.roles || []).length > 1
+    ? `<button class="role-tag" style="border:0;font:inherit;cursor:pointer" onclick="go('roles')"><i style="background:${ROLES[S.role].c}"></i>${S.role === 'general' ? 'کارفرما' : ROLES[S.role].n} ⇄</button>`
+    : `<span class="role-tag"><i style="background:${ROLES[S.role].c}"></i>${S.role === 'general' ? 'کارفرما' : ROLES[S.role].n}</span>`);
   ['renderExplore', 'renderMe'].forEach((fn) => wrapW(fn, function (prev, ...a) {
     const r = prev(...a);
     document.querySelectorAll(`#s-${fn === 'renderMe' ? 'me' : 'explore'} .role-pill`).forEach((b) => (b.outerHTML = staticRole()));
@@ -957,6 +960,14 @@
   window.addRole = (k) => roleReqSend(k);
   window.renderRoles = function () {
     const r = ROLES[S.role];
+    // چند نقش ثبت‌شده (مثل حساب آزمایشی یا وقتی مدیر «چند نقش» را روشن کرده) ← جابه‌جایی با یک لمس
+    const own = (S.roles || []).filter((k) => ROLES[k]);
+    if (own.length > 1) {
+      $('s-roles').innerHTML = `${pageBar('نقش‌های من')}
+      <div class="section" style="margin-top:8px"><p class="hint" style="margin-top:0">بزن تا آن نقش فعال شود؛ خانه، کاوش و پروژه‌ها با نقش فعال عوض می‌شوند.</p>
+      <div class="rolepick">${own.map((k, i) => { const act = S.role === k, v = ROLE_INFO[k]; return `<button style="animation-delay:${i * 50}ms;--c:${ROLES[k].c}" class="${act ? 'act' : ''}" onclick="${act ? '' : `switchRole('${k}')`}"><span class="rp-ic">${v[2]}</span><div><b>${k === 'general' ? 'کارفرما' : v[0]}</b><small>${act ? 'نقش فعال' : 'بزن تا فعال شود'}</small></div><span class="rp-n">${act ? 'فعال ✓' : 'فعال کن'}</span></button>`; }).join('')}</div></div>`;
+      return;
+    }
     $('s-roles').innerHTML = `${pageBar('نقش من')}
     <div class="section" style="margin-top:8px"><div class="card" style="display:flex;gap:12px;align-items:center"><div class="hex" style="background:${r.c}">${r.n[0]}</div><div style="flex:1"><b style="display:block">${S.role === 'general' ? 'کارفرما' : r.n}</b><span style="font-size:13px;color:var(--muted)">نقش هنگام ثبت‌نام انتخاب شده</span></div></div>
     <p class="hint">برای تغییر نقش، درخواست به پشتیبانی می‌رود و بعد از بررسی انجام می‌شود.</p><button class="cta" onclick="roleChangeReq()">درخواست تغییر نقش</button></div>`;
