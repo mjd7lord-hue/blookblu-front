@@ -1213,44 +1213,128 @@
       <b>${t[0]} بعد از ورود باز می‌شود</b><p>${t[1]}</p><button class="cta" onclick="startAuth()">ورود یا ثبت‌نام</button><button class="ghost" onclick="go('explore')">دیدن آگهی‌ها</button></div></div>`;
   });
 
-  // ۸) صفحهٔ «من»: کاشی‌ها در ۴ گروه (پرکاربردترین اول)
-  const ME_GROUPS = [
-    ['کار من', ["go('req')", "go('proj')", "go('myads')", "go('cal')", "go('disp')"]],
-    ['پروفایل و اعتبار', ['trust', "go('pf')", "go('guar')", "go('team')", "go('docs')"]],
-    ['ابزارها', ["go('est')", "go('learn')", "go('stats')", "go('safe')", "go('saved')"]],
-    ['تنظیمات', ["go('set')", "go('notif')", "go('invite')", "go('about')"]],
+  // ۸) صفحهٔ «من» خلوت: ۴ میان‌بر پرکاربرد + ۴ کشوی تاشو؛ هیچ گزینه‌ای حذف نمی‌شود، فقط تکراری‌ها یکی می‌شوند
+  const ME_QUICK = ["go('req')", "go('proj')", "go('myads')", "go('notif')"];
+  const ME_ACC = [
+    ['work', 'کار و پروژه', 'helmet', 'var(--accent)', ["go('cal')", "go('disp')", "go('team')", "go('visit')", "go('safe')", "go('arbj')"]],
+    ['prof', 'پروفایل و اعتبار', 'card', 'var(--gold)', ["go('pf')", "go('guar')", "go('docs')"]],
+    ['tools', 'ابزارها و یادگیری', 'search', 'var(--r-engineer)', ["go('est')", "go('learn')", "go('stats')", "go('saved')"]],
+    ['acct', 'حساب و تنظیمات', 'gear', 'var(--concrete-2)', ["go('set')", "go('invite')", "go('about')"]],
   ];
+  // فقط این‌ها «کار منتظر تو» حساب می‌شوند (نه مثلاً تعداد اعضای تیم)
+  const ME_ALERT = ["go('disp')", "go('docs')", "go('visit')", "go('arbj')"];
+  S.meAcc = S.meAcc || {};
+  const meCss = document.createElement('style');
+  meCss.textContent = `
+  #s-me .checklist .ck.d{display:none}#s-me .checklist .ck{border-top:0}#s-me .checklist .ck:not(.d)~.ck:not(.d){border-top:1px solid var(--line)}
+  #s-me .me-quick{grid-template-columns:repeat(4,1fr)}#s-me .me-quick button{padding:10px 4px;font-size:12.5px}
+  .me-accs{display:grid;gap:10px}
+  .me-acc{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .me-acc>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:60px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .me-acc>summary::-webkit-details-marker{display:none}
+  .me-acc>summary .ic{--c:var(--accent);flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c)}
+  .me-acc>summary .ic svg{width:21px;height:21px}
+  .me-acc>summary .t{flex:1;min-width:0}.me-acc>summary .t b{display:block;font-size:15px}
+  .me-acc>summary .t small{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .me-acc>summary .n{flex:none;background:#EF4444;color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;font:700 12px/1 inherit;font-style:normal}
+  .me-acc>summary .chev{flex:none;color:var(--muted);transition:transform .2s;font-style:normal;font-size:18px}
+  .me-acc[open]>summary .chev{transform:rotate(-90deg)}
+  .me-acc[open]>summary{border-bottom:1px solid var(--line)}
+  .me-acc .acc-body{padding:12px;display:grid;gap:12px}
+  .me-acc .acc-body .section{margin:0;padding:0}
+  .me-acc .acc-body .card{box-shadow:none;border:1px solid var(--line)}`;
+  document.head.appendChild(meCss);
+  const faN = (s) => +String(s || '').replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^\d]/g, '') || 0;
+  const tileName = (t) => [...t.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+  const secBy = (re) => [...document.querySelectorAll('#s-me > .section')].find((s) => { const h = s.querySelector('.sec-head h3'); return h && re.test(h.textContent); });
+  const rowBy = (re) => [...document.querySelectorAll('#s-me .linkrow')].find((b) => re.test(b.textContent));
+  window.meAccTog = (el) => { S.meAcc[el.dataset.k] = el.open; };
   wrap('renderMe', function (prev) {
     const r = prev();
     if (!S.auth) return r;
-    const grid = document.querySelector('#s-me .mygrid');
+    const root = document.getElementById('s-me');
+    const grid = root && root.querySelector('.mygrid');
     if (!grid || grid.dataset.grouped) return r;
     const sec = grid.closest('.section');
     const tiles = [...grid.children];
     const used = new Set();
-    const take = (key) => {
-      if (key === 'trust') {
-        const b = document.createElement('button');
-        b.setAttribute('onclick', "openTrust('me')");
-        b.innerHTML = `<span class="ic" style="--c:var(--gold)">${(typeof QI === 'object' && QI.card) || ''}</span>شناسنامهٔ کاری`;
-        return [b];
-      }
-      return tiles.filter((t) => !used.has(t) && (t.getAttribute('onclick') || '') === key).map((t) => (used.add(t), t));
-    };
+    const take = (key) => tiles.filter((t) => !used.has(t) && (t.getAttribute('onclick') || '') === key).map((t) => (used.add(t), t));
+    const mkGrid = (items, cls) => { const g = document.createElement('div'); g.className = 'mygrid' + (cls ? ' ' + cls : ''); g.dataset.grouped = '1'; items.forEach((t) => g.appendChild(t)); return g; };
+    const linkCard = (rows) => { const c = document.createElement('div'); c.className = 'card'; c.style.padding = '4px 16px'; rows.forEach((x) => c.appendChild(x)); return c; };
+
+    // چک‌لیست تکمیل پروفایل: فقط کارهای مانده؛ اگر همه انجام شده، پنهان
+    const ck = root.querySelector('.checklist');
+    if (ck) {
+      const ckSec = ck.closest('.section'), mc = root.querySelector('.mecard');
+      if (!ck.querySelector('.ck:not(.d)')) ckSec.style.display = 'none';
+      else if (mc) mc.after(ckSec); // درست زیر حلقهٔ «کامل بودن پروفایل»
+    }
+
+    const quick = ME_QUICK.flatMap(take);
+    const groups = ME_ACC.map(([k, title, ic, c, keys]) => ({ k, title, ic, c, tiles: keys.flatMap(take), extra: [], names: [] }));
+    tiles.filter((t) => !used.has(t)).forEach((t) => groups[2].tiles.push(t)); // کاشی تازه/ناشناخته ← «ابزارها»
+    const G = Object.fromEntries(groups.map((g) => [g.k, g]));
+
+    // پروفایل و اعتبار: شناسنامه (یک بار، نه سه بار)، ویرایش، پیش‌نمایش، معرف‌ها
+    const trustSec = secBy(/شناسنامهٔ کاری من/);
+    const trustRow = rowBy(/شناسنامهٔ کاری من/);
+    if (trustSec) { if (trustRow) trustRow.remove(); G.prof.extra.push(trustSec); G.prof.names.push('شناسنامهٔ کاری'); }
+    const edAll = root.querySelector('.ed-all');
+    const prevRow = rowBy(/پیش‌نمایش پروفایل عمومی/);
+    const pRows = [];
+    if (edAll) {
+      const b = document.createElement('button');
+      b.className = 'linkrow ed-all';
+      b.setAttribute('onclick', edAll.getAttribute('onclick') || 'openEditAll()');
+      b.innerHTML = `<span class="ic">✎</span><span>ویرایش همهٔ اطلاعات پروفایل</span><small>‹</small>`;
+      edAll.closest('.section').remove();
+      pRows.push(b);
+    }
+    if (prevRow) pRows.push(prevRow);
+    if (pRows.length) G.prof.extra.push(linkCard(pRows));
+    const guarSec = secBy(/معرف‌های من/);
+    if (guarSec) G.prof.extra.push(guarSec);
+
+    // حساب و تنظیمات: حریم خصوصی، نقش‌های من و هر ردیف باقی‌ماندهٔ کارت پیوندها
+    const privSec = secBy(/حریم خصوصی/);
+    if (privSec) { G.acct.extra.push(privSec); G.acct.names.push('حریم خصوصی'); }
+    const restRows = [...root.querySelectorAll('#s-me > .section .linkrow')];
+    if (restRows.length) {
+      const host = restRows[0].closest('.section');
+      G.acct.extra.push(linkCard(restRows));
+      restRows.forEach((b) => { const t = b.querySelectorAll('span')[1]; if (t && t.textContent.trim()) G.acct.names.push(t.textContent.trim()); });
+      if (host && !host.querySelector('.linkrow, .switch, .poster, .checklist, .mygrid')) host.remove();
+    }
+
     const frag = document.createDocumentFragment();
-    const groups = ME_GROUPS.map(([title, keys]) => [title, keys.flatMap(take)]);
-    tiles.filter((t) => !used.has(t)).forEach((t) => groups[2][1].push(t)); // بقیه در «ابزارها»
-    groups.forEach(([title, items]) => {
-      if (!items.length) return;
-      const s2 = document.createElement('div');
-      s2.className = 'section me-grp';
-      s2.innerHTML = `<div class="sec-head"><h3>${title}</h3></div>`;
-      const g2 = document.createElement('div');
-      g2.className = grid.className; g2.dataset.grouped = '1';
-      items.forEach((t) => g2.appendChild(t));
-      s2.appendChild(g2);
-      frag.appendChild(s2);
+    if (quick.length) {
+      const s = document.createElement('div');
+      s.className = 'section me-grp';
+      s.innerHTML = `<div class="sec-head"><h3>دسترسی سریع</h3></div>`;
+      s.appendChild(mkGrid(quick, 'me-quick'));
+      frag.appendChild(s);
+    }
+    const box = document.createElement('div');
+    box.className = 'section me-accs';
+    groups.forEach((g) => {
+      if (!g.tiles.length && !g.extra.length) return;
+      const names = g.tiles.map(tileName).concat(g.names);
+      const n = g.tiles.filter((t) => ME_ALERT.includes(t.getAttribute('onclick'))).reduce((a, t) => a + [...t.querySelectorAll('em.num, .blk-red')].reduce((x, e) => x + faN(e.textContent), 0), 0);
+      const d = document.createElement('details');
+      d.className = 'me-acc';
+      d.dataset.k = g.k;
+      if (S.meAcc[g.k]) d.open = true;
+      d.setAttribute('ontoggle', 'meAccTog(this)');
+      const icon = (typeof QI === 'object' && QI[g.ic]) || (typeof MI === 'object' && MI[g.ic]) || '';
+      d.innerHTML = `<summary><span class="ic" style="--c:${g.c}">${icon}</span><span class="t"><b>${g.title}</b><small>${names.map(esc).join('، ')}</small></span>${n ? `<em class="n">${fa(n)}</em>` : ''}<i class="chev" aria-hidden="true">‹</i></summary>`;
+      const body = document.createElement('div');
+      body.className = 'acc-body';
+      if (g.tiles.length) body.appendChild(mkGrid(g.tiles));
+      g.extra.forEach((x) => body.appendChild(x));
+      d.appendChild(body);
+      box.appendChild(d);
     });
+    frag.appendChild(box);
     sec.replaceWith(frag);
     return r;
   });

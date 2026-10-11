@@ -639,7 +639,9 @@
   async function loadArb(force) {
     if (!force && fresh('arb', 20000)) return;
     L.loaded.arb = Date.now();
+    const seq = (L.arbSeq = (L.arbSeq || 0) + 1);
     const [me, jobs] = await Promise.all([api('GET', '/arbitration/me'), api('GET', '/arbitration/jobs')]);
+    if (seq !== L.arbSeq) return; // پاسخ کهنه (مثلاً بارگذاری اول بعد از ثبت درخواست رسید) وضعیت تازه را خراب نکند
     L.arbHome = me;
     const a = me.arbiter;
     S.arbMe = !a || a.status === 'rejected' ? null : { st: a.status === 'approved' ? 'ok' : a.status === 'pending' ? 'review' : 'form', fields: a.fields, range: RANGE_A2[a.range] || a.range };
