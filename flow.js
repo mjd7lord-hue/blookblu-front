@@ -740,7 +740,8 @@
   };
   window.egCands = function () {
     const g = S.eg;
-    return Object.entries(P).filter(([id, p]) => id !== 'me' && p && !p.me && p.name && g.roles.includes(p.role))
+    // با سرور فقط کاربران واقعی (کد B-XXXX)؛ افراد نمایشی دعوت‌پذیر نیستند
+    return Object.entries(P).filter(([id, p]) => id !== 'me' && p && !p.me && p.name && g.roles.includes(p.role) && (!live() || /^B-[A-Z0-9]{4}$/.test(id)))
       .map(([id, p]) => ({ id, p, free: (p.week || []).filter((d) => d === 'a').length, near: provOf(p.place) === 'هرمزگان' ? 1 : 0 }))
       .sort((a, b) => b.near - a.near || (b.free > 0) - (a.free > 0) || trustOf(b.p).t - trustOf(a.p).t).slice(0, 12);
   };

@@ -445,6 +445,9 @@
     if (link.screen === 'trust') return "openTrust('me')";
     if (link.screen === 'kyc') return 'openKYC()';
     if (link.screen === 'docs') return "go('docs')";
+    if (link.screen === 'urgent' && link.id) return `openUrgent('${link.id}')`;
+    if (link.screen === 'home') return "go('home')";
+    if (link.screen === 'myads') return "go('myads')";
     return "go('notif')";
   }
   const mapNotif = (n) => ({ id: n.id, g: group(n.createdAt), ty: NTY[n.type] || 'req', t: n.title, s: n.body || '', time: rel(n.createdAt), go: goFor(n.link), read: !!n.readAt });
