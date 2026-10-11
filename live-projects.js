@@ -446,12 +446,12 @@
       <span class="label">واحد</span><div class="chips" id="srU">${['متر مربع', 'متر مکعب', 'کیلوگرم', 'متر طول', 'عدد', 'روز'].map((x, k) => `<button class="chip" aria-pressed="${k === 0}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
       <span class="label">مقدار کل</span><input class="field num" inputmode="decimal" id="srQ" placeholder="مثلاً ۴۲">
       <span class="label">انجام‌شده تا امروز</span><input class="field num" inputmode="decimal" id="srD" placeholder="مثلاً ۲۰">
-      <span class="label">فی (تومان)</span><div class="numf"><input class="field" inputmode="numeric" id="srP" placeholder="۴٬۲۰۰٬۰۰۰"><span>تومان</span></div>
+      <span class="label">فی (تومان)</span><div class="numf"><input class="field" inputmode="numeric" id="srP" placeholder="۴.۲۰۰.۰۰۰"><span>تومان</span></div>
       <button class="cta" id="srGo">افزودن</button>`;
     show();
     $('srGo').onclick = () => {
       const n = $('srN').value.trim(), num = (x) => +toEn(x).replace(/[٬,\s]/g, '').replace('٫', '.');
-      const q = num($('srQ').value), d = num($('srD').value || '0'), pr = num($('srP').value);
+      const q = num($('srQ').value), d = num($('srD').value || '0'), pr = +toEn($('srP').value).replace(/\D/g, '');
       if (n.length < 2 || !(q > 0) || !(pr >= 0) || !(d >= 0)) { toast('عنوان، مقدار و فی را کامل بنویس'); return; }
       if (d > q) { toast('انجام‌شده از مقدار کل بیشتر است'); return; }
       S.sov[key()].items.push({ n, u: sel('srU').textContent, q, done: d, prev: 0, p: Math.round(pr) });

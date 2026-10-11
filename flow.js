@@ -233,7 +233,7 @@
       <div id="crNew" ${S.cr.pick === 'new' ? '' : 'hidden'}><input class="field" id="crT" style="margin-top:8px" placeholder="مثلاً بلوک‌چینی طبقهٔ دوم ویلای درگهان"></div>
       <span class="label">روز شروع</span>
       <div class="chips" id="crD">${free.map((k) => `<button class="chip" data-v="${DAYF[k]} ${DAYS[k][1]} مهر" aria-pressed="${k === di}" onclick="pickOne(this)">${DAYF[k]} ${DAYS[k][1]} مهر</button>`).join('')}<button class="chip" data-v="با هماهنگی" aria-pressed="${free.length ? 'false' : 'true'}" onclick="pickOne(this)">با هماهنگی</button></div>
-      <span class="label">مبلغ پیشنهادی (اختیاری)</span><input class="field" id="crO" inputmode="text" placeholder="مثلاً ۲٬۰۰۰٬۰۰۰ تومان روزانه">
+      <span class="label">مبلغ پیشنهادی (اختیاری)</span><input class="field" id="crO" inputmode="text" placeholder="مثلاً ۲.۰۰۰.۰۰۰ تومان روزانه">
       <span class="label">توضیح کوتاه (اختیاری)</span><textarea class="field" id="crM" rows="2" placeholder="مدت کار، ساعت، ابزار…"></textarea>
       <button class="cta" onclick="collabSend()">ارسال درخواست</button>`;
       show();
@@ -377,7 +377,7 @@
     let body = '';
     if (n === 1) body = `<span class="label" style="margin-top:0">شرح کار</span><input class="field" id="cwJ" value="${esc(w.job)}" placeholder="مثلاً آرماتوربندی سقف دوم ویلای درگهان">
       <span class="label">مقدار کار (اختیاری)</span><input class="field" id="cwQ" value="${esc(w.qty)}" placeholder="مثلاً حدود ۳ تن یا ۱۲۰ متر">
-      <span class="label">مبلغ یا دستمزد</span><input class="field" id="cwP" value="${esc(w.price)}" placeholder="مثلاً ۹٬۲۰۰٬۰۰۰ تومان هر تن">
+      <span class="label">مبلغ یا دستمزد</span><input class="field" id="cwP" value="${esc(w.price)}" placeholder="مثلاً ۹.۲۰۰.۰۰۰ تومان هر تن">
       ${w.place ? `<p class="hint">محل: ${esc(placeLbl(w.place))} (از آگهی)</p>` : ''}
       <button class="cta" onclick="ctrStep(2)">ادامه</button>`;
     if (n === 2) body = `<span class="label" style="margin-top:0">زمان شروع</span><input class="field" id="cwS" value="${esc(w.start)}" placeholder="مثلاً شنبه ۱۱ مهر، ۷ صبح">

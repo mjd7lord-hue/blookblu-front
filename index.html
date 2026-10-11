@@ -2168,7 +2168,7 @@ svg text{direction:rtl;unicode-bidi:plaintext}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const fa=n=>String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
-const faNum=n=>fa(Math.round(n).toLocaleString('en-US')).replace(/,/g,'٬');
+const faNum=n=>fa(Math.round(n).toLocaleString('en-US')).replace(/,/g,'.'); // جداکنندهٔ سه‌رقمی: نقطه (۸۵۰.۲۰۰.۰۰۰)
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2217,7 +2217,7 @@ const SKILLS=['بلوک‌چینی','آرماتوربندی','قالب‌بند�
 const P={
  karimi:{role:'engineer',name:'مهندس کریمی',ini:'م.ک',title:'مهندس عمران · نظارت و محاسبات',place:'بندرعباس',rating:4.9,done:23,revN:17,verified:true,age:'۳۹ سال',born:'شیراز',exp:'۱۲ سال',phone:'۰۹۱۷ ۲۲۳ ۴۴۵۵',code:'B-K7Q2',since:'فروردین ۱۴۰۴',resp:'معمولاً ظرف ۲ ساعت پاسخ می‌دهد',
   bio:'۱۲ سال سابقهٔ نظارت و اجرای پروژه‌های مسکونی و تجاری در فارس و هرمزگان.',
-  skills:[['محاسبات سازه','بیش از ۱۰ سال',12,'پروژه‌ای','از ۱۸٬۰۰۰٬۰۰۰ تومان'],['نظارت عالیه','۵ تا ۱۰ سال',8,'هر بازدید','از ۳٬۵۰۰٬۰۰۰ تومان'],['متره و برآورد','۵ تا ۱۰ سال',6,'پروژه‌ای','توافقی']],
+  skills:[['محاسبات سازه','بیش از ۱۰ سال',12,'پروژه‌ای','از ۱۸.۰۰۰.۰۰۰ تومان'],['نظارت عالیه','۵ تا ۱۰ سال',8,'هر بازدید','از ۳.۵۰۰.۰۰۰ تومان'],['متره و برآورد','۵ تا ۱۰ سال',6,'پروژه‌ای','توافقی']],
   week:['a','b','a','o','b','a','o'],
   pf:[['نظارت مجتمع مسکونی ۲۴ واحدی','بندرعباس','tower'],['بازدید فونداسیون ویلایی','قشم','villa'],['طراحی سازهٔ ویلای دوبلکس','درگهان','villa2'],['بازرسی فنی انبار صنعتی','لافت','shed']],
   revs:[['کارفرما احمدی',5,'دقیق و منظم، پروژه را سر وقت تحویل داد.','۲ هفته پیش'],['پیمانکار توکلی',5,'همکاری خیلی خوبی داشتیم. گزارش‌هایش روشن است.','۱ ماه پیش'],['کارفرما نوری',4,'بازدید دقیق بود، فقط زمان‌بندی کمی جابه‌جا شد.','۲ ماه پیش']],
@@ -2233,7 +2233,7 @@ const P={
   guar:[['مهندس کریمی','ناظر ۴ پروژه','engineer'],['فروشگاه ابزار قشم','۱۲ سفارش مشترک','company'],['کارفرما قاسمی','کارفرمای قبلی','general']]},
  rezaei:{role:'specialist',name:'استادکار رضایی',ini:'ا.ر',title:'متخصص جوشکاری و اسکلت فلزی',place:'رمکان',rating:4.5,done:19,revN:11,verified:true,age:'۳۴ سال',born:'بوشهر',exp:'۸ سال',phone:'۰۹۱۷ ۸۸۰ ۱۲۳۴',code:'B-R2W5',since:'اسفند ۱۴۰۳',resp:'معمولاً ظرف ۱ ساعت پاسخ می‌دهد',
   bio:'۸ سال تجربهٔ جوشکاری صنعتی و اجرای اسکلت فلزی سوله و ویلا. ابزار کامل همراه دارد.',
-  skills:[['جوشکاری آرگون','۵ تا ۱۰ سال',8,'روزانه','۲٬۸۰۰٬۰۰۰ تومان'],['نصب اسکلت فلزی','۵ تا ۱۰ سال',7,'پروژه‌ای','پس از بازدید'],['برشکاری CNC','۲ تا ۵ سال',3,'ساعتی','۴۵۰٬۰۰۰ تومان']],
+  skills:[['جوشکاری آرگون','۵ تا ۱۰ سال',8,'روزانه','۲.۸۰۰.۰۰۰ تومان'],['نصب اسکلت فلزی','۵ تا ۱۰ سال',7,'پروژه‌ای','پس از بازدید'],['برشکاری CNC','۲ تا ۵ سال',3,'ساعتی','۴۵۰.۰۰۰ تومان']],
   week:['b','a','a','a','a','o','o'],
   pf:[['اسکلت فلزی سوله صنعتی','بندرعباس','shed'],['سازهٔ پل عابر پیاده','بندرعباس','bridge']],
   revs:[['پیمانکار توکلی',4,'کار تمیز و دقیق، فقط کمی گران‌تر از بقیه.','۳ هفته پیش'],['شرکت ساحل‌ساز',5,'سر وقت آمد و جوش‌ها تست شدند.','۲ ماه پیش']],
@@ -2241,7 +2241,7 @@ const P={
   guar:[['کارگاه فلزکاری بندر','استادکار سابق','company']]},
  reza:{role:'worker',name:'استاد رضا بهمنی',ini:'ر.ب',title:'آرماتوربند',place:'درگهان',rating:4.7,done:41,revN:26,verified:true,age:'۴۵ سال',born:'درگهان',exp:'۱۸ سال',phone:'۰۹۳۵ ۴۱۲ ۷۷۰۰',code:'B-4X92',since:'دی ۱۴۰۳',resp:'معمولاً همان روز پاسخ می‌دهد',
   bio:'آرماتوربندی سقف و فونداسیون. با تیم ۳ نفره کار می‌کنم؛ داخل قشم رفت‌وآمد با خودم.',
-  skills:[['آرماتوربندی سقف','بیش از ۱۰ سال',15,'تنی','۹٬۵۰۰٬۰۰۰ تومان هر تن'],['آرماتوربندی فونداسیون','بیش از ۱۰ سال',14,'تنی','۱۰٬۰۰۰٬۰۰۰ تومان هر تن']],
+  skills:[['آرماتوربندی سقف','بیش از ۱۰ سال',15,'تنی','۹.۵۰۰.۰۰۰ تومان هر تن'],['آرماتوربندی فونداسیون','بیش از ۱۰ سال',14,'تنی','۱۰.۰۰۰.۰۰۰ تومان هر تن']],
   week:['a','a','b','a','a','a','o'],
   pf:[['سقف دوم ویلای درگهان','درگهان','villa'],['فونداسیون ساختمان ۴ طبقه','طولا','tower']],
   revs:[['گروه ساختمانی توکلی',5,'خوش‌قول و دقیق. کار را تمیز تحویل داد.','۱ هفته پیش'],['مهندس کریمی',5,'اجرای آرماتور مطابق نقشه بود و در بازدید ایرادی نداشت.','۱ ماه پیش']],
@@ -2249,7 +2249,7 @@ const P={
   guar:[['استاد جواد رحیمی','استادکار سابق','worker'],['مهندس کریمی','ناظر پروژه','engineer']]},
  qasemi:{role:'worker',name:'حسن قاسمی',ini:'ح.ق',title:'قالب‌بند · تیم ۲ نفره',place:'طولا',rating:4.3,done:9,revN:5,verified:false,age:'۲۹ سال',born:'کرمان',exp:'۶ سال',phone:null,code:'B-Q8M1',since:'تیر ۱۴۰۵',resp:'معمولاً ظرف یک روز پاسخ می‌دهد',
   bio:'قالب‌بندی ستون و سقف. ابزار قالب فلزی داریم.',
-  skills:[['قالب‌بندی ستون','۵ تا ۱۰ سال',6,'متری','۳۸۰٬۰۰۰ تومان'],['قالب‌بندی سقف','۲ تا ۵ سال',4,'متری','۳۲۰٬۰۰۰ تومان']],
+  skills:[['قالب‌بندی ستون','۵ تا ۱۰ سال',6,'متری','۳۸۰.۰۰۰ تومان'],['قالب‌بندی سقف','۲ تا ۵ سال',4,'متری','۳۲۰.۰۰۰ تومان']],
   week:['a','a','a','b','b','a','a'],
   pf:[['قالب ستون‌های ساختمان ۴ طبقه','طولا','tower']],
   revs:[['کارفرما دهقانی',4,'کار خوب بود؛ یک روز دیر شروع شد.','۱ ماه پیش']],
@@ -2280,13 +2280,13 @@ const P={
 /* ---------- ads ---------- */
 /* type: work = آمادهٔ کار (در حالت «پیدا کردن نیرو» دیده می‌شود) · job = نیاز به نیرو (در «پیدا کردن کار») · consult = پرسش */
 let ADS=[
- {id:'w2',type:'work',who:'reza',title:'آرماتوربند با ۱۸ سال سابقه، آماده از شنبه',place:'درگهان',wageType:'تنی',wage:'۹٬۵۰۰٬۰۰۰ تومان هر تن',start:'فوری',range:'شهر',aud:['contractor','company','general'],resp:3,posted:'۲ ساعت پیش',skills:['آرماتوربندی'],desc:'با تیم ۳ نفره آرماتوربندی سقف و فونداسیون انجام می‌دهیم. داخل جزیره رفت‌وآمد با خودمان است. نقشه را قبل از شروع می‌خواهیم.'},
- {id:'w1',type:'work',who:'rezaei',title:'جوشکار آرگون، آزاد از یکشنبه',place:'رمکان',wageType:'روزانه',wage:'۲٬۸۰۰٬۰۰۰ تومان',start:'این هفته',range:'استان',aud:['contractor','company'],resp:5,posted:'امروز ۹:۱۰',skills:['جوشکاری'],desc:'جوشکاری آرگون و نصب اسکلت فلزی. ابزار کامل همراه دارم. برای قشم هم می‌آیم؛ هزینهٔ لنج با کارفرما.'},
- {id:'w4',type:'work',who:'qasemi',title:'قالب‌بند ستون و سقف، تیم ۲ نفره',place:'طولا',wageType:'متری',wage:'۳۸۰٬۰۰۰ تومان',start:'امروز',range:'شهر',aud:['contractor','general'],resp:1,posted:'دیروز',skills:['قالب‌بندی'],desc:'قالب فلزی داریم. برای پروژه‌های کرمان و رفسنجان در دسترس هستیم.'},
- {id:'w3',type:'work',who:'karimi',title:'نظارت و محاسبات سازه برای ویلا و مسکونی',place:'بندرعباس',wageType:'پروژه‌ای',wage:'از ۱۸٬۰۰۰٬۰۰۰ تومان',start:'با هماهنگی',range:'استان',aud:['general','contractor','company'],resp:7,posted:'۳ روز پیش',skills:['نظارت ساختمان','محاسبات سازه'],desc:'محاسبهٔ سازه، نظارت مرحله‌ای و گزارش بازدید مکتوب. بازدید اول داخل شیراز رایگان است.'},
- {id:'a2',type:'job',who:'tavakoli',title:'۳ کارگر برای بلوک‌چینی دیوارهای طبقهٔ دوم',place:'درگهان',wageType:'روزانه',wage:'۱٬۸۰۰٬۰۰۰ تومان',start:'فوری',range:'شهر',aud:['worker'],need:3,resp:2,posted:'۴۰ دقیقه پیش',skills:['بلوک‌چینی'],desc:'کار حدود ۱۰ روز. ناهار و آب با کارگاه. ساعت کار ۷ صبح تا ۳ بعدازظهر.'},
+ {id:'w2',type:'work',who:'reza',title:'آرماتوربند با ۱۸ سال سابقه، آماده از شنبه',place:'درگهان',wageType:'تنی',wage:'۹.۵۰۰.۰۰۰ تومان هر تن',start:'فوری',range:'شهر',aud:['contractor','company','general'],resp:3,posted:'۲ ساعت پیش',skills:['آرماتوربندی'],desc:'با تیم ۳ نفره آرماتوربندی سقف و فونداسیون انجام می‌دهیم. داخل جزیره رفت‌وآمد با خودمان است. نقشه را قبل از شروع می‌خواهیم.'},
+ {id:'w1',type:'work',who:'rezaei',title:'جوشکار آرگون، آزاد از یکشنبه',place:'رمکان',wageType:'روزانه',wage:'۲.۸۰۰.۰۰۰ تومان',start:'این هفته',range:'استان',aud:['contractor','company'],resp:5,posted:'امروز ۹:۱۰',skills:['جوشکاری'],desc:'جوشکاری آرگون و نصب اسکلت فلزی. ابزار کامل همراه دارم. برای قشم هم می‌آیم؛ هزینهٔ لنج با کارفرما.'},
+ {id:'w4',type:'work',who:'qasemi',title:'قالب‌بند ستون و سقف، تیم ۲ نفره',place:'طولا',wageType:'متری',wage:'۳۸۰.۰۰۰ تومان',start:'امروز',range:'شهر',aud:['contractor','general'],resp:1,posted:'دیروز',skills:['قالب‌بندی'],desc:'قالب فلزی داریم. برای پروژه‌های کرمان و رفسنجان در دسترس هستیم.'},
+ {id:'w3',type:'work',who:'karimi',title:'نظارت و محاسبات سازه برای ویلا و مسکونی',place:'بندرعباس',wageType:'پروژه‌ای',wage:'از ۱۸.۰۰۰.۰۰۰ تومان',start:'با هماهنگی',range:'استان',aud:['general','contractor','company'],resp:7,posted:'۳ روز پیش',skills:['نظارت ساختمان','محاسبات سازه'],desc:'محاسبهٔ سازه، نظارت مرحله‌ای و گزارش بازدید مکتوب. بازدید اول داخل شیراز رایگان است.'},
+ {id:'a2',type:'job',who:'tavakoli',title:'۳ کارگر برای بلوک‌چینی دیوارهای طبقهٔ دوم',place:'درگهان',wageType:'روزانه',wage:'۱.۸۰۰.۰۰۰ تومان',start:'فوری',range:'شهر',aud:['worker'],need:3,resp:2,posted:'۴۰ دقیقه پیش',skills:['بلوک‌چینی'],desc:'کار حدود ۱۰ روز. ناهار و آب با کارگاه. ساعت کار ۷ صبح تا ۳ بعدازظهر.'},
  {id:'a1',type:'job',who:'ahmadi',title:'تیم اجرای نمای مجتمع ۱۲ واحدی',place:'قشم',wageType:'توافقی',wage:'پس از بازدید',start:'این هفته',range:'استان',aud:['contractor','specialist','company'],need:1,resp:4,posted:'امروز ۸:۳۰',skills:['اجرای نما'],desc:'نمای سنگ و کامپوزیت، حدود ۶۰۰ متر مربع. نقشه‌ها آماده است. بازدید از کارگاه با هماهنگی.'},
- {id:'a4',type:'job',who:'sahel',title:'۲ جوشکار برای اسکلت فلزی سوله',place:'لافت',wageType:'روزانه',wage:'۳٬۰۰۰٬۰۰۰ تومان',start:'این هفته',range:'استان',aud:['specialist'],need:2,resp:1,posted:'دیروز',skills:['جوشکاری'],desc:'سولهٔ ۲۴۰۰ متری. اسکان کارگری در کارگاه فراهم است. مدرک فنی‌وحرفه‌ای امتیاز دارد.'},
+ {id:'a4',type:'job',who:'sahel',title:'۲ جوشکار برای اسکلت فلزی سوله',place:'لافت',wageType:'روزانه',wage:'۳.۰۰۰.۰۰۰ تومان',start:'این هفته',range:'استان',aud:['specialist'],need:2,resp:1,posted:'دیروز',skills:['جوشکاری'],desc:'سولهٔ ۲۴۰۰ متری. اسکان کارگری در کارگاه فراهم است. مدرک فنی‌وحرفه‌ای امتیاز دارد.'},
  {id:'a3',type:'job',who:'noori',title:'بازسازی کامل آپارتمان ۹۰ متری',place:'قشم',wageType:'پروژه‌ای',wage:'۲۰۰ تا ۳۰۰ میلیون تومان',start:'با هماهنگی',range:'شهر',aud:['contractor','engineer'],need:1,resp:6,posted:'۲ روز پیش',skills:['بازسازی','لوله‌کشی','کاشی‌کاری'],desc:'تعویض لوله‌کشی، کاشی آشپزخانه و حمام، کف‌سازی و نقاشی. واحد طبقهٔ سوم، آسانسور دارد.'},
  {id:'c1',type:'consult',who:'noori',title:'علت ترک مورب کنار پنجره چیست؟',place:'قشم',wageType:'',wage:'',start:'',range:'شهر',aud:['engineer'],resp:4,posted:'امروز ۱۰:۰۵',skills:['نظارت ساختمان'],desc:'ساختمان ۸ ساله است. ترک از گوشهٔ پنجره به سمت بالا رفته و در یک ماه اخیر بلندتر شده.'},
  {id:'c2',type:'consult',who:'ahmadi',title:'نم زیر کاشی حمام بعد از ۶ ماه',place:'قشم',wageType:'',wage:'',start:'',range:'شهر',aud:['engineer','specialist'],resp:2,posted:'دیروز',skills:['کاشی‌کاری','لوله‌کشی'],desc:'بعد از بازسازی حمام، دور کف‌شور نم زده. آیا لوله است یا عایق؟'}
@@ -2447,7 +2447,7 @@ function renderResults(first){
 const WK_L=['ش','ی','د','س','چ','پ','ج'],WK_ST={a:'آزاد',b:'رزرو',o:'تعطیل'};
 function weekBar(w,style=''){w=w||['o','o','o','o','o','o','o'];const lbl=w.map((d,i)=>DAYF[i]+': '+(WK_ST[d]||'تعطیل')).join('، ');
   return `<div class="weekw" style="${style}"><div class="week" role="img" aria-label="روزهای این هفته — ${lbl}" title="${lbl}">${w.map(d=>`<i class="${d}"></i>`).join('')}</div><div class="week-l" aria-hidden="true">${WK_L.map((x,i)=>`<span class="${w[i]}">${x}</span>`).join('')}</div></div>`}
-// «۹٬۵۰۰٬۰۰۰ تومان هر تن» + «تنی» تکراری نشود: واحد فقط یک بار
+// «۹.۵۰۰.۰۰۰ تومان هر تن» + «تنی» تکراری نشود: واحد فقط یک بار
 function wageTxt(a){const w=String(a.wage||''),t=a.wageType||'';if(!t||t==='توافقی'||t==='پروژه‌ای'||/هر |روزانه|متری|ساعتی|تنی|پروژه|روزی|ماهانه/.test(w))return w;
   return w+' '+({'تنی':'هر تن','متری':'هر متر','ساعتی':'هر ساعت','هر بازدید':'هر بازدید'}[t]||t)}
 function adCard(a,p,k=0,preview){
@@ -2545,9 +2545,9 @@ function sent(name){
 
 /* ---------- me ---------- */
 const ME_ROLE={
-  worker:['کارگر ساختمانی · بنایی و بلوک‌چینی',[['بلوک‌چینی','۵ تا ۱۰ سال',8,'روزانه','۲٬۰۰۰٬۰۰۰ تومان'],['کاشی‌کاری','۲ تا ۵ سال',4,'متری','۴۵۰٬۰۰۰ تومان']]],
-  specialist:['متخصص قالب‌بندی و آرماتور',[['قالب‌بندی سقف','۵ تا ۱۰ سال',7,'متری','۳۵۰٬۰۰۰ تومان'],['آرماتوربندی','۵ تا ۱۰ سال',6,'تنی','۹٬۰۰۰٬۰۰۰ تومان']]],
-  engineer:['مهندس عمران · نظارت',[['نظارت عالیه','۵ تا ۱۰ سال',7,'هر بازدید','۳٬۰۰۰٬۰۰۰ تومان']]],
+  worker:['کارگر ساختمانی · بنایی و بلوک‌چینی',[['بلوک‌چینی','۵ تا ۱۰ سال',8,'روزانه','۲.۰۰۰.۰۰۰ تومان'],['کاشی‌کاری','۲ تا ۵ سال',4,'متری','۴۵۰.۰۰۰ تومان']]],
+  specialist:['متخصص قالب‌بندی و آرماتور',[['قالب‌بندی سقف','۵ تا ۱۰ سال',7,'متری','۳۵۰.۰۰۰ تومان'],['آرماتوربندی','۵ تا ۱۰ سال',6,'تنی','۹.۰۰۰.۰۰۰ تومان']]],
+  engineer:['مهندس عمران · نظارت',[['نظارت عالیه','۵ تا ۱۰ سال',7,'هر بازدید','۳.۰۰۰.۰۰۰ تومان']]],
   contractor:['پیمانکار · اسکلت و سفت‌کاری',[['اجرای اسکلت بتنی','بیش از ۱۰ سال',12,'متری','پس از بازدید'],['سفت‌کاری','بیش از ۱۰ سال',12,'متری','توافقی']]],
   company:['شرکت ساختمانی · مجری ویلا و مسکونی',[['اجرای ویلا','بیش از ۱۰ سال',11,'پروژه‌ای','پس از بازدید']]],
   general:['کارفرما · ساخت ویلای درگهان',null]
@@ -2927,10 +2927,10 @@ function toggleTheme(){const r=document.documentElement;const dark=r.dataset.the
 
 /* =================== HOME (۶ نقش) =================== */
 P.jasemi={role:'specialist',name:'استاد جاسمی',ini:'ج',title:'کاشی‌کار و سنگ‌کار',place:'قشم',rating:4.6,done:27,revN:15,verified:true,age:'۴۱ سال',born:'قشم',exp:'۱۵ سال',phone:null,code:'B-J3K8',since:'دی ۱۴۰۳',resp:'معمولاً ظرف ۳ ساعت پاسخ می‌دهد',
-  bio:'کاشی و سرامیک حمام و آشپزخانه، سنگ پله و نما.',skills:[['کاشی‌کاری','بیش از ۱۰ سال',15,'متری','۴۲۰٬۰۰۰ تومان'],['سنگ‌کاری','۵ تا ۱۰ سال',8,'متری','۵۵۰٬۰۰۰ تومان']],
+  bio:'کاشی و سرامیک حمام و آشپزخانه، سنگ پله و نما.',skills:[['کاشی‌کاری','بیش از ۱۰ سال',15,'متری','۴۲۰.۰۰۰ تومان'],['سنگ‌کاری','۵ تا ۱۰ سال',8,'متری','۵۵۰.۰۰۰ تومان']],
   week:['b','a','a','b','a','o','o'],pf:[['حمام و آشپزخانهٔ واحد ۹۰ متری','قشم','reno']],revs:[['کارفرما نوروزی',5,'بندکشی تمیز، سر وقت تمام کرد.','۳ هفته پیش']],stars:[12,2,1,0,0],guar:[['گروه ساختمانی توکلی','پیمانکار همکار','contractor']]};
 P.naser={role:'specialist',name:'استاد ناصر',ini:'ن.ا',title:'نقاش و نازک‌کار',place:'درگهان',rating:4.2,done:12,revN:6,verified:false,age:'۳۳ سال',born:'درگهان',exp:'۷ سال',phone:null,code:'B-N2S6',since:'خرداد ۱۴۰۵',resp:'معمولاً همان روز پاسخ می‌دهد',
-  bio:'نقاشی ساختمان، کناف و گچ‌کاری.',skills:[['نقاشی ساختمان','۵ تا ۱۰ سال',7,'متری','۱۸۰٬۰۰۰ تومان'],['کناف','۲ تا ۵ سال',3,'متری','توافقی']],
+  bio:'نقاشی ساختمان، کناف و گچ‌کاری.',skills:[['نقاشی ساختمان','۵ تا ۱۰ سال',7,'متری','۱۸۰.۰۰۰ تومان'],['کناف','۲ تا ۵ سال',3,'متری','توافقی']],
   week:['a','a','a','a','b','o','o'],pf:[],revs:[['خانم نوری',4,'کار خوب؛ یک روز تأخیر داشت.','۳ ماه پیش']],stars:[3,2,1,0,0],guar:[]};
 
 const now=new Date(), HR=now.getHours()+now.getMinutes()/60;
@@ -2938,7 +2938,7 @@ const greet=()=>HR<5?'شب بخیر':HR<11?'صبح بخیر':HR<15?'ظهر بخ�
 const hm=h=>fa(String(Math.floor(h)).padStart(2,'0')+':'+String(Math.round((h%1)*60)).padStart(2,'0'));
 
 const REQ={
-  worker:[['همکاری برای نازک‌کاری واحد ۳','tavakoli','شروع شنبه · روزانه ۲٬۹۰۰٬۰۰۰ تومان'],['هماهنگی بازدید کارگاه','noori','چهارشنبه ۸ مهر · ساعت ۱۰']],
+  worker:[['همکاری برای نازک‌کاری واحد ۳','tavakoli','شروع شنبه · روزانه ۲.۹۰۰.۰۰۰ تومان'],['هماهنگی بازدید کارگاه','noori','چهارشنبه ۸ مهر · ساعت ۱۰']],
   specialist:[['جوشکاری اسکلت فلزی سوله','sahel','این هفته · دستمزد توافقی'],['نصب نردهٔ راه‌پله','ahmadi','قشم · ۲ روز کار']],
   engineer:[['درخواست بازدید ترک سازه','noori','قشم · دوشنبه ساعت ۹']],
   contractor:[['پیشنهاد بازسازی آپارتمان','noori','قشم · بودجه ۲۵۰ میلیون تومان']],
@@ -3021,7 +3021,7 @@ function homeWorker(){
   return `${head()}${storiesRail()}
   <div class="hcard"><div class="stars"></div>
     <div style="display:flex;justify-content:space-between;gap:10px;position:relative"><div><small>شیفت امروز</small><h2>بلوک‌چینی طبقهٔ دوم</h2><div style="font-size:13.5px;color:var(--concrete)">گروه ساختمانی توکلی · درگهان</div></div>
-      <div style="text-align:left"><small>دستمزد امروز</small><div class="big num" style="font-size:22px">۱٬۸۰۰٬۰۰۰<span>تومان</span></div></div></div>
+      <div style="text-align:left"><small>دستمزد امروز</small><div class="big num" style="font-size:22px">۱.۸۰۰.۰۰۰<span>تومان</span></div></div></div>
     <svg class="sky" viewBox="0 0 300 104" aria-label="پیشرفت شیفت از ۷ صبح تا ۳ بعدازظهر">
       <path d="M20 90 A130 72 0 0 1 280 90" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2" stroke-dasharray="3 5"/>
       <path d="M150 18 A130 72 0 0 1 280 90" fill="none" stroke="rgba(224,106,42,.5)" stroke-width="6" stroke-linecap="round"/>
@@ -3237,12 +3237,12 @@ S.convs=[
    {me:0,k:'voice',dur:14,time:'۰۸:۵۵'},
    {me:0,k:'loc',place:'درگهان',label:'ورودی کارگاه، کوچهٔ پشت مسجد',time:'۰۹:۱۰'},
    {me:0,k:'text',t:'دوشنبه ساعت ۹ برای کنترل آرماتور می‌آیم. تا قبل از آن بتن‌ریزی نکنید.',time:'۰۹:۱۲'}]},
- {id:'c-reza',pid:'reza',type:'ad',online:true,unread:1,pinned:false,muted:false,arch:false,stage:0,ad:'w2',ctx:{label:'آگهی',title:'آرماتوربند با ۱۸ سال سابقه',meta:'درگهان · ۹٬۵۰۰٬۰۰۰ هر تن'},
+ {id:'c-reza',pid:'reza',type:'ad',online:true,unread:1,pinned:false,muted:false,arch:false,stage:0,ad:'w2',ctx:{label:'آگهی',title:'آرماتوربند با ۱۸ سال سابقه',meta:'درگهان · ۹.۵۰۰.۰۰۰ هر تن'},
   replies:['چشم، دوشنبه ۷ صبح با تیم می‌آیم.','میلگردها رسیده؟','باشه.'],
   msgs:[{k:'sys',t:'این گفت‌وگو از آگهی «آرماتوربند با ۱۸ سال سابقه» شروع شد.'},{k:'date',t:'امروز'},
    {me:1,k:'text',t:'سلام استاد، برای سقف دوم ویلای درگهان حدود ۳ تن آرماتور داریم. از کی می‌توانی؟',time:'۱۰:۰۲',st:'read'},
    {me:0,k:'text',t:'سلام، از دوشنبه آزادم. شرایط را این‌طور پیشنهاد می‌دهم:',time:'۱۰:۱۵'},
-   {me:0,k:'deal',d:{job:'آرماتوربندی سقف دوم',qty:'حدود ۳ تن',price:'۹٬۵۰۰٬۰۰۰ تومان هر تن',start:'دوشنبه ۶ مهر، ۷ صبح',dur:'۳ روز'},st:null,time:'۱۰:۱۶'}]},
+   {me:0,k:'deal',d:{job:'آرماتوربندی سقف دوم',qty:'حدود ۳ تن',price:'۹.۵۰۰.۰۰۰ تومان هر تن',start:'دوشنبه ۶ مهر، ۷ صبح',dur:'۳ روز'},st:null,time:'۱۰:۱۶'}]},
  {id:'c-amir',pid:'amir',type:'ad',online:false,unread:1,pinned:false,muted:false,arch:false,stage:0,ad:null,ctx:{label:'آگهی من',title:'نیروی بلوک‌چینی ویلای درگهان',meta:'درگهان'},
   replies:['باشه.'],
   msgs:[{k:'sys',t:'این گفت‌وگو از آگهی «نیروی بلوک‌چینی ویلای درگهان» شروع شد.'},{k:'date',t:'امروز'},
@@ -3444,7 +3444,7 @@ function pickLoc(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">م�
 function dealForm(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">پیشنهاد توافق</h3><p class="sub">وقتی طرف مقابل تأیید کند، مرحلهٔ همکاری به «توافق» می‌رود.</p>
   <span class="label">کار</span><input class="field" id="dJ" value="آرماتوربندی سقف دوم">
   <span class="label">مقدار</span><input class="field" id="dQ" value="حدود ۳ تن">
-  <span class="label">دستمزد</span><input class="field" id="dP" value="۹٬۲۰۰٬۰۰۰ تومان هر تن">
+  <span class="label">دستمزد</span><input class="field" id="dP" value="۹.۲۰۰.۰۰۰ تومان هر تن">
   <span class="label">شروع</span><div class="chips">${['دوشنبه ۶ مهر','سه‌شنبه ۷ مهر','چهارشنبه ۸ مهر'].map((x,k)=>`<button class="chip" aria-pressed="${k===0}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
   <button class="cta" onclick="const s=document.querySelector('#sb .chip[aria-pressed=true]').textContent;const d={job:$('dJ').value,qty:$('dQ').value,price:$('dP').value,start:s+'، ۷ صبح',dur:'۳ روز'};closeSheet();pushMsg({me:1,k:'deal',d,st:null},true)">فرستادن پیشنهاد</button>`;show()}
 function pickDayProposal(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">پیشنهاد روز شروع</h3><p class="sub">بعد از تأیید، به تقویم هر دو نفر اضافه می‌شود.</p>
@@ -3539,7 +3539,7 @@ const REG={
    {k:'skills',t:'multi',max:5,req:1,label:'مهارت‌ها',opts:['کارگر ساده','بنایی و دیوارچینی','کمک‌آرماتوربند','کمک‌قالب‌بند','گچ و خاک','کمک‌کاشی‌کار','نقاشی','بتن‌ریزی','تخریب و نخاله','حمل مصالح','ایزوگام','نظافت پایان کار']},
    {k:'exp',t:'chips',label:'سابقهٔ کار ساختمانی',opts:EXP,req:1}]},
   {title:'شرایط کار',sub:'این‌ها روی آگهی آمادگی‌ات نشان داده می‌شود.',f:[
-   {k:'wage',t:'num',label:'دستمزد روزانهٔ پیشنهادی',unit:'تومان',ph:'مثلاً ۱٬۸۰۰٬۰۰۰'},
+   {k:'wage',t:'num',label:'دستمزد روزانهٔ پیشنهادی',unit:'تومان',ph:'مثلاً ۱.۸۰۰.۰۰۰'},
    {k:'team',t:'chips',label:'چطور کار می‌کنی؟',opts:['تنها','با یک همکار','با تیم ۳ نفره یا بیشتر'],req:1},
    {k:'tools',t:'toggle',label:'ابزار شخصی دارم'},{k:'stay',t:'toggle',label:'اسکان در کارگاه را قبول می‌کنم'},{k:'ins',t:'toggle',label:'بیمهٔ تأمین اجتماعی دارم'}]},
   {title:'روزهای آزاد',sub:'فقط روزهای سبز برای کارفرما قابل درخواست است.',f:[
@@ -3563,7 +3563,7 @@ const REG={
   PRIV],
  engineer:[BASE,
   {title:'رشته و پایه',sub:'اطلاعات پروانهٔ اشتغال نظام مهندسی.',f:[
-   {k:'field',t:'chips',label:'رشته',opts:['عمران','معماری','تأسیسات مکانیکی','تأسیسات برقی','نقشه‌برداری','شهرسازی','ترافیک'],req:1},
+   {k:'field',t:'multi',max:3,label:'رشته (تا ۳ رشته)',opts:['عمران','معماری','تأسیسات مکانیکی','تأسیسات برقی','نقشه‌برداری','شهرسازی','ترافیک'],req:1},
    {k:'grade',t:'chips',label:'پایهٔ پروانه',opts:['پایه ۳','پایه ۲','پایه ۱','ارشد','هنوز پروانه ندارم'],req:1},
    {k:'nezam',t:'text',label:'شمارهٔ عضویت نظام مهندسی',ph:'مثلاً ۲۳-۱۰-۰۴۵۶',show:d=>d.grade&&d.grade!=='هنوز پروانه ندارم'},
    {k:'nprov',t:'prov',label:'استان سازمان نظام مهندسی',show:d=>d.grade&&d.grade!=='هنوز پروانه ندارم'}]},
@@ -3571,7 +3571,7 @@ const REG={
    {k:'comp',t:'multi',label:'صلاحیت‌ها',opts:['طراحی','نظارت','اجرا','محاسبات'],req:1},
    {k:'services',t:'multi',max:6,label:'خدمات',opts:['نظارت ساختمان','طراحی و نقشه','محاسبات سازه','متره و برآورد','بازدید و کارشناسی','ترک و مقاوم‌سازی','پروانه و پایان‌کار','نقشهٔ ازبیلت','نقشه‌برداری و پیاده‌کردن'],req:1}]},
   {title:'تعرفه و ظرفیت',sub:'کارفرما قبل از درخواست بازدید این‌ها را می‌بیند.',f:[
-   {k:'visit',t:'num',label:'هزینهٔ هر بازدید',unit:'تومان',ph:'مثلاً ۳٬۰۰۰٬۰۰۰'},
+   {k:'visit',t:'num',label:'هزینهٔ هر بازدید',unit:'تومان',ph:'مثلاً ۳.۰۰۰.۰۰۰'},
    {k:'cap',t:'chips',label:'پروژه‌های همزمان نظارت',opts:['۱ تا ۲','۳ تا ۵','بیش از ۵']},
    {k:'days',t:'days',label:'روزهای قابل بازدید',req:1}]},
   {title:'مدارک',sub:'بعد از بررسی، نشان «مهندس دارای پروانه» می‌گیری.',f:[
@@ -3672,7 +3672,7 @@ function fieldHTML(f,d){
   const id='rf_'+f.k,lab=`<label class="label" for="${id}">${f.label}${f.req?'':' <span class="opt">اختیاری</span>'}</label>`;
   if(f.t==='text')return lab+`<input class="field" id="${id}" ${f.dir?`dir="${f.dir}"`:''} ${f.list?'list="citylist"':''} placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="S.reg.d['${f.k}']=this.value;updRegBtn()">${f.hint?`<p class="hint">${f.hint}</p>`:''}`;
   if(f.t==='area')return lab+`<textarea class="field" id="${id}" placeholder="${f.ph||''}" oninput="S.reg.d['${f.k}']=this.value;updRegBtn()">${esc(d[f.k]||'')}</textarea>`;
-  if(f.t==='num')return lab+`<div class="numf"><input class="field" id="${id}" inputmode="numeric" placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="this.value=this.value.replace(/[^0-9۰-۹٬,]/g,'');S.reg.d['${f.k}']=this.value;updRegBtn()"><span>${f.unit||''}</span></div>`;
+  if(f.t==='num')return lab+`<div class="numf"><input class="field" id="${id}" inputmode="numeric" placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="this.value=this.value.replace(/[^0-9۰-۹٬,.]/g,'');S.reg.d['${f.k}']=this.value;updRegBtn()"><span>${f.unit||''}</span></div>`;
   if(f.t==='prov')return lab+`<select class="field" id="${id}" onchange="S.reg.d['${f.k}']=this.value;renderRegStep()"><option value="">انتخاب استان</option>${PROVS.map(p=>`<option ${d[f.k]===p?'selected':''}>${p}</option>`).join('')}</select>`;
   if(f.t==='chips')return `<span class="label">${f.label}${f.req?'':' <span class="opt">اختیاری</span>'}</span><div class="chips">${f.opts.map(o=>`<button class="chip" aria-pressed="${d[f.k]===o}" onclick="S.reg.d['${f.k}']=S.reg.d['${f.k}']==='${o}'&&!${!!f.req}?undefined:'${o}';renderRegStep()">${o}</button>`).join('')}</div>`;
   if(f.t==='multi'){const a=d[f.k]||[];return `<span class="label">${f.label}${f.max?` <span class="opt num">${fa(a.length)} از ${fa(f.max)}</span>`:''}</span><div class="chips">${f.opts.map(o=>`<button class="chip" aria-pressed="${a.includes(o)}" onclick="togMulti('${f.k}','${o}',${f.max||99})">${o}</button>`).join('')}</div>`}
@@ -3887,7 +3887,7 @@ S.pfItems=[{t:'سقف دوم ویلای درگهان',c:'درگهان',k:'villa'
 S.roles=null;
 (function(){const m0=ME;window.ME=function(){const m=m0();m.pf=S.pfItems.map(x=>[x.t,x.c,x.k]);if(S.profile&&S.profile.place)m.place=S.profile.place;if(S.bio)m.bio=S.bio;return m}})();
 const MYADS=[
- {id:'m1',type:'job',who:'me',title:'۲ آرماتوربند برای سقف دوم ویلای درگهان',place:'درگهان',wageType:'تنی',wage:'۹٬۵۰۰٬۰۰۰ تومان',start:'این هفته',range:'استان',aud:['worker','specialist'],need:2,resp:3,posted:'۲ روز پیش',skills:['آرماتوربندی'],desc:'حدود ۳ تن. نقشه آماده است. شروع دوشنبه.',views:148,st:'active',rs:[['reza','از دوشنبه با تیم ۳ نفره می‌آیم.','۹٬۵۰۰٬۰۰۰ هر تن'],['qasemi','تیم دو نفره داریم؛ اگر قالب هم دارید با هم انجام می‌دهیم.','۹٬۰۰۰٬۰۰۰ هر تن'],['amir','آماده‌ایم، پیش‌پرداخت لازم است.','توافقی']]},
+ {id:'m1',type:'job',who:'me',title:'۲ آرماتوربند برای سقف دوم ویلای درگهان',place:'درگهان',wageType:'تنی',wage:'۹.۵۰۰.۰۰۰ تومان',start:'این هفته',range:'استان',aud:['worker','specialist'],need:2,resp:3,posted:'۲ روز پیش',skills:['آرماتوربندی'],desc:'حدود ۳ تن. نقشه آماده است. شروع دوشنبه.',views:148,st:'active',rs:[['reza','از دوشنبه با تیم ۳ نفره می‌آیم.','۹.۵۰۰.۰۰۰ هر تن'],['qasemi','تیم دو نفره داریم؛ اگر قالب هم دارید با هم انجام می‌دهیم.','۹.۰۰۰.۰۰۰ هر تن'],['amir','آماده‌ایم، پیش‌پرداخت لازم است.','توافقی']]},
  {id:'m2',type:'consult',who:'me',title:'پمپ بتن یا جام برای سقف دوم؟',place:'درگهان',wageType:'',wage:'',start:'',range:'استان',aud:['engineer'],resp:2,posted:'هفتهٔ پیش',skills:['نظارت ساختمان'],desc:'حدود ۱۲ متر مکعب بتن سقف دوم. کدام روش برای دسترسی کوچهٔ باریک بهتر است؟',views:61,st:'closed',rs:[['karimi','با کوچهٔ کمتر از ۴ متر، پمپ دکل کوتاه بهتر است؛ جام زمان‌بر است.','—']]}];
 MYADS.forEach(a=>{if(!ADS.find(x=>x.id===a.id))ADS.push(a)});
 
@@ -4069,7 +4069,7 @@ S.pays={};
 function openProjPage(i){S.pi=i;closeSheet();go('pdet')}
 function openProjByTitle(t){const L=S.projs[S.role]||[];const i=L.findIndex(p=>p.t.includes(t)||t.includes(p.t.split(' · ')[0]));if(i>-1)openProjPage(i);else go('proj')}
 function renderPdet(){
-  const p=S.projs[S.role][S.pi],w=P[p.who],key=S.role+':'+S.pi,pays=S.pays[key]||(S.pays[key]=p.stage>=2?[{a:'۱۲۰٬۰۰۰٬۰۰۰',f:'پیش‌پرداخت طبق توافق',d:'۲۸ شهریور'}]:[]);
+  const p=S.projs[S.role][S.pi],w=P[p.who],key=S.role+':'+S.pi,pays=S.pays[key]||(S.pays[key]=p.stage>=2?[{a:'۱۲۰.۰۰۰.۰۰۰',f:'پیش‌پرداخت طبق توافق',d:'۲۸ شهریور'}]:[]);
   const tl=[['پیشنهاد ثبت شد','۲۰ شهریور'],['توافق در چت بلوک','۲۵ شهریور'],['شروع کار','۱ مهر'],['پایان و امتیازدهی','—']];
   $('s-pdet').innerHTML=`${pageBar('پروژه',`<button class="icon-btn" aria-label="چت" onclick="openChatWith('${p.who}')">${I.chat}</button>`)}
   <div class="hcard pd-hero" style="padding:0" id="pdh"><div class="site2">
@@ -4089,14 +4089,14 @@ function renderPdet(){
   document.querySelectorAll('#pdh .floor').forEach((el,k)=>setTimeout(()=>el.classList.add('in'),reduce?0:150+k*140));
 }
 function addPay(key){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">ثبت پرداخت</h3><p class="sub">فقط برای یادداشت خودت و طرف مقابل.</p>
-  <span class="label">مبلغ</span><div class="numf"><input class="field" id="payA" inputmode="numeric" placeholder="مثلاً ۵۰٬۰۰۰٬۰۰۰"><span>تومان</span></div>
+  <span class="label">مبلغ</span><div class="numf"><input class="field" id="payA" inputmode="numeric" placeholder="مثلاً ۵۰.۰۰۰.۰۰۰"><span>تومان</span></div>
   <span class="label">بابت</span><div class="chips">${['پیش‌پرداخت','قسط مرحله','دستمزد هفتگی','تسویهٔ نهایی'].map((x,k)=>`<button class="chip" aria-pressed="${k===1}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
   <button class="cta" onclick="const a=$('payA').value.trim();if(!a){toast('مبلغ را بنویس');return}S.pays['${key}'].unshift({a:a.replace(/\\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]),f:document.querySelector('#sb .chip[aria-pressed=true]').textContent,d:'امروز'});closeSheet();renderPdet();toast('پرداخت در دفترچه ثبت شد')">ثبت</button>`;show()}
 
 /* ---------- پیشنهاد مناقصه ---------- */
 function tenderSheet(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">ارسال پیشنهاد مناقصه</h3><p class="sub">اجرای اسکلت فلزی سولهٔ ۲۴۰۰ متری · شرکت ساحل‌ساز</p>
   <button class="upl" style="width:100%;font-family:inherit" onclick="toast('اسناد مناقصه دانلود شد')"><span class="upl-ic">${QI.doc}</span><span>دریافت اسناد مناقصه (PDF · ۴٫۸ مگابایت)</span></button>
-  <span class="label">مبلغ پیشنهادی</span><div class="numf"><input class="field" inputmode="numeric" placeholder="مثلاً ۸٬۲۰۰٬۰۰۰٬۰۰۰"><span>تومان</span></div>
+  <span class="label">مبلغ پیشنهادی</span><div class="numf"><input class="field" inputmode="numeric" placeholder="مثلاً ۸.۲۰۰.۰۰۰.۰۰۰"><span>تومان</span></div>
   <span class="label">مدت اجرا</span><div class="chips">${['۳ ماه','۴ ماه','۶ ماه'].map((x,k)=>`<button class="chip" aria-pressed="${k===1}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
   <span class="label">ضمانت‌نامهٔ شرکت در مناقصه</span><label class="upl"><span class="upl-ic">${MI.img}</span><span>بارگذاری تصویر ضمانت‌نامه</span><input type="file" hidden onchange="if(this.files[0]){this.parentElement.classList.add('has');this.previousElementSibling.textContent=this.files[0].name}"></label>
   <span class="label">فایل پیشنهاد فنی و مالی</span><label class="upl"><span class="upl-ic">${QI.doc}</span><span>بارگذاری فایل</span><input type="file" hidden onchange="if(this.files[0]){this.parentElement.classList.add('has');this.previousElementSibling.textContent=this.files[0].name}"></label>
@@ -4233,7 +4233,7 @@ function estCalc(){const e=S.est,f=EST.fr[e.fr],tot=e.area*e.fl,con=tot*f.con;
   const cost=tot*EST.q[e.q].p*f.k; /* میلیون تومان */
   return {tot,con:Math.round(con),cem:Math.round(con*7+tot*1.1),reb:+(tot*f.reb/1000).toFixed(1),stl:+(tot*f.stl/1000).toFixed(1),blk:Math.round(tot*27/100)*100,lab:Math.round(tot*f.lab),
     lo:cost*.9,hi:cost*1.12,mon:Math.round(4+e.fl*1.8)}}
-function toman(m){return m>=1000?fa((m/1000).toFixed(1).replace(/\.0$/,''))+' میلیارد':fa(Math.round(m))+' میلیون'}
+function toman(m){return m>=1000?fa((m/1000).toFixed(1).replace(/\.0$/,'').replace('.','٫'))+' میلیارد':fa(Math.round(m))+' میلیون'}
 function estSet(k,v){S.est[k]=v;renderEst(true)}
 function estStep(k,d,min,max){S.est[k]=Math.max(min,Math.min(max,S.est[k]+d));renderEst(true)}
 function renderEst(soft){const e=S.est,r=estCalc();
@@ -4327,7 +4327,7 @@ function renderTeam(soft){const t=S.team,pres=t.filter((m,k)=>S.today[k]==='p').
 function addMember(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">افزودن نیرو به تیم</h3>
   <span class="label">نام</span><input class="field" id="tmN" placeholder="مثلاً رضا امیری">
   <span class="label">تخصص</span><div class="chips">${['بنا','کارگر ساده','آرماتوربند','قالب‌بند','برق‌کار','لوله‌کش'].map((x,k)=>`<button class="chip" aria-pressed="${k===0}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
-  <span class="label">دستمزد روزانه</span><div class="numf"><input class="field" id="tmW" inputmode="numeric" placeholder="۱٬۸۰۰٬۰۰۰"><span>تومان</span></div>
+  <span class="label">دستمزد روزانه</span><div class="numf"><input class="field" id="tmW" inputmode="numeric" placeholder="۱.۸۰۰.۰۰۰"><span>تومان</span></div>
   <button class="ghost" style="width:100%;margin-top:12px" onclick="closeSheet();exploreMode('workers')">یا از کاوش بلوک نیرو پیدا کن</button>
   <button class="cta" onclick="saveMember()">افزودن</button>`;show()}
 function saveMember(){const n=$('tmN').value.trim();if(!n){toast('نام را بنویسید');return}
@@ -4523,14 +4523,14 @@ function renderBoost(){const a=ADS.find(x=>x.id===S.bst.id),b=BOOST.find(x=>x[0]
   <div class="section" style="margin-top:6px"><p class="sub" style="margin:0 0 10px">${esc(a.title)}</p>
   <div class="bst-prev" aria-hidden="true">${others.map((o,k)=>`<div class="bp o" style="--k:${k}"><i></i><span>${esc(o.title)}</span></div>`).join('')}<div class="bp me ${b[0]}" style="--c:${b[4]}"><i></i><span>${esc(a.title)}</span>${b[0]!=='ladder'?`<em>${b[1]}</em>`:''}</div></div>
   <p class="est-note center" style="margin:8px 0 0">پیش‌نمایش جای آگهی تو در فهرست کاوش</p></div>
-  <div class="section"><div class="bplans">${BOOST.map(x=>`<button aria-pressed="${S.bst.pick===x[0]}" onclick="S.bst.pick='${x[0]}';renderBoost()" style="--c:${x[4]}"><span class="dot"></span><div style="flex:1;text-align:right"><b>${x[1]}</b><small>${x[2]}</small></div><b class="num">${fa(x[3].toLocaleString('en').replace(/,/g,'٬'))}<small> تومان</small></b></button>`).join('')}</div></div>
+  <div class="section"><div class="bplans">${BOOST.map(x=>`<button aria-pressed="${S.bst.pick===x[0]}" onclick="S.bst.pick='${x[0]}';renderBoost()" style="--c:${x[4]}"><span class="dot"></span><div style="flex:1;text-align:right"><b>${x[1]}</b><small>${x[2]}</small></div><b class="num">${faNum(x[3])}<small> تومان</small></b></button>`).join('')}</div></div>
   <div class="section"><div class="card bst-stat"><div><b class="num">${fa(b[0]==='star'?'۴×':b[0]==='urgent'?'۲٫۵×':'۱٫۸×')}</b><small>بازدید بیشتر</small></div><div><b class="num">${fa(b[0]==='star'?'۷ روز':b[0]==='urgent'?'۲۴ ساعت':'یک بار')}</b><small>مدت</small></div><div><b class="num">${fa(a.views||0)}</b><small>بازدید تا امروز</small></div></div>
     <button class="cta" style="margin-top:12px" onclick="gate('boost',()=>payBoost())">پرداخت و ارتقا</button>
     <p class="est-note" style="margin-top:10px">ارتقا فقط جای آگهی را بهتر می‌کند؛ رتبهٔ اعتبار تو را تغییر نمی‌دهد. پرداخت از درگاه بانکی.</p></div>`;
 }
 function payBoost(){const a=ADS.find(x=>x.id===S.bst.id),b=BOOST.find(x=>x[0]===S.bst.pick);
   sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">پرداخت</h3><p class="sub">${b[1]} · ${esc(a.title)}</p>
-  <div class="card" style="box-shadow:none;background:var(--bg)"><div class="est-leg"><span>مبلغ</span><b class="num">${fa(b[3].toLocaleString('en').replace(/,/g,'٬'))} تومان</b></div><div class="est-leg"><span>مالیات بر ارزش افزوده</span><b class="num">${fa(Math.round(b[3]*.1).toLocaleString('en').replace(/,/g,'٬'))} تومان</b></div></div>
+  <div class="card" style="box-shadow:none;background:var(--bg)"><div class="est-leg"><span>مبلغ</span><b class="num">${faNum(b[3])} تومان</b></div><div class="est-leg"><span>مالیات بر ارزش افزوده</span><b class="num">${fa(Math.round(b[3]*.1).toLocaleString('en').replace(/,/g,'٬'))} تومان</b></div></div>
   <button class="cta" onclick="ADS.find(x=>x.id==='${a.id}').boost='${b[0]}';closeSheet();toast('آگهی ارتقا یافت: ${b[1]}');go('myads')">رفتن به درگاه (نمایشی)</button>`;show()}
 
 /* ---------- اتصال‌ها ---------- */
@@ -4547,7 +4547,7 @@ function payBoost(){const a=ADS.find(x=>x.id===S.bst.id),b=BOOST.find(x=>x[0]===
 })();
 /* =================== ROUND 12: صورت‌وضعیت · آمار عملکرد · آکادمی بلوک =================== */
 Object.assign(GATE,{sov:'صورت‌وضعیت',stats:'آمار عملکرد',learn:'ثبت دوره‌ها'});
-const tmn=n=>fa(Math.round(n).toLocaleString('en').replace(/,/g,'٬'));
+const tmn=n=>fa(Math.round(n).toLocaleString('en').replace(/,/g,'.'));
 
 /* ---------- ۱) صورت‌وضعیت (متره × فی) ---------- */
 S.sov={};
@@ -7429,7 +7429,7 @@ function resetPrefs(){S.prefs=Object.assign({},PREF_DEF);savePrefs();applyPrefs(
 
 function prefsHTML(){const p=S.prefs,tg=(k,t,s)=>`<div class="switch"><div class="t"><b>${t}</b><span>${s}</span></div><button class="tog" role="switch" aria-checked="${!!p[k]}" aria-label="${t}" onclick="setPref('${k}',${!p[k]})"></button></div>`;
   return `<div class="section"><div class="sec-head"><h3>نمایش و دسترسی‌پذیری</h3></div>
-  <div class="card pf-prev" aria-hidden="true"><small>پیش‌نمایش</small><div class="pp-row">${hexA(P.reza)}<div style="flex:1;min-width:0"><b>۲ آرماتوربند برای سقف دوم</b><span>درگهان · ۹٬۵۰۰٬۰۰۰ تومان هر تن</span></div><button class="mini yes" tabindex="-1">چت</button></div></div>
+  <div class="card pf-prev" aria-hidden="true"><small>پیش‌نمایش</small><div class="pp-row">${hexA(P.reza)}<div style="flex:1;min-width:0"><b>۲ آرماتوربند برای سقف دوم</b><span>درگهان · ۹.۵۰۰.۰۰۰ تومان هر تن</span></div><button class="mini yes" tabindex="-1">چت</button></div></div>
   <div class="card" style="display:grid;gap:14px;margin-top:8px">
     <div><span class="label" style="margin-top:0">اندازهٔ نوشته</span><div class="fs-seg">${Object.entries(FS).map(([k,v],i)=>`<button aria-pressed="${p.fs===k}" onclick="setPref('fs','${k}')" style="--s:${14+i*2.5}px"><b>آ</b><small>${v[0]}</small></button>`).join('')}</div></div>
     <div><span class="label" style="margin-top:0">زبان</span><div class="seg2"><button aria-pressed="${p.lang==='fa'}" onclick="setPref('lang','fa')">فارسی</button><button aria-pressed="${p.lang==='en'}" onclick="setPref('lang','en')">English</button></div>
@@ -7523,7 +7523,7 @@ window.dealForm=function(){peSet(PAY_PLANS.two[1],'two');
   sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">پیشنهاد توافق</h3><p class="sub">وقتی طرف مقابل تأیید کند، پروژه و پیش‌نویس قرارداد با همین اطلاعات ساخته می‌شود.</p>
   <span class="label">کار</span><input class="field" id="dJ" value="آرماتوربندی سقف دوم">
   <span class="label">مقدار</span><input class="field" id="dQ" value="حدود ۳ تن">
-  <span class="label">دستمزد</span><input class="field" id="dP" value="۹٬۲۰۰٬۰۰۰ تومان هر تن">
+  <span class="label">دستمزد</span><input class="field" id="dP" value="۹.۲۰۰.۰۰۰ تومان هر تن">
   <span class="label">شروع</span><div class="chips" id="dS">${[['دوشنبه ۶ مهر',2],['سه‌شنبه ۷ مهر',3],['چهارشنبه ۸ مهر',4]].map((x,k)=>`<button class="chip" data-v="${x[0]}" aria-pressed="${k===0}" onclick="pickOne(this)">${x[0]}</button>`).join('')}</div>
   <span class="label">مدت</span><div class="chips" id="dD">${['۳ روز','۱ هفته','۲ هفته','۱ ماه'].map((x,k)=>`<button class="chip" data-v="${x}" aria-pressed="${k===0}" onclick="pickOne(this)">${x}</button>`).join('')}</div>
   <span class="label">مراحل پرداخت</span><div id="peBox">${peHTML()}</div>
@@ -7912,9 +7912,9 @@ window.renderRegStep=function(){const r=S.reg;if(r&&r.step==='edit'){renderEditA
 
 /* ---------- ۳) پروفایل از روی ثبت‌نام + ME ---------- */
 function demoProfileD(role){const base={fn:'مجید',ln:'یحیایی',nat:'ایرانی',prov:'هرمزگان',city:'قشم',range:'کل استان',days:[0,2,3],pub:true};
-  return Object.assign(base,{worker:{skills:['بنایی و دیوارچینی','بتن‌ریزی'],exp:'۵ تا ۱۰ سال',wage:'۲٬۰۰۰٬۰۰۰',team:'با یک همکار',hours:'تمام روز'},
-    specialist:{skills:['قالب‌بندی','آرماتوربندی'],exp:'۵ تا ۱۰ سال',cert:'دارم',rateType:'متری',rate:'۳۵۰٬۰۰۰',team:'با شاگرد'},
-    engineer:{field:'عمران',grade:'پایه ۱',comp:['نظارت','محاسبات'],services:['نظارت ساختمان','محاسبات سازه'],visit:'۳٬۰۰۰٬۰۰۰',cap:'۳ تا ۵'},
+  return Object.assign(base,{worker:{skills:['بنایی و دیوارچینی','بتن‌ریزی'],exp:'۵ تا ۱۰ سال',wage:'۲.۰۰۰.۰۰۰',team:'با یک همکار',hours:'تمام روز'},
+    specialist:{skills:['قالب‌بندی','آرماتوربندی'],exp:'۵ تا ۱۰ سال',cert:'دارم',rateType:'متری',rate:'۳۵۰.۰۰۰',team:'با شاگرد'},
+    engineer:{field:'عمران',grade:'پایه ۱',comp:['نظارت','محاسبات'],services:['نظارت ساختمان','محاسبات سازه'],visit:'۳.۰۰۰.۰۰۰',cap:'۳ تا ۵'},
     contractor:{kinds:['اسکلت بتنی','سفت‌کاری'],exp:'بیش از ۱۰ سال',contract:['درصدی (امانی)','متری'],max:'۴ تا ۶ طبقه',crew:'۸',bio:'پروژه‌های مسکونی و ویلایی در قشم؛ تیم ثابت آرماتور و قالب دارم.'},
     company:{cname:'ساحل‌سازان هرمز',ctype:'سهامی خاص',nid:'10861234567',rank:'رتبه ۳',areas:['مسکونی','صنعتی و سوله'],staff:'۱۰ تا ۵۰',fn:'مجید یحیایی',pos:'مدیر پروژه'},
     general:{need:'ساخت ویلا یا ساختمان',land:'پروانه گرفته‌ام'}}[role]||{})}
@@ -8294,6 +8294,7 @@ go('home',true);</script>
 <script src="live.js"></script>
 <script src="live-projects.js"></script>
 <script src="live-more.js"></script>
+<script src="work.js"></script>
 <script src="desktop.js"></script>
 
 </body></html>

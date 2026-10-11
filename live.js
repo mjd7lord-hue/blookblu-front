@@ -723,9 +723,11 @@
     else if (m.k === 'phone') body = { kind: 'phone' };
     else if (m.k === 'deal') {
       const d = m.d, plan = (d.plan && d.plan.length ? d.plan : [['پس از پایان کار', 100]]).map((x) => ({ title: String(x[0] || '').trim().padEnd(2, '.'), pct: +toEn(x[1]) }));
-      const amount = +toEn(d.price || '').replace(/\D/g, '') || undefined;
+      // مبلغ کل: از فرم قرارداد (work.js)؛ وگرنه حدس از متن مبلغ (فقط وقتی نرخ واحدی نیست)
+      const guess = +toEn(d.price || '').replace(/\D/g, '') || undefined;
+      const amount = d.amount > 0 ? Math.round(d.amount) : /تن|متر|روز|ساعت/.test(d.price || '') ? undefined : guess;
       path = '/conversations/' + c.id + '/deals';
-      body = { job: d.job, qty: d.qty || null, price: d.price || 'توافقی', amount: /تن|متر|روز|ساعت/.test(d.price || '') ? undefined : amount, start: d.start, durationDays: Math.max(1, faInt(d.dur) || 1), plan, retentionPct: 0 };
+      body = { job: d.job, qty: d.qty || null, price: d.price || 'توافقی', amount, start: d.start, durationDays: Math.min(1000, window.durDays ? durDays(d.dur) : Math.max(1, faInt(d.dur) || 1)), plan, retentionPct: 0, steps: (d.steps || []).slice(0, 30) };
     } else if (m.k === 'day') { path = '/conversations/' + c.id + '/days'; body = { date: m.t, hour: m.h }; }
     else if (m.k === 'voice') {
       // فایل ضبط‌شده (live-more.js ← L._voiceBlob) به‌صورت پیوست
