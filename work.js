@@ -361,9 +361,30 @@
     closeSheet(); S.rs = null; if (S.cur === 'home') renderHome(); toast('آگهی آمادگی حذف شد');
   }
 
-  // آگهی‌های خودم: هر ورود به خانه (بیش از ۵ ثانیه بعد از بار قبل) تازه شود؛ بازرسم‌های پشت‌سرهم نه
-  let rdAt = 0;
-  wrapW('go', function (prev, name, ...a) { if (name === 'home' && Date.now() - rdAt > 5000) rdAt = 0; return prev(name, ...a); });
+  /* ---- دادهٔ خانه یک‌جا (دور ۳۲) ----
+   * پروژه‌ها، آگهی‌های خودم (کلید آماده به کار) و کار فوری با هم و موازی بار می‌شوند و در پایان یک بار بازرسم.
+   * شکست ← دفعهٔ بعد دوباره (قبلاً هر کدام جدا با مهلت ۱۵–۶۰ ثانیه بود و چند رفرش لازم داشت).
+   * هر ورود به خانه، برگشت اپ از پس‌زمینه و عوض شدن نقش ← تازه. */
+  let hsAt = 0, hsBusy = null, hsRole = '', hsSkip = false;
+  window.homeSync = function (force) {
+    if (!live()) return Promise.resolve();
+    if (hsBusy) return hsBusy;
+    if (!force && hsRole === S.role && Date.now() - hsAt < 4000) return Promise.resolve();
+    const role = S.role, jobs = [];
+    // بارگذاری خانه کش صفحه‌های دیگر («پروژه‌ها»، «آگهی‌های من») را «تازه» علامت نزند
+    if (LIVE.loadProjects) jobs.push(LIVE.loadProjects(true).then(() => { LIVE.loaded['projs:' + role] = 0; }));
+    if (READY_ROLES.includes(role) && LIVE.loadMyAds) jobs.push(LIVE.loadMyAds(true).then(() => { LIVE.loaded['myads:' + role] = 0; }));
+    if (typeof window.urgSync === 'function') jobs.push(window.urgSync());
+    hsBusy = Promise.allSettled(jobs).then((rs) => {
+      hsBusy = null;
+      if (rs.every((x) => x.status === 'fulfilled')) { hsAt = Date.now(); hsRole = role; } else hsAt = 0;
+      if (S.cur === 'home' && S.role === role) { hsSkip = true; try { renderHome(); } finally { hsSkip = false; } }
+      if (window.urgAfterSync) window.urgAfterSync();
+    });
+    return hsBusy;
+  };
+  wrapW('go', function (prev, name, ...a) { if (name === 'home' && Date.now() - hsAt > 5000) hsAt = 0; return prev(name, ...a); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S.cur === 'home' && Date.now() - hsAt > 10000) homeSync(true); });
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
     const host = $('s-home');
@@ -371,14 +392,31 @@
     const old = $('rdSec'); if (old) old.remove();
     const html = readyCard();
     if (html) { const hd = host.querySelector(':scope > header'); if (hd) hd.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
-    // آگهی‌های خودم لازم است (کلید از روی آن ساخته می‌شود)
-    if (live() && READY_ROLES.includes(S.role) && LIVE.loadMyAds && !renderHome._rd && Date.now() - rdAt > 15000) {
-      renderHome._rd = 1; rdAt = Date.now();
-      // بارگذاری خانه کش «آگهی‌های من» را نگه ندارد (آگهی تازه‌ثبت‌شده باید در آن صفحه بیاید)
-      const rk = 'myads:' + S.role;
-      LIVE.loadMyAds(true).then(() => { LIVE.loaded[rk] = 0; if (S.cur === 'home') renderHome(); else if (S.cur === 'myads' && typeof renderMyAds === 'function') renderMyAds(); })
-        .catch(() => { LIVE.loaded[rk] = 0; }).finally(() => { renderHome._rd = 0; });
-    }
+    if (!hsSkip && S.auth) homeSync();
+    return r;
+  });
+
+  /* ---- ماندگاری تنظیمات روی همین گوشی: تنظیمات پیام، اعلان و پوستهٔ روشن/تیره ---- */
+  const KEEP = [['blk-mprefs', 'mprefs'], ['blk-nprefs', 'nprefs']];
+  KEEP.forEach(([k, f]) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); if (v && typeof v === 'object') S[f] = Object.assign(S[f] || {}, v); } catch (e) {} });
+  try { const th = localStorage.getItem('blk-theme'); if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th; } catch (e) {}
+  const keepSnap = () => JSON.stringify([S.mprefs, S.nprefs, document.documentElement.dataset.theme || '']);
+  let keepLast = keepSnap();
+  setInterval(() => {
+    const now = keepSnap(); if (now === keepLast) return; keepLast = now;
+    try {
+      KEEP.forEach(([k, f]) => localStorage.setItem(k, JSON.stringify(S[f] || {})));
+      const th = document.documentElement.dataset.theme; if (th) localStorage.setItem('blk-theme', th); else localStorage.removeItem('blk-theme');
+    } catch (e) {}
+  }, 1000);
+  // کلیدهای حریم خصوصی صفحهٔ «من» هم مثل صفحهٔ تنظیمات روی سرور ذخیره شوند
+  wrapW('renderMe', function (prev, ...a) {
+    const r = prev(...a);
+    if (!live()) return r;
+    const save = (data, ok) => api('PATCH', '/me/roles/' + S.role, { data }).then(() => { toast(ok); return LIVE.loadMe && LIVE.loadMe(); }).catch(err);
+    const pub = document.querySelector('#s-me .tog[aria-label="پروفایل عمومی"]'), ph = document.querySelector('#s-me .tog[aria-label="نمایش شمارهٔ تماس"]');
+    if (pub) pub.addEventListener('click', () => save({ pub: S.me.pub }, S.me.pub ? 'پروفایلت در کاوش دیده می‌شود' : 'پروفایلت خصوصی شد'));
+    if (ph) ph.addEventListener('click', () => save({ showPhone: S.me.phone }, S.me.phone ? 'شماره روی کارت نمایش داده می‌شود' : 'شماره پنهان شد'));
     return r;
   });
   // کاوش (حالت نیرو): آگهی آمادگی خودم بالای فهرست — «این تویی»

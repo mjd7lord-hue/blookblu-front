@@ -228,7 +228,7 @@
     return `<div class="section" id="ugIn"><div class="sec-head"><h3>⚡ کار فوری برای تو${L.length > 1 ? ' (' + fa(L.length) + ')' : ''}</h3><span>اولین قبول برنده است</span></div>
       ${L.map((o) => `<button class="ug-mini" onclick="urgOffer('${o.id}')"><span class="t"><b>${esc(o.title)}</b><small>${esc(o.city)}، ${esc(o.startWhen)}، ${esc(o.client.name)}</small></span><em class="num">${moneyM(o.total)}</em></button>`).join('')}</div>`;
   }
-  let lastIn = 0;
+
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
     const host = $('s-home');
@@ -243,23 +243,22 @@
     if (CREW.includes(S.role)) {
       const html = offersHTML();
       if (html) { const at = $('rdSec') || after; if (at) at.insertAdjacentHTML('afterend', html); }
-      if (Date.now() - lastIn > 5000) {
-        lastIn = Date.now();
-        loadInbox().then(() => {
-          if (S.cur !== 'home') return;
-          renderHome();
-          // پیشنهاد تازه‌ای که هنوز ندیده ← خودش باز شود (مثل اسنپ)
-          const fresh = (S.ug.inbox || []).find((x) => !S.ug.seen[x.id]);
-          if (fresh && live() && !document.querySelector('#sheet.on')) urgOffer(fresh.id);
-        }).catch(() => {});
-      }
-    }
-    if (CLIENTS.includes(S.role) && live() && !renderHome._ug) {
-      renderHome._ug = 1;
-      loadMine().then(() => { if (S.cur === 'home') renderHome(); }).catch(() => {}).finally(() => setTimeout(() => { renderHome._ug = 0; }, 30000));
+      // نسخهٔ نمایشی: یک پیشنهاد نمونه
+      if (!live() && !S.ug.demoInbox) { loadInbox().then(() => { if (S.cur === 'home') renderHome(); }); }
     }
     return r;
   });
+  // بارگذاری با «دادهٔ خانه یک‌جا» (homeSync در work.js)
+  window.urgSync = function () {
+    if (!live()) return Promise.resolve();
+    return Promise.all([CLIENTS.includes(S.role) ? loadMine() : null, CREW.includes(S.role) ? loadInbox() : null]);
+  };
+  window.urgAfterSync = function () {
+    // پیشنهاد تازه‌ای که هنوز ندیده ← خودش باز شود (مثل اسنپ)
+    if (S.cur !== 'home' || !CREW.includes(S.role) || !live()) return;
+    const fresh = (S.ug.inbox || []).find((x) => !S.ug.seen[x.id]);
+    if (fresh && !document.querySelector('#sheet.on')) urgOffer(fresh.id);
+  };
   // کاوش (حالت نیرو): میان‌بر نیروی فوری برای کارفرماها
   wrapW('renderExplore', function (prev, ...a) {
     const r = prev(...a);
@@ -276,8 +275,7 @@
     es.addEventListener('urgent', (e) => {
       let d = {}; try { d = JSON.parse(e.data); } catch (x) {}
       if (d.offer && CREW.includes(S.role)) {
-        lastIn = 0;
-        loadInbox().then(() => { if (S.cur === 'home') renderHome(); if (!document.querySelector('#sheet.on')) urgOffer(d.offer); }).catch(() => {});
+
       } else if (d.closed) {
         S.ug.inbox = (S.ug.inbox || []).filter((x) => !d.closed.includes(x.id));
         if (S.cur === 'home') renderHome();
