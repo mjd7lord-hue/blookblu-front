@@ -137,6 +137,146 @@
   .sov-auto .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,transparent);font-size:20px}`;
   document.head.appendChild(css);
 
+  /* ================= بازرسم یک صفحه = اسکرول سر جایش بماند =================
+   * هر انتخاب (تنظیمات، فیلتر، کلید…) کل صفحه را دوباره می‌سازد؛ اگر محتوای تازه لحظه‌ای کوتاه‌تر باشد
+   * (داده هنوز از سرور نیامده) مرورگر اسکرول را بالا می‌برد. فقط رفتن به صفحهٔ دیگر (go) بالا می‌برد. */
+  let navigating = false, lastY = 0, lastH = 0, relT = 0;
+  const onScr = () => document.querySelector('.screen.on');
+  addEventListener('scroll', () => { if (navigating) return; lastY = scrollY; const el = onScr(); if (el) lastH = el.offsetHeight; }, { passive: true });
+  wrapW('go', function (prev, ...a) {
+    navigating = true;
+    try { return prev(...a); } finally { lastY = 0; lastH = 0; setTimeout(() => { navigating = false; }, 0); }
+  });
+  const keep = new MutationObserver((muts) => {
+    const el = onScr();
+    if (navigating || !el || el.id === 's-chat' || !muts.some((m) => m.target === el) || lastY < 4) return;
+    el.classList.add('noanim2');
+    if (lastH && el.offsetHeight < lastH) el.style.minHeight = lastH + 'px';
+    if (Math.abs(scrollY - lastY) > 2) scrollTo(0, lastY);
+    clearTimeout(relT);
+    relT = setTimeout(() => { el.style.minHeight = ''; el.classList.remove('noanim2'); }, 900);
+  });
+  document.querySelectorAll('.screen').forEach((s) => keep.observe(s, { childList: true }));
+
+  /* ================= دکمهٔ تازه‌سازی در پیام‌ها و کاوش ================= */
+  const RF_ICO = '<svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>';
+  const rfCss = document.createElement('style');
+  rfCss.textContent = '.rf-btn.spin svg{animation:rfspin .8s linear infinite}@keyframes rfspin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(rfCss);
+  const MODE_T = { workers: 'work', jobs: 'job', consult: 'consult' };
+  window.refreshNow = async function (btn) {
+    if (btn) btn.classList.add('spin');
+    const scr = S.cur;
+    try {
+      if (live()) {
+        if (scr === 'msg') await LIVE.loadConvs();
+        else if (scr === 'explore') await LIVE.loadAds(MODE_T[S.mode] || 'work', true);
+        if (S.cur === scr) render();
+        toast('به‌روز شد');
+      } else { await new Promise((r) => setTimeout(r, 500)); toast('به‌روز است'); }
+    } catch (e) { err(e); } finally { const b = document.querySelector('.screen.on .rf-btn'); if (b) b.classList.remove('spin'); }
+  };
+  ['renderMsgs', 'renderExplore'].forEach((fn) => wrapW(fn, function (prev, ...a) {
+    const r = prev(...a);
+    const h = document.querySelector(`#s-${fn === 'renderMsgs' ? 'msg' : 'explore'} header.top`);
+    if (h && !h.querySelector('.rf-btn')) {
+      const first = h.querySelector('.icon-btn, .login-btn');
+      const html = `<button class="icon-btn rf-btn" aria-label="تازه‌سازی" title="تازه‌سازی" onclick="refreshNow(this)">${RF_ICO}</button>`;
+      if (first) first.insertAdjacentHTML('beforebegin', html); else h.insertAdjacentHTML('beforeend', html);
+    }
+    return r;
+  }));
+
+  /* ================= «آماده به کار» (مثل روشن کردن راننده در اسنپ) =================
+   * آگهی «آمادهٔ همکاری» یک بار ساخته می‌شود؛ بعد فقط یک کلید روشن/خاموش در خانه.
+   * روشن = در کاوش با نشان سبز «آماده به کار». با قرارداد خودکار خاموش می‌شود (بک‌اند)؛ بعد از پایان کار یک لمس. */
+  const READY_ROLES = ['worker', 'specialist', 'engineer', 'contractor'];
+  const rdCss = document.createElement('style');
+  rdCss.textContent = `
+  .rd-card{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:14px;font-family:inherit;text-align:right;cursor:pointer;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
+  .rd-card.on{background:linear-gradient(135deg,color-mix(in srgb,var(--ok) 22%,var(--surface)),var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 55%,transparent),var(--shadow)}
+  .rd-card .t{flex:1;min-width:0}.rd-card b{display:block;font-size:16px}.rd-card small{display:block;font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:2px}
+  .rd-sw{flex:none;width:64px;height:36px;border-radius:20px;background:var(--line);position:relative;transition:background .25s}
+  .rd-sw i{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:right .25s cubic-bezier(.3,1.4,.5,1)}
+  .rd-card.on .rd-sw{background:var(--ok)}.rd-card.on .rd-sw i{right:32px}
+  .rd-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ok);margin-inline-end:6px;box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 60%,transparent);animation:rdpulse 1.8s infinite}
+  @keyframes rdpulse{70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .type.rd-type{background:color-mix(in srgb,var(--ok) 15%,transparent)!important;color:var(--ok)!important;display:inline-flex;align-items:center}
+  .rd-strip{display:flex;align-items:center;gap:8px;margin:10px 16px 0;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--ok) 10%,var(--surface));font-size:13.5px}
+  .rd-strip b{color:var(--ok)}`;
+  document.head.appendChild(rdCss);
+  const myReady = () => {
+    const L = ADS.filter((a) => a.who === 'me' && a.type === 'work' && (a.st || 'active') !== 'removed');
+    return L.find((a) => (a.st || 'active') === 'active') || L.find((a) => a.st === 'paused') || L.find((a) => a.st === 'closed') || null;
+  };
+  const busyNow = () => (S.projs[S.role] || []).some((p) => p.stage >= 1 && p.stage < 3 && (!p.status || p.status === 'active'));
+  window.readyCard = function () {
+    if (!S.auth || !READY_ROLES.includes(S.role)) return '';
+    const a = myReady(), on = !!a && (a.st || 'active') === 'active';
+    const sub = !a ? 'یک بار آگهی آمادگی بساز؛ بعد فقط این کلید را روشن و خاموش کن.'
+      : on ? 'کارفرماها الان در کاوش تو را با نشان سبز می‌بینند.'
+      : a.st === 'closed' && busyNow() ? 'سر کاری؛ آگهی‌ات بعد از قرارداد خودکار خاموش شد. کار که تمام شد روشنش کن.'
+      : 'خاموشی؛ در کاوش دیده نمی‌شوی. روشنش کن تا کار پیدا کنی.';
+    return `<div class="section" id="rdSec"><button class="rd-card ${on ? 'on' : ''}" role="switch" aria-checked="${on}" onclick="readyToggle()">
+      <span class="t"><b>${on ? '<span class="rd-dot"></span>' : ''}آماده به کار ${on ? '· روشن' : a ? '· خاموش' : ''}</b><small>${esc(sub)}</small></span><span class="rd-sw" aria-hidden="true"><i></i></span></button></div>`;
+  };
+  window.readyToggle = async function () {
+    const a = myReady();
+    if (!a) {
+      const aud = S.role === 'worker' ? ['contractor', 'company', 'general'] : S.role === 'engineer' ? ['general', 'contractor', 'company'] : ['contractor', 'company', 'general'];
+      const sk = (ME().skills || [])[0];
+      postWith('work', sk ? `${sk[0]}، آماده به کار` : 'آماده به کار', aud);
+      toast('آگهی آمادگی را یک بار کامل کن؛ بعد فقط کلید را بزن');
+      return;
+    }
+    const on = (a.st || 'active') === 'active', st = on ? 'paused' : 'active';
+    const old = a.st;
+    ADS.forEach((x) => { if (x.id === a.id) x.st = st; });
+    if (S.cur === 'home') renderHome();
+    if (live() && a._live) {
+      try {
+        await api('PATCH', '/ads/' + a.id, { status: st });
+        LIVE.loaded['ads:work'] = 0;
+      } catch (e) { ADS.forEach((x) => { if (x.id === a.id) x.st = old; }); if (S.cur === 'home') renderHome(); err(e); return; }
+    }
+    toast(on ? 'خاموش شدی؛ در کاوش دیده نمی‌شوی' : 'روشن شدی! کارفرماها الان تو را با نشان سبز می‌بینند');
+    if (!on && S.prefs && S.prefs.haptic && navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
+  };
+  wrapW('renderHome', function (prev, ...a) {
+    const r = prev(...a);
+    const host = $('s-home');
+    if (!host) return r;
+    const old = $('rdSec'); if (old) old.remove();
+    const html = readyCard();
+    if (html) { const hd = host.querySelector(':scope > header'); if (hd) hd.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
+    // آگهی‌های خودم لازم است (کلید از روی آن ساخته می‌شود)
+    if (live() && READY_ROLES.includes(S.role) && LIVE.loadMyAds && !renderHome._rd) {
+      renderHome._rd = 1;
+      // بارگذاری خانه کش «آگهی‌های من» را نگه ندارد (آگهی تازه‌ثبت‌شده باید در آن صفحه بیاید)
+      const rk = 'myads:' + S.role;
+      LIVE.loadMyAds(true).then(() => { LIVE.loaded[rk] = 0; if (S.cur === 'home') renderHome(); else if (S.cur === 'myads' && typeof renderMyAds === 'function') renderMyAds(); })
+        .catch(() => { LIVE.loaded[rk] = 0; }).finally(() => setTimeout(() => { renderHome._rd = 0; }, 60000));
+    }
+    return r;
+  });
+  // کاوش: آگهی آمادگیِ روشن = نشان سبز «آماده به کار» + نوار شمارش
+  wrapW('adCard', function (prev, a, ...rest) {
+    let h = prev(a, ...rest);
+    if (a && a.type === 'work' && (a.st || 'active') === 'active') h = h.replace(/<span class="type"[^>]*>[^<]*<\/span>/, '<span class="type rd-type"><span class="rd-dot"></span>آماده به کار</span>');
+    return h;
+  });
+  wrapW('renderExplore', function (prev, ...a) {
+    const r = prev(...a);
+    const host = $('s-explore');
+    if (!host || S.mode !== 'workers' || host.querySelector('.rd-strip')) return r;
+    const n = ADS.filter((x) => x.type === 'work' && x.who !== 'me' && (x.st || 'active') === 'active').length;
+    if (!n) return r;
+    const html = `<div class="rd-strip" role="status"><span class="rd-dot"></span><span><b class="num">${fa(n)}</b> نیرو همین الان آماده به کار است؛ روی هر کارت «چت» را بزن.</span></div>`;
+    const anchor = host.querySelector('.ex-where') || host.querySelector('header.top');
+    if (anchor) anchor.insertAdjacentHTML('afterend', html);
+    return r;
+  });
+
   /* ================= مدت و فهرست کار ================= */
   const DUR_U = { 'روز': 1, 'هفته': 7, 'ماه': 30, 'سال': 365 };
   window.durDays = (s) => {
@@ -282,7 +422,7 @@
     return `<div class="hp-card" role="button" tabindex="0" onclick="openProjPage(${i})">
       <div class="hp-top"><span class="nt-ic">${QI.helmet}</span><span class="t"><b>${esc(p.t)}</b><small>${w ? esc(w.name) + ' · ' : ''}${esc(stg)}${qty ? ' · ' + esc(qty) : ''}</small></span><span class="tag ${p.stage >= 2 ? 'ok' : 'wait'}">${inf.pct != null ? fa(inf.pct) + '٪' : esc(stg)}</span></div>
       <div class="hp-bar" aria-label="پیشرفت کار ${fa(prog)} درصد"><i style="width:${prog}%"></i></div>
-      <div class="hp-row"><span>پیشرفت کار${inf.steps.length ? ` · ${fa(inf.doneN)} از ${fa(inf.steps.length)}` : ''}</span><b class="num">${fa(prog)}٪</b></div>
+      <div class="hp-row"><span>پیشرفت کار${inf.steps.length ? `: ${fa(inf.doneN)} از ${fa(inf.steps.length)}` : ''}</span><b class="num">${fa(prog)}٪</b></div>
       <div class="hp-kpi">
         <div><b class="num">${inf.total ? moneyM(inf.paid) : '—'}</b><small>دریافت شده${inf.total ? ' از ' + moneyM(inf.total) : ''}</small></div>
         <div class="${inf.left != null && inf.left < 0 ? 'late' : ''}"><b class="num">${leftTxt}</b><small>${leftLbl}</small></div>
@@ -299,7 +439,7 @@
   window.homeProjects = function () {
     const L = activeProjs();
     if (!L.length) return '';
-    return `<div class="section" id="hmProj"><div class="sec-head"><h3>پروژه‌های در جریان${L.length > 1 ? ' · ' + fa(L.length) : ''}</h3><button onclick="go('proj')">همه ‹</button></div>${L.map(([p, i]) => projCard(p, i)).join('')}</div>`;
+    return `<div class="section" id="hmProj"><div class="sec-head"><h3>پروژه‌های در جریان${L.length > 1 ? ' (' + fa(L.length) + ')' : ''}</h3><button onclick="go('proj')">همه ‹</button></div>${L.map(([p, i]) => projCard(p, i)).join('')}</div>`;
   };
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
@@ -324,14 +464,47 @@
     return r;
   });
 
+  // پرداخت را فقط کارفرمای قرارداد ثبت می‌کند؛ مجری دریافت را تأیید می‌کند (هم‌تراز با CLIENT_ONLY در بک‌اند)
+  const isProvider = (p) => (p && p._x ? !p.meClient : !CLIENT_ROLES.includes(S.role));
+  window.isProvider = isProvider;
+  wrapW('addPay', function (prev, k, ...a) {
+    const p = (S.projs[S.role] || [])[+String(k).split(':')[1]];
+    if (p && p._x && isProvider(p)) { toast('پرداخت را کارفرما ثبت می‌کند؛ تو فقط دریافت را تأیید می‌کنی'); return; }
+    return prev(k, ...a);
+  });
+  function payRules(host, p) {
+    if (!p || !p._x || !isProvider(p)) return;
+    const sec = [...host.querySelectorAll('.section')].find((s) => /دفترچهٔ پرداخت/.test((s.querySelector('.sec-head h3') || {}).textContent || ''));
+    const b = sec && sec.querySelector('.sec-head button[onclick^="addPay"]');
+    if (b) b.outerHTML = '<span>کارفرما ثبت می‌کند · تو تأیید می‌کنی</span>';
+  }
+
+  // قرارداد امضاشده ← دکمهٔ بزرگ «رفتن به پروژه» برای هر دو طرف
+  wrapW('renderCtr', function (prev, ...a) {
+    const r = prev(...a);
+    const host = $('s-ctr'), ct = S.ctr && S.ctr[S.role + ':' + S.pi];
+    if (!host || !ct || host.querySelector('.ctr-go')) return r;
+    const active = ct._c ? ct._c.status === 'active' : ct.me && ct.them;
+    if (!active) return r;
+    const p = (S.projs[S.role] || [])[S.pi];
+    const next = !p ? '' : p.stage < 2 ? 'قدم بعد: «شروع کار» را بزنید' : p.stage === 2 ? (isProvider(p) ? 'قدم بعد: هر کاری تمام شد تیکش را بزن' : 'قدم بعد: پرداخت‌ها را ثبت کن و پیشرفت را ببین') : 'پروژه تمام شده';
+    const html = `<div class="section ctr-go"><div class="card" style="display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--ok) 45%,transparent)">
+      <span class="nt-ic" style="color:var(--ok)">✓</span><div style="flex:1"><b style="display:block">قرارداد فعال است</b><span style="font-size:13px;color:var(--muted)">${esc(next)}</span></div>
+      <button class="cta" style="margin:0;width:auto;padding:0 16px;min-height:44px" onclick="openProjPage(${S.pi})">رفتن به پروژه</button></div></div>`;
+    const bar = host.querySelector('.bar, .pagebar, header');
+    if (bar) bar.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html);
+    return r;
+  });
+
   // صفحهٔ پروژه: بخش «پیشرفت کار»
   wrapW('renderPdet', function (prev, ...a) {
     const r = prev(...a);
     const host = $('s-pdet'), p = (S.projs[S.role] || [])[S.pi];
+    if (host && p) payRules(host, p);
     if (!host || !p || host.querySelector('#pgSec')) return r;
     const i = S.pi, inf = projInfo(p);
     if (!inf.steps.length && !inf.canTick) return r;
-    const html = `<div class="section" id="pgSec"><div class="sec-head"><h3>پیشرفت کار</h3><span>${inf.steps.length ? `${fa(inf.doneN)} از ${fa(inf.steps.length)} · ${fa(inf.pct)}٪` : ''}</span></div>
+    const html = `<div class="section" id="pgSec"><div class="sec-head"><h3>پیشرفت کار</h3><span>${inf.steps.length ? `${fa(inf.doneN)} از ${fa(inf.steps.length)}، ${fa(inf.pct)}٪` : ''}</span></div>
       <div class="card" style="padding:4px 16px">${inf.steps.length ? inf.steps.map((s, k) => `<button class="pg-row ${s.done ? 'd' : ''}" ${inf.canTick ? `onclick="pgTick(${i},${k})"` : 'disabled'} aria-pressed="${!!s.done}"><span class="m">${s.done ? '✓' : ''}</span><span class="t">${esc(s.t)}</span><small>${s.done ? shortDate(s.at) : ''}</small></button>`).join('')
         : `<p class="hint" style="margin:12px 0">هنوز فهرست کار ندارد. مثلاً برای ساختمان ۴ واحدی «واحد ۱ تا ۴» بساز؛ هر واحد که تمام شد تیک بزن.</p>`}</div>
       ${inf.canTick ? `<button class="ghost" style="width:100%;margin-top:8px" onclick="pgEdit(${i})">${inf.steps.length ? 'ویرایش فهرست کار' : '+ ساخت فهرست کار'}</button><p class="hint">${inf.steps.length ? 'هر بار کاری تمام شد تیکش را بزن؛ کارفرما در چت و اعلان‌ها می‌بیند.' : ''}</p>` : `<p class="hint">مجری با تمام شدن هر ردیف تیک می‌زند.</p>`}</div>`;
@@ -471,60 +644,257 @@
     toast(`قرارداد ${moneyFa(t)} تومانی برای تأیید فرستاده شد`);
   };
 
-  /* ================= ۵) صورت‌وضعیت آسان ================= */
-  const SG_K = 'blk-sovg';
+  /* ================= ۵) صورت‌وضعیت ساده =================
+   * هر ردیف = «یک کار + مبلغش + چند درصد انجام شده». بدون واحد، مقدار کل و فی.
+   * (در داده: u='درصد'، q=100، p=مبلغ÷۱۰۰، done=درصد — همان قالب سرور؛ ردیف‌های قدیمی واحدی هم نمایش داده می‌شوند)
+   * پرداخت صورت‌وضعیت تأییدشده را کارفرما ثبت می‌کند. */
+  const sovCss = document.createElement('style');
+  sovCss.textContent = `
+  .sv-row{background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:14px;margin-bottom:10px}
+  .sv-h{display:flex;gap:8px;align-items:flex-start}.sv-h b{flex:1;font-size:15px;line-height:1.6}.sv-h small{color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .sv-bar{height:12px;border-radius:7px;background:var(--soft);margin:10px 0 8px;position:relative;overflow:hidden}
+  .sv-bar i{position:absolute;top:0;bottom:0;right:0;border-radius:7px}.sv-bar i.pv{background:var(--concrete-2)}.sv-bar i.nw{background:var(--gold)}
+  .sv-ctl{display:flex;align-items:center;gap:10px}
+  .sv-ctl button{width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-size:24px;font-family:inherit;color:var(--ink);flex:none}
+  .sv-ctl button:disabled{opacity:.35}
+  .sv-ctl .pc{flex:1;text-align:center}.sv-ctl .pc b{display:block;font-size:24px;line-height:1.2}.sv-ctl .pc small{font-size:12px;color:var(--muted)}
+  .sv-now{margin-top:8px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between}.sv-now b{color:var(--gold)}
+  .sv-pay{background:var(--night);color:#fff;border-radius:20px;padding:16px;text-align:center}
+  .sv-pay small{display:block;color:var(--concrete);font-size:13px}.sv-pay b{display:block;font-size:26px;margin:4px 0}
+  .sv-pay span{display:block;color:var(--gold-2);font-size:13px;line-height:1.7}
+  .sv-pay details{margin-top:10px;text-align:right;font-size:13px;color:var(--concrete)}
+  .sv-pay details summary{cursor:pointer;text-align:center}
+  .sv-pay .est-leg{color:var(--concrete)}.sv-pay .est-leg b{font-size:13px;display:inline;margin:0;color:#fff}
+  .sv-pct{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .sv-pct button{min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-family:inherit;font-size:15px;color:var(--ink)}
+  .sv-pct button[aria-pressed=true]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent);font-weight:800}`;
+  document.head.appendChild(sovCss);
+  const SG_K = 'blk-sovg2';
   const sgOpen = () => { try { return localStorage.getItem(SG_K) !== '0'; } catch (e) { return true; } };
   window.sgTog = (el) => { try { localStorage.setItem(SG_K, el.open ? '1' : '0'); } catch (e) {} };
-  const SG_ART = `<svg class="sg-art" viewBox="0 0 240 46" aria-hidden="true"><rect x="0" y="16" width="240" height="14" rx="7" fill="var(--soft)"/><rect x="140" y="16" width="100" height="14" rx="7" fill="var(--concrete-2)"/><rect x="90" y="16" width="56" height="14" fill="var(--gold)"/><text x="190" y="44" text-anchor="middle" font-size="10" fill="var(--muted)">قبلاً</text><text x="118" y="44" text-anchor="middle" font-size="10" fill="var(--muted)">این دوره</text><text x="45" y="44" text-anchor="middle" font-size="10" fill="var(--muted)">مانده</text><text x="118" y="11" text-anchor="middle" font-size="10" fill="var(--gold)">+ و −</text></svg>`;
   function guideHTML() {
-    return `<div class="section"><details class="sov-guide" ${sgOpen() ? 'open' : ''} ontoggle="sgTog(this)"><summary><span class="q">؟</span>صورت‌وضعیت در ۳ قدم<em>راهنما</em></summary>
+    return `<div class="section"><details class="sov-guide" ${sgOpen() ? 'open' : ''} ontoggle="sgTog(this)"><summary><span class="q">؟</span>صورت‌وضعیت چطور کار می‌کند؟<em>راهنما</em></summary>
       <div class="sg-steps">
-        <div class="sg-step"><span class="n">۱</span><span><b>ردیف‌های کار را بساز (فقط یک بار)</b><small>کارهای قرارداد با واحد و قیمت. ساده‌ترین راه: «درصدی» — یک ردیف «کل کار» به مبلغ قرارداد.</small></span></div>
-        <div class="sg-step"><span class="n">۲</span><span><b>بگو تا امروز چقدر انجام شده</b><small>با دکمه‌های + و − جلوی هر ردیف. نوار طلایی = کار همین دوره که پولش را می‌خواهی.</small>${SG_ART}</span></div>
-        <div class="sg-step"><span class="n">۳</span><span><b>«ارسال» را بزن</b><small>کارفرما تأیید یا رد (با دلیل) می‌کند. بعد از تأیید، مبلغ «قابل پرداخت» در دفترچهٔ پرداخت ثبت می‌شود.</small></span></div>
-      </div>
-      <p class="sg-note">کسورات پایین صفحه: «حسن انجام کار» بخشی است که کارفرما تا پایان کار نگه می‌دارد؛ «بیمه» سهم بیمهٔ کارگاه است. درصدها از قرارداد می‌آید.</p></details></div>`;
+        <div class="sg-step"><span class="n">۱</span><span><b>کارها را با مبلغشان بنویس</b><small>مثلاً «سیم‌کشی واحد ۱ — ۲۰۰ میلیون». یا با یک دکمه از قرارداد بساز.</small></span></div>
+        <div class="sg-step"><span class="n">۲</span><span><b>بگو هر کار چند درصد تمام شده</b><small>با دکمه‌های + و −. بخش طلایی نوار = کار همین دوره که پولش را می‌خواهی.</small></span></div>
+        <div class="sg-step"><span class="n">۳</span><span><b>بفرست</b><small>کارفرما تأیید می‌کند و مبلغ را پرداخت و در دفترچه ثبت می‌کند؛ تو دریافت را تأیید می‌کنی.</small></span></div>
+      </div></details></div>`;
   }
+  const sovKey = () => S.role + ':' + S.pi;
+  const sovV = (k) => S.sov[k] || (typeof sovOf === 'function' ? sovOf(k) : null);
+  const isPct = (r) => r.u === 'درصد' && +r.q === 100;
+  const rowAmt = (r) => Math.round(r.q * r.p);
   function sovAutoHTML(i) {
     const p = (S.projs[S.role] || [])[i], inf = projInfo(p);
-    return `<div class="section" id="sovAuto"><div class="sec-head"><h3>شروع سریع</h3><span>ردیف‌ها از قرارداد ساخته می‌شود</span></div><div class="sov-auto">
-      <button onclick="sovAuto('pct')"><span class="ic">٪</span><span><b>درصدی (ساده‌ترین)</b><small>یک ردیف «کل کار»${inf.total ? ' به مبلغ ' + moneyFa(inf.total) + ' تومان' : ''}؛ فقط بگو چند درصد تمام شده.</small></span></button>
-      ${inf.steps.length ? `<button onclick="sovAuto('steps')"><span class="ic">✓</span><span><b>از فهرست کار (${fa(inf.steps.length)} ردیف)</b><small>${esc(inf.steps.slice(0, 4).map((s) => s.t).join('، '))}${inf.steps.length > 4 ? '…' : ''} — ردیف‌های تیک‌خورده انجام‌شده حساب می‌شوند.</small></span></button>` : ''}
+    return `<div class="section" id="sovAuto"><div class="sec-head"><h3>شروع با یک لمس</h3><span>از قرارداد</span></div><div class="sov-auto">
+      <button onclick="sovAuto('pct')"><span class="ic">٪</span><span><b>یک ردیف: کل کار</b><small>${inf.total ? 'به مبلغ ' + moneyFa(inf.total) + ' تومان؛ ' : ''}فقط بگو چند درصد تمام شده.</small></span></button>
+      ${inf.steps.length ? `<button onclick="sovAuto('steps')"><span class="ic">✓</span><span><b>از فهرست کار (${fa(inf.steps.length)} ردیف)</b><small>${esc(inf.steps.slice(0, 4).map((s) => s.t).join('، '))}${inf.steps.length > 4 ? '…' : ''}</small></span></button>` : ''}
     </div></div>`;
   }
   window.sovAuto = function (mode) {
-    const i = S.pi, p = (S.projs[S.role] || [])[i], inf = projInfo(p);
-    const k = S.role + ':' + i, v = S.sov[k] || (typeof sovOf === 'function' ? sovOf(k) : null);
+    const i = S.pi, p = (S.projs[S.role] || [])[i], inf = projInfo(p), v = sovV(sovKey());
     if (!v) return;
-    let total = inf.total;
-    if (!total) { toast('مبلغ کل قرارداد ثبت نشده؛ ردیف را دستی اضافه کن'); return; }
-    if (mode === 'pct') v.items.push({ n: 'کل کار طبق قرارداد: ' + p.t.slice(0, 60), u: 'درصد', q: 100, done: inf.pct || 0, prev: 0, p: Math.round(total / 100) });
-    else {
-      const each = Math.round(total / inf.steps.length);
-      inf.steps.forEach((s) => v.items.push({ n: s.t, u: 'مرحله', q: 1, done: s.done ? 1 : 0, prev: 0, p: each }));
-    }
+    if (!inf.total) { toast('مبلغ کل قرارداد ثبت نشده؛ کار را با «+ افزودن کار» اضافه کن'); return; }
+    if (mode === 'pct') v.items.push({ n: 'کل کار: ' + p.t.slice(0, 80), u: 'درصد', q: 100, done: inf.pct || 0, prev: 0, p: Math.round(inf.total / 100) });
+    else { const each = inf.total / inf.steps.length; inf.steps.forEach((s) => v.items.push({ n: s.t, u: 'درصد', q: 100, done: s.done ? 100 : 0, prev: 0, p: Math.round(each / 100) })); }
     renderSov(true);
-    toast('ردیف‌ها ساخته شد؛ با + و − مقدار انجام‌شده را درست کن و بفرست');
+    toast('آماده شد؛ درصدها را درست کن و بفرست');
+  };
+  window.sovAddSimple = function () {
+    let pct = 0;
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">افزودن کار</h3><p class="sub">فقط اسم کار، مبلغش و اینکه چقدرش تمام شده.</p>
+      <span class="label" style="margin-top:0">چه کاری؟</span><input class="field" id="svN" placeholder="مثلاً سیم‌کشی واحد ۱">
+      <span class="label">مبلغ این کار (تومان)</span><div class="numf"><input class="field" id="svA" data-money="1" inputmode="numeric" placeholder="مثلاً ۲۰۰.۰۰۰.۰۰۰"><span>تومان</span></div>
+      <span class="label">تا امروز چند درصد تمام شده؟</span><div class="sv-pct" id="svP">${[0, 25, 50, 75, 100].map((x) => `<button aria-pressed="${x === 0}" data-v="${x}">${fa(x)}٪</button>`).join('')}</div>
+      <button class="cta" id="svGo">افزودن</button>`;
+    show();
+    $('svP').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; pct = +b.dataset.v; $('svP').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); };
+    $('svGo').onclick = () => {
+      const n = $('svN').value.trim(), amt = +digits($('svA').value);
+      if (n.length < 2) { toast('اسم کار را بنویس'); return; }
+      if (!(amt >= 100)) { toast('مبلغ این کار را بنویس'); return; }
+      sovV(sovKey()).items.push({ n: n.slice(0, 120), u: 'درصد', q: 100, done: pct, prev: 0, p: Math.round(amt / 100) });
+      closeSheet(); renderSov(true);
+    };
   };
   wrapW('sovQ', function (prev, key, k, d) {
-    const v = S.sov[key] || (typeof sovOf === 'function' ? sovOf(key) : null), r = v && v.items[k];
-    if (r && (r.u === 'درصد' || r.u === 'مرحله')) { const step = r.u === 'درصد' ? 5 : 1; r.done = Math.max(r.prev, Math.min(r.q, r.done + d * step)); renderSov(true); return; }
+    const v = sovV(key), r = v && v.items[k];
+    if (r && isPct(r)) { r.done = Math.max(r.prev, Math.min(100, r.done + d * 10)); renderSov(true); return; }
+    if (r && r.u === 'مرحله') { r.done = Math.max(r.prev, Math.min(r.q, r.done + d)); renderSov(true); return; }
     return prev(key, k, d);
   });
+  function rowHTML(key, r, k, edit) {
+    const pct = isPct(r);
+    const doneP = pct ? r.done : Math.round((r.done / r.q) * 100), prevP = pct ? r.prev : Math.round((r.prev / r.q) * 100);
+    const now = Math.round((r.done - r.prev) * r.p);
+    return `<div class="sv-row"><div class="sv-h"><b>${esc(r.n)}</b><small class="num">${pct ? moneyFa(rowAmt(r)) + ' تومان' : `${fa(r.q)} ${esc(r.u)} × ${moneyFa(r.p)}`}</small></div>
+      <div class="sv-bar" aria-hidden="true"><i class="pv" style="width:${prevP}%"></i><i class="nw" style="right:${prevP}%;width:${Math.max(0, doneP - prevP)}%"></i></div>
+      <div class="sv-ctl">${edit ? `<button onclick="sovQ('${key}',${k},-1)" aria-label="کمتر" ${r.done <= r.prev ? 'disabled' : ''}>−</button>` : ''}
+        <div class="pc"><b class="num">${pct ? fa(r.done) + '٪' : fa(r.done) + ' ' + esc(r.u)}</b><small>${pct ? 'انجام شده' : 'از ' + fa(r.q) + ' ' + esc(r.u)}${r.prev ? ' · قبلاً ' + (pct ? fa(r.prev) + '٪' : fa(r.prev)) : ''}</small></div>
+        ${edit ? `<button onclick="sovQ('${key}',${k},1)" aria-label="بیشتر" ${r.done >= r.q ? 'disabled' : ''}>+</button>` : ''}</div>
+      ${now > 0 ? `<div class="sv-now"><span>این دوره</span><b class="num">+${moneyFa(now)} تومان</b></div>` : ''}</div>`;
+  }
   wrapW('renderSov', function (prev, ...a) {
     const r = prev(...a);
-    const host = $('s-sov');
-    if (!host || host.querySelector('.sov-guide')) return r;
-    const hero = host.querySelector('.sov-hero');
-    if (hero) hero.insertAdjacentHTML('afterend', guideHTML()); else host.insertAdjacentHTML('afterbegin', guideHTML());
-    const p = (S.projs[S.role] || [])[S.pi], v = S.sov[S.role + ':' + S.pi];
-    const provider = p && (p._x ? !p.meClient : true);
-    if (v && v.st === 'draft' && provider && !v.items.length) {
-      const g = host.querySelector('.sov-guide').closest('.section');
-      g.insertAdjacentHTML('afterend', sovAutoHTML(S.pi));
+    const host = $('s-sov'), key = sovKey(), v = sovV(key), p = (S.projs[S.role] || [])[S.pi];
+    if (!host || !v || !p) return r;
+    const provider = isProvider(p), edit = provider && v.st === 'draft';
+    const secs = [...host.querySelectorAll(':scope > .section')];
+    const rowsSec = secs.find((s) => s.querySelector('.sov-row') || /ردیف‌های کار/.test(s.textContent));
+    const sumCard = secs.map((s) => s.querySelector('.card')).find((c) => c && /خلاصهٔ مالی/.test(c.textContent));
+    // ۱) ردیف‌ها
+    if (rowsSec) {
+      rowsSec.innerHTML = `<div class="sec-head"><h3>کارها</h3><span>${edit ? 'با + و − بگو چند درصد تمام شده' : ''}</span></div>
+        ${v.items.length ? v.items.map((x, k) => rowHTML(key, x, k, edit)).join('') : `<div class="empty">${edit ? 'هنوز کاری اضافه نشده.' : 'مجری هنوز کاری ثبت نکرده.'}</div>`}
+        ${edit ? `<button class="ghost" style="width:100%" id="sovAdd2">+ افزودن کار</button>` : ''}`;
+      const b = $('sovAdd2'); if (b) b.onclick = sovAddSimple;
     }
-    // واژه‌های ساده‌تر
-    host.querySelectorAll('.sec-head span').forEach((s) => { if (s.textContent.trim() === 'مقدار انجام‌شده را اصلاح کن') s.textContent = 'با + و − بگو تا امروز چقدر انجام شده'; });
+    const oldAdd = $('sovAdd'); if (oldAdd) oldAdd.remove();
+    // ۲) خلاصهٔ مالی: فقط «قابل پرداخت» بزرگ؛ کسورات در جزئیات
+    if (sumCard) {
+      const legs = [...sumCard.querySelectorAll('.est-leg')];
+      const net = legs.find((l) => l.classList.contains('sov-net'));
+      const netB = net ? net.querySelector('b').textContent : '';
+      const n = +digits(netB);
+      sumCard.outerHTML = `<div class="sv-pay"><small>قابل پرداخت این صورت‌وضعیت</small><b class="num">${esc(netB)}</b><span>${n > 0 ? numWords(n) + ' تومان' : 'هنوز کاری برای این دوره ثبت نشده'}</span>
+        <details><summary>جزئیات و کسورات</summary>${legs.filter((l) => l !== net).map((l) => l.outerHTML).join('')}<p style="margin:6px 0 0;line-height:1.8">«حسن انجام کار» بخشی است که کارفرما تا پایان کار نگه می‌دارد؛ «بیمه» سهم بیمهٔ کارگاه است.</p></details></div>`;
+    }
+    host.querySelectorAll('.sr-leg').forEach((x) => x.remove());
+    // ۳) راهنما و شروع سریع
+    if (!host.querySelector('.sov-guide')) {
+      const hero = host.querySelector('.sov-hero');
+      if (hero) hero.insertAdjacentHTML('afterend', guideHTML()); else host.insertAdjacentHTML('afterbegin', guideHTML());
+    }
+    if (edit && !v.items.length && !host.querySelector('#sovAuto')) host.querySelector('.sov-guide').closest('.section').insertAdjacentHTML('afterend', sovAutoHTML(S.pi));
+    // ۴) دکمه‌ها: پرداخت صورت‌وضعیت تأییدشده فقط با کارفرما
+    const acts = [...host.querySelectorAll(':scope > .section')].pop();
+    if (acts) {
+      acts.querySelectorAll('.est-note').forEach((x) => x.remove());
+      if (v.st === 'ok') {
+        const c = acts.querySelector('.cta');
+        if (c && provider) c.outerHTML = '<p class="hint center">تأیید شد ✓ کارفرما پرداخت را ثبت می‌کند؛ بعد در «دفترچهٔ پرداخت» دریافت را تأیید کن.</p>';
+        else if (c) c.textContent = 'پرداخت کردم؛ ثبت در دفترچهٔ پرداخت';
+      }
+      if (edit) { const c = acts.querySelector('.cta'); if (c && /ارسال/.test(c.textContent)) c.disabled = !v.items.some((x) => x.done > x.prev); }
+    }
+    return r;
+  });
+
+  /* ================= خانه: پروژهٔ فعال در کارت اصلی بالای صفحه، با انیمیشن همان نوع کار =================
+   * ساختمان (طبقه‌ها بالا می‌روند) · برق (سیم و لامپ) · لوله‌کشی (آب در لوله) · کاشی · نقشه (خط‌کشی) · بازسازی (غلتک رنگ) · روزانه (تقویم) */
+  const heroCss = document.createElement('style');
+  heroCss.textContent = `
+  .ph-hero{position:relative;overflow:hidden}
+  .ph-hero .ph-top{display:flex;gap:12px;align-items:flex-start;position:relative}
+  .ph-hero .ph-t{flex:1;min-width:0}.ph-hero small{color:var(--concrete);font-size:12.5px}
+  .ph-hero h2{font-size:19px;line-height:1.5;margin:2px 0}
+  .ph-hero .ph-who{font-size:13px;color:var(--concrete)}
+  .ph-art{flex:none;width:132px;height:112px}
+  .ph-hero .hp-steps{position:relative}.ph-hero .hp-steps span{border-color:rgba(255,255,255,.18);color:#E5E7EB}
+  .ph-hero .hp-steps span.d{background:rgba(47,179,122,.22);border-color:rgba(47,179,122,.6);color:#8FE3B8}
+  .ph-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;position:relative}
+  .ph-kpi div{background:rgba(255,255,255,.07);border-radius:12px;padding:8px 6px;text-align:center}
+  .ph-kpi b{display:block;font-size:15px;color:#fff}.ph-kpi small{display:block;font-size:11.5px}
+  .ph-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden;position:relative}
+  .ph-bar i{position:absolute;top:0;bottom:0;right:0;border-radius:5px;background:var(--gold);width:0;transition:width 1.2s cubic-bezier(.3,1,.4,1)}
+  .ph-row{display:flex;align-items:center;gap:8px;margin-top:12px;position:relative}
+  .ph-row .go{margin-inline-start:auto;border:0;border-radius:12px;background:var(--gold);color:#1a1205;font:800 14px inherit;font-family:inherit;min-height:42px;padding:0 14px}
+  .ph-nav{display:flex;gap:6px;align-items:center}
+  .ph-nav button{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:none;color:#fff;font-size:16px}
+  .ph-nav span{font-size:12px;color:var(--concrete)}
+  @keyframes phRise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes phSwing{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+  @keyframes phBlink{50%{opacity:.35}}
+  @keyframes phDraw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:var(--to)}}
+  @keyframes phFlow{to{stroke-dashoffset:-24}}
+  @keyframes phGlow{50%{filter:drop-shadow(0 0 6px #FFD54A)}}
+  @keyframes phPop{from{transform:scale(0)}to{transform:scale(1)}}
+  @keyframes phRoll{0%,100%{transform:translateX(0)}50%{transform:translateX(var(--rx))}}
+  .ph-art .rise{animation:phRise .6s both}
+  .ph-art .swing{transform-box:fill-box;transform-origin:50% 0;animation:phSwing 3.2s ease-in-out infinite}
+  .ph-art .blink{animation:phBlink 1.2s infinite}
+  .ph-art .draw{stroke-dasharray:var(--len);animation:phDraw 1.6s .2s both cubic-bezier(.4,0,.2,1)}
+  .ph-art .flow{stroke-dasharray:6 6;animation:phFlow .9s linear infinite}
+  .ph-art .glow{animation:phGlow 1.6s infinite}
+  .ph-art .pop{transform-box:fill-box;transform-origin:center;animation:phPop .35s both}
+  .ph-art .roll{animation:phRoll 2.6s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.ph-art *{animation:none!important}}`;
+  document.head.appendChild(heroCss);
+  const ART_KIND = { elec: 'elec', plumb: 'plumb', tile: 'tile', arch: 'plan', struct: 'plan', reno: 'paint', build: 'build', sup: 'build', units: 'build', days: 'days', none: 'build' };
+  function artKind(p, inf) {
+    // نوع کار از عنوان (حتی وقتی «۴ واحدی» دارد: سیم‌کشی ← برق)
+    const g = guessTpl(String(p.t || '').replace(/[0-9۰-۹]+\s*(واحد|طبقه)/g, ''), '');
+    if (g.k !== 'none' && g.k !== 'units') return ART_KIND[g.k];
+    if (inf.steps[0] && /^روز /.test(inf.steps[0].t)) return 'days';
+    return 'build';
+  }
+  // ساختمان: n طبقه، d تا تمام؛ برای برق سیم و لامپ، برای لوله‌کشی لوله و آب
+  function artBuilding(n, d, mode) {
+    n = Math.max(2, Math.min(8, n)); const H = 84 / n, x0 = 34, w = 64;
+    let s = `<rect x="16" y="104" width="108" height="4" rx="2" fill="#5B6573"/>`;
+    for (let i = 0; i < n; i++) {
+      const y = 104 - (i + 1) * H, done = i < d, cur = i === d;
+      s += `<g class="rise" style="animation-delay:${i * 0.12}s"><rect x="${x0}" y="${y + 1}" width="${w}" height="${H - 2}" rx="2" fill="${done ? (mode === 'build' ? '#F2B53A' : '#3D4A5A') : 'none'}" stroke="${done || cur ? '#C9D1DC' : '#4A5563'}" stroke-dasharray="${done ? 0 : 3}"/>`;
+      if (mode === 'build') for (let j = 0; j < 3; j++) s += `<rect x="${x0 + 8 + j * 19}" y="${y + H / 2 - 3}" width="10" height="6" rx="1" fill="${done ? '#1F2933' : '#2B3440'}"/>`;
+      if (mode === 'elec') s += `<circle cx="${x0 + w - 10}" cy="${y + H / 2}" r="${Math.min(5, H / 3)}" fill="${done ? '#FFD54A' : '#4A5563'}" class="${done ? 'glow' : ''}"/>`;
+      if (mode === 'plumb') s += `<path d="M${x0 + 10} ${y + H / 2}H${x0 + w - 6}" stroke="${done ? '#5EA8FF' : '#4A5563'}" stroke-width="3" class="${done ? 'flow' : ''}"/>`;
+      if (cur) s += `<rect x="${x0}" y="${y + 1}" width="${w}" height="${H - 2}" rx="2" fill="#F97316" opacity=".25" class="blink"/>`;
+      s += '</g>';
+    }
+    if (mode === 'elec') { const len = n * H + 20, to = len - (d / n) * len; s += `<path d="M24 104V${104 - n * H}H${x0 + w - 10}" fill="none" stroke="#FFD54A" stroke-width="2.5" class="draw" style="--len:${len + 70};--to:${to + 70 * (1 - d / n)}"/>`; }
+    if (mode === 'plumb') s += `<path d="M${x0 + 10} 104V${104 - n * H + H / 2}" stroke="#5EA8FF" stroke-width="4" class="flow"/>`;
+    if (mode === 'build') { const top = 104 - Math.max(d, 1) * H; s += `<path d="M110 104V8M110 12H62" stroke="#F97316" stroke-width="3" fill="none"/><g class="swing" style="transform-origin:96px 12px"><path d="M96 12V${Math.max(20, top - 10)}" stroke="#C9D1DC" stroke-width="1.5"/><rect x="90" y="${Math.max(20, top - 10)}" width="12" height="8" rx="1.5" fill="#F2B53A"/></g>`; }
+    return s;
+  }
+  function artTile(pct) { let s = ''; const N = 24, d = Math.round((pct / 100) * N); for (let i = 0; i < N; i++) { const x = 18 + (i % 6) * 17, y = 14 + Math.floor(i / 6) * 22; s += `<rect x="${x}" y="${y}" width="15" height="20" rx="2" fill="${i < d ? (i % 2 ? '#E9D8B4' : '#F2B53A') : 'none'}" stroke="#4A5563" class="${i < d ? 'pop' : ''}" style="animation-delay:${i * 0.04}s"/>`; } return s; }
+  function artPlan(pct) {
+    let s = '<rect x="10" y="8" width="120" height="96" rx="6" fill="#123B63"/>';
+    for (let i = 1; i < 6; i++) s += `<path d="M10 ${8 + i * 16}H130M${10 + i * 20} 8V104" stroke="#2A5A86" stroke-width=".6"/>`;
+    const len = 420, to = len - (pct / 100) * len;
+    s += `<path d="M26 92V24H86V58H114V92ZM26 58H86M58 24V58" fill="none" stroke="#E6F1FF" stroke-width="2.2" class="draw" style="--len:${len};--to:${to}"/>`;
+    return s + `<path d="M108 100l14-14 4 4-14 14z" fill="#F2B53A" class="swing"/>`;
+  }
+  function artPaint(pct) { const W = 104 * pct / 100; return `<rect x="18" y="14" width="104" height="80" rx="4" fill="#3D4A5A"/><rect x="18" y="14" width="${W}" height="80" rx="4" fill="#5EC2B7" class="rise"/><g class="roll" style="--rx:${-Math.max(10, W - 10)}px"><rect x="${Math.max(18, 18 + W - 14)}" y="${50}" width="22" height="12" rx="4" fill="#F2B53A"/><path d="M${Math.max(18, 18 + W - 14) + 11} 62v30" stroke="#C9D1DC" stroke-width="3"/></g>`; }
+  function artDays(steps) { const L = steps.slice(0, 14); let s = ''; L.forEach((x, i) => { const cx = 22 + (i % 7) * 16, cy = 30 + Math.floor(i / 7) * 34; s += `<rect x="${cx - 7}" y="${cy - 10}" width="14" height="22" rx="3" fill="${x.done ? '#2FB37A' : 'none'}" stroke="#4A5563" class="${x.done ? 'pop' : ''}" style="animation-delay:${i * 0.05}s"/>${x.done ? `<path d="M${cx - 3} ${cy + 1}l2 3 5-6" stroke="#fff" stroke-width="2" fill="none"/>` : ''}`; }); return `<rect x="10" y="8" width="120" height="8" rx="3" fill="#F97316"/>` + s; }
+  window.projArt = function (p) {
+    const inf = projInfo(p), k = artKind(p, inf), pct = inf.pct != null ? inf.pct : p.stage >= 2 ? 30 : 0;
+    const n = inf.steps.length && /^واحد /.test(inf.steps[0].t) ? inf.steps.length : 5;
+    const d = inf.steps.length && n === inf.steps.length ? inf.doneN : Math.round((pct / 100) * n);
+    const body = k === 'tile' ? artTile(pct) : k === 'plan' ? artPlan(pct) : k === 'paint' ? artPaint(pct) : k === 'days' && inf.steps.length ? artDays(inf.steps) : artBuilding(n, d, k === 'elec' ? 'elec' : k === 'plumb' ? 'plumb' : 'build');
+    return `<svg class="ph-art" viewBox="0 0 140 112" aria-hidden="true">${body}</svg>`;
+  };
+  S.hpi = S.hpi || 0;
+  window.heroNav = (d, ev) => { if (ev) ev.stopPropagation(); S.hpi += d; renderHome(); };
+  function heroHTML(L) {
+    const at = ((S.hpi % L.length) + L.length) % L.length, [p, i] = L[at], w = p.who && person(p.who), inf = projInfo(p);
+    const prog = inf.pct != null ? inf.pct : p.stage >= 2 ? 50 : 0;
+    const left = !inf.started ? `${fa(inf.durD)} روز` : inf.left == null ? '—' : `${fa(Math.abs(inf.left))} روز`;
+    const next = p.stage < 2 ? 'شروع کار را بزنید' : inf.steps.length ? (inf.steps.find((s) => !s.done) ? 'بعدی: ' + inf.steps.find((s) => !s.done).t : 'همهٔ کارها تیک خورد') : 'در حال اجرا';
+    return `<div class="hcard ph-hero" id="phHero" role="button" tabindex="0" onclick="openProjPage(${i})"><div class="stars"></div>
+      <div class="ph-top"><div class="ph-t"><small>${L.length > 1 ? `پروژهٔ ${fa(at + 1)} از ${fa(L.length)} در جریان` : 'پروژهٔ در جریان'}</small><h2>${esc(p.t)}</h2><div class="ph-who">${w ? esc(w.name) + ' · ' : ''}${esc(next)}</div></div>${projArt(p)}</div>
+      <div class="ph-bar" aria-label="پیشرفت ${fa(prog)} درصد"><i data-w="${prog}"></i></div>
+      ${inf.steps.length ? stepsHTML(i, inf, 8) : ''}
+      <div class="ph-kpi"><div><b class="num">${fa(prog)}٪</b><small>پیشرفت</small></div><div><b class="num">${inf.total ? moneyM(inf.paid) : '—'}</b><small>دریافت${inf.total ? ' از ' + moneyM(inf.total) : ''}</small></div><div><b class="num" style="${inf.left != null && inf.left < 0 ? 'color:#FF8A80' : ''}">${left}</b><small>${!inf.started ? 'مدت قرارداد' : inf.left != null && inf.left < 0 ? 'تأخیر' : 'مانده'}</small></div></div>
+      <div class="ph-row">${L.length > 1 ? `<div class="ph-nav"><button onclick="heroNav(-1,event)" aria-label="پروژهٔ قبلی">›</button><button onclick="heroNav(1,event)" aria-label="پروژهٔ بعدی">‹</button></div>` : ''}<button class="go" onclick="event.stopPropagation();openProjPage(${i})">ادامهٔ کار ‹</button></div></div>`;
+  }
+  wrapW('renderHome', function (prev, ...a) {
+    const r = prev(...a);
+    const host = $('s-home');
+    if (!S.auth || !host) return r;
+    const L = (S.projs[S.role] || []).map((p, i) => [p, i]).filter(([p]) => p.stage >= 1 && p.stage < 3 && (!p.status || p.status === 'active'));
+    const old = $('phHero'); if (old) old.remove();
+    if (!L.length) return r;
+    const hero = host.querySelector(':scope > .hcard');
+    const html = heroHTML(L);
+    // کارت اصلی‌ای که خودش «پروژه/کارگاه/شیفت» نمونه بود جایش را به پروژهٔ واقعی می‌دهد؛ بقیه (آمار تقاضا، رشته) پایین‌تر می‌مانند
+    if (hero && (hero.id === 'csite' || /^\s*(شیفت امروز|پروژهٔ من)/.test(hero.textContent))) hero.outerHTML = html;
+    else if (hero) hero.insertAdjacentHTML('beforebegin', html);
+    else { const anchor = $('rdSec') || host.querySelector(':scope > header'); if (anchor) anchor.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
+    // کارت همین پروژه در فهرست پایین تکرار نشود
+    const at = ((S.hpi % L.length) + L.length) % L.length, cur = L[at][1];
+    const list = $('hmProj');
+    if (list) { list.querySelectorAll('.hp-card').forEach((c) => { if ((c.getAttribute('onclick') || '') === `openProjPage(${cur})`) c.remove(); }); if (!list.querySelector('.hp-card')) list.remove(); else { const h = list.querySelector('.sec-head h3'); if (h) h.textContent = 'پروژه‌های دیگر'; } }
+    requestAnimationFrame(() => requestAnimationFrame(() => { const b = document.querySelector('#phHero .ph-bar i'); if (b) b.style.width = b.dataset.w + '%'; }));
     return r;
   });
 

@@ -73,6 +73,7 @@
     for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].who === 'me') ADS.splice(i, 1);
     d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: myAuthor() })), { who: 'me', st: x.status, views: x.views })));
   }
+  L.loadMyAds = loadMyAds;
   wrap('renderMyAds', function (prev) {
     if (!on()) return prev();
     prev();

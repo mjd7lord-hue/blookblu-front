@@ -2554,7 +2554,7 @@ const ME_ROLE={
 };
 function ME(){
   const [title,skills]=ME_ROLE[S.role], gOk=S.me.guar.filter(g=>g[2]==='ok').length;
-  return {me:true,role:S.role,name:(S.profile&&S.profile.name)||'مجید یحیایی',ini:'م.ی',title,place:'قشم',rating:4.8,done:31,revN:18,verified:true,age:'۳۶ سال',born:'قشم',exp:'۱۲ سال',phone:S.me.phone?'۰۹۱۷ ۳۰۰ ۴۵۱۲':null,code:'B-7K31',since:'آذر ۱۴۰۳',resp:'معمولاً ظرف ۲ ساعت پاسخ می‌دهد',
+  return {me:true,role:S.role,name:(S.profile&&S.profile.name)||'حسین صالحی',ini:'ح.ص',title,place:'قشم',rating:4.8,done:31,revN:18,verified:true,age:'۳۶ سال',born:'قشم',exp:'۱۲ سال',phone:S.me.phone?'۰۹۱۷ ۳۰۰ ۴۵۱۲':null,code:'B-7K31',since:'آذر ۱۴۰۳',resp:'معمولاً ظرف ۲ ساعت پاسخ می‌دهد',
     bio:'پروژه‌های مسکونی و ویلایی در قشم؛ تیم ثابت آرماتور و قالب دارم.',skills:skills||undefined,
     needs:skills?undefined:[['بتن‌ریزی سقف دوم ویلا','درگهان','توافقی',null]],
     week:['a','b','a','a','b','o','o'],
@@ -3006,7 +3006,7 @@ function railPeople(title,sub,ids){return `<div class="section"><div class="sec-
 function head(){
   const r=ROLES[S.role];
   return `<header class="top"><div class="avatar" aria-hidden="true">م</div>
-    <div class="hello"><b>${greet()}، ${esc(((S.profile&&S.profile.name)||'مجید').split(' ')[0])}</b><button class="role-pill" onclick="openRoles()"><i style="background:${r.c}"></i>${S.role==='general'?'کارفرما':r.n}${I.down}</button></div>
+    <div class="hello"><b>${greet()}، ${esc(((S.profile&&S.profile.name)||'حسین').split(' ')[0])}</b><button class="role-pill" onclick="openRoles()"><i style="background:${r.c}"></i>${S.role==='general'?'کارفرما':r.n}${I.down}</button></div>
     <button class="icon-btn" aria-label="تغییر حالت روشن و تیره" onclick="toggleTheme()">${I.moon}</button>
     <button class="icon-btn" aria-label="اعلان‌ها" onclick="go('notif')"><svg class="ico" viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="bell-dot"></span></button></header>`;
 }
@@ -3230,7 +3230,7 @@ S.convs=[
  {id:'c-karimi',pid:'karimi',type:'project',online:true,unread:2,pinned:true,muted:false,arch:false,stage:2,ctx:{label:'پروژه',title:'نظارت ویلای درگهان',meta:'بازدید بعدی: دوشنبه ۹ صبح'},
   replies:['باشه، هماهنگ است.','عکس آرماتور ستون‌ها را هم بفرست لطفاً.','فردا سر کارگاه می‌بینمت.'],
   msgs:[{k:'sys',t:'این گفت‌وگو برای پروژهٔ «نظارت ویلای درگهان» ساخته شد.'},{k:'date',t:'دیروز'},
-   {me:0,k:'text',t:'سلام مجید، نقشهٔ اصلاحی آرماتور سقف دوم را فرستادم.',time:'۱۸:۴۰'},
+   {me:0,k:'text',t:'سلام حسین، نقشهٔ اصلاحی آرماتور سقف دوم را فرستادم.',time:'۱۸:۴۰'},
    {me:0,k:'file',name:'نقشهٔ آرماتور سقف دوم.pdf',size:'۱٫۲ مگابایت',time:'۱۸:۴۱'},
    {me:1,k:'text',t:'ممنون مهندس. استاد رضا فردا شروع می‌کند.',time:'۱۹:۰۲',st:'read'},
    {k:'date',t:'امروز'},
@@ -3526,7 +3526,7 @@ function quickLogin(role){if(!DEMO)return;S.auth=true;S.role=role;S.mode=({worke
 const PROVS=IRP.map(p=>p.t).sort((a,b)=>a.localeCompare(b,'fa'));
 const EXP=['کمتر از ۱ سال','۱ تا ۳ سال','۳ تا ۵ سال','۵ تا ۱۰ سال','بیش از ۱۰ سال'];
 const BASE={title:'اطلاعات پایه',sub:'نام واقعی لازم است؛ بعداً با کارت ملی تطبیق داده می‌شود.',f:[
-  {k:'fn',t:'text',label:'نام',req:1,ph:'مثلاً مجید'},{k:'ln',t:'text',label:'نام خانوادگی',req:1,ph:'مثلاً یحیایی'},
+  {k:'fn',t:'text',label:'نام',req:1,ph:'مثلاً حسین'},{k:'ln',t:'text',label:'نام خانوادگی',req:1,ph:'مثلاً صالحی'},
   {k:'prov',t:'prov',label:'استان محل کار',req:1},{k:'city',t:'text',label:'شهر',req:1,ph:'مثلاً قشم',list:1},
   {k:'range',t:'chips',label:'تا کجا برای کار می‌روی؟',opts:['فقط شهر خودم','تا ۵۰ کیلومتر','کل استان','هر جای ایران'],req:1}]};
 const PRIV={title:'حریم خصوصی',sub:'هر وقت بخواهی از تنظیمات عوض می‌شود.',f:[
@@ -3626,7 +3626,7 @@ function renderAuth(){
     <div class="auth-hero"><div class="auth-logo">${logoSVG('anim')}</div>
       <h1>ورود به ${wordmark('anim md')}</h1><p>با شمارهٔ موبایل وارد شو یا حساب تازه بساز.</p></div>
     <div class="section"><label class="label" for="ph">شمارهٔ موبایل</label>
-      <div class="phone-in"><span>۰۹</span><input id="ph" dir="ltr" inputmode="numeric" maxlength="9" placeholder="xx xxx xxxx" value="${esc(r.phone)}" oninput="this.value=this.value.replace(/[^0-9۰-۹]/g,'');S.reg.phone=this.value;chkPhone()"></div>
+      <div class="phone-in"><span>۰۹</span><input id="ph" dir="ltr" inputmode="numeric" maxlength="14" placeholder="xx xxx xxxx" value="${esc(r.phone)}" oninput="phIn(this)"></div>
       <label class="agree"><input type="checkbox" id="agr" onchange="chkPhone()" ${r.ok?'checked':''}><span><a href="#" onclick="event.preventDefault();openLegal('terms')">قوانین استفاده</a> و <a href="#" onclick="event.preventDefault();openLegal('privacy')">حریم خصوصی</a> بلوک را می‌پذیرم.</span></label>
       <button class="cta" id="phBtn" disabled onclick="sendOtp()">دریافت کد تأیید</button>
       <button class="ghost" onclick="S.pending=null;go('explore')">فعلاً فقط آگهی‌ها را می‌بینم</button></div>`;
@@ -3657,6 +3657,9 @@ const ROLE_INFO={
  company:['شرکت ساختمانی','شخص حقوقی با شناسهٔ ملی و روزنامهٔ رسمی','<svg class="ico" viewBox="0 0 24 24"><path d="M4 21V5h10v16M14 9h6v12M7 9h2M7 13h2M7 17h2"/></svg>'],
  general:['کارفرما (کاربر عادی)','صاحب‌کار؛ دنبال نیرو، پیمانکار یا مشاورم','<svg class="ico" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>']
 };
+/* شماره: با ۰۹، ۹۸+ یا بدون آن قبول؛ S.reg.phone همیشه ۹ رقم بعد از ۰۹ */
+function phNorm(v){let d=String(v||'').replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g,'');if(d.startsWith('0098'))d=d.slice(4);else if(d.startsWith('98')&&d.length>=12)d=d.slice(2);if(d.startsWith('09'))d=d.slice(2);else if(d.startsWith('9')&&d.length===10)d=d.slice(1);return d.slice(0,9)}
+function phIn(el){el.value=el.value.replace(/[^0-9۰-۹+]/g,'');S.reg.phone=phNorm(el.value);const sp=el.previousElementSibling;if(sp)sp.style.display=/^[+0۰]|^(98|۹۸)/.test(el.value)&&el.value.length>1?'none':'';chkPhone()}
 function chkPhone(){const r=S.reg,v=(r.phone||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)),ag=$('agr');r.ok=ag&&ag.checked;const b=$('phBtn');if(b)b.disabled=!(v.length===9&&r.ok)}
 function sendOtp(){S.reg.step='otp';S.reg.t=Date.now();renderAuth();toast('کد تأیید فرستاده شد')}
 function otpTimer(){clearInterval(S.otpI);const upd=()=>{const el=$('otpT');if(!el){clearInterval(S.otpI);return}const s=Math.max(0,120-Math.floor((Date.now()-S.reg.t)/1000));
@@ -4781,7 +4784,7 @@ function tr(s){if(!s||!hasFa(s))return s;const lead=s.match(/^\s*/)[0],trail=s.m
     I18N.miss.add(key);return s}
   let i=0;t=t.replace(/\{([#@])\}/g,()=>{const x=slots[i++];return x?(x[0]==='#'?i18nNum(x[1]):i18nName(x[1])):''});
   t=t.replace(/\b1 (week|month|day|hour|minute|year|floor|bay|person|stage)s\b/g,'1 $1');return lead+t+trail}
-Object.assign(I18N.names,{"مهندس کریمی": "Eng. Karimi", "گروه ساختمانی توکلی": "Tavakoli Construction Group", "استادکار رضایی": "Master Rezaei", "استاد رضا بهمنی": "Master Reza Bahmani", "حسن قاسمی": "Hassan Ghasemi", "شرکت ساحل‌ساز": "Sahelsaz Co.", "کارگاه ساختمانی احمدی": "Ahmadi Construction", "خانم نوری": "Ms. Noori", "استاد جاسمی": "Master Jasemi", "استاد ناصر": "Master Naser", "امیر ف.": "Amir F.", "مجید یحیایی": "Majed Yahyaei", "قشم": "Qeshm", "درگهان": "Dargahan", "طولا": "Tola", "لافت": "Laft", "سوزا": "Suza", "بندرعباس": "Bandar Abbas", "میناب": "Minab", "بوشهر": "Bushehr", "شیراز": "Shiraz", "کرمان": "Kerman", "تهران": "Tehran", "اصفهان": "Isfahan", "مشهد": "Mashhad", "البرز": "Alborz", "سیستان و بلوچستان": "Sistan & Baluchestan", "خراسان شمالی": "North Khorasan", "خراسان رضوی": "Razavi Khorasan", "خراسان جنوبی": "South Khorasan", "کردستان": "Kurdistan", "گیلان": "Gilan", "کرمانشاه": "Kermanshah", "آذربایجان شرقی": "East Azerbaijan", "آذربایجان غربی": "West Azerbaijan", "قزوین": "Qazvin", "زنجان": "Zanjan", "همدان": "Hamadan", "قم": "Qom", "مرکزی": "Markazi", "اردبیل": "Ardabil", "هرمزگان": "Hormozgan", "ایلام": "Ilam", "لرستان": "Lorestan", "خوزستان": "Khuzestan", "چهار محال و بختیاری": "Chaharmahal & Bakhtiari", "یزد": "Yazd", "سمنان": "Semnan", "مازندران": "Mazandaran", "گلستان": "Golestan", "فارس": "Fars", "کهگیلویه و بویر احمد": "Kohgiluyeh & Boyer-Ahmad", "حسین کمالی": "Hossein Kamali", "جواد رحیمی": "Javad Rahimi", "رسول نظری": "Rasoul Nazari", "علی جاسمی": "Ali Jasemi", "کریم زارعی": "Karim Zarei", "استاد جواد رحیمی": "Master Javad Rahimi"});
+Object.assign(I18N.names,{"مهندس کریمی": "Eng. Karimi", "گروه ساختمانی توکلی": "Tavakoli Construction Group", "استادکار رضایی": "Master Rezaei", "استاد رضا بهمنی": "Master Reza Bahmani", "حسن قاسمی": "Hassan Ghasemi", "شرکت ساحل‌ساز": "Sahelsaz Co.", "کارگاه ساختمانی احمدی": "Ahmadi Construction", "خانم نوری": "Ms. Noori", "استاد جاسمی": "Master Jasemi", "استاد ناصر": "Master Naser", "امیر ف.": "Amir F.", "حسین صالحی": "Majed Yahyaei", "قشم": "Qeshm", "درگهان": "Dargahan", "طولا": "Tola", "لافت": "Laft", "سوزا": "Suza", "بندرعباس": "Bandar Abbas", "میناب": "Minab", "بوشهر": "Bushehr", "شیراز": "Shiraz", "کرمان": "Kerman", "تهران": "Tehran", "اصفهان": "Isfahan", "مشهد": "Mashhad", "البرز": "Alborz", "سیستان و بلوچستان": "Sistan & Baluchestan", "خراسان شمالی": "North Khorasan", "خراسان رضوی": "Razavi Khorasan", "خراسان جنوبی": "South Khorasan", "کردستان": "Kurdistan", "گیلان": "Gilan", "کرمانشاه": "Kermanshah", "آذربایجان شرقی": "East Azerbaijan", "آذربایجان غربی": "West Azerbaijan", "قزوین": "Qazvin", "زنجان": "Zanjan", "همدان": "Hamadan", "قم": "Qom", "مرکزی": "Markazi", "اردبیل": "Ardabil", "هرمزگان": "Hormozgan", "ایلام": "Ilam", "لرستان": "Lorestan", "خوزستان": "Khuzestan", "چهار محال و بختیاری": "Chaharmahal & Bakhtiari", "یزد": "Yazd", "سمنان": "Semnan", "مازندران": "Mazandaran", "گلستان": "Golestan", "فارس": "Fars", "کهگیلویه و بویر احمد": "Kohgiluyeh & Boyer-Ahmad", "حسین کمالی": "Hossein Kamali", "جواد رحیمی": "Javad Rahimi", "رسول نظری": "Rasoul Nazari", "علی جاسمی": "Ali Jasemi", "کریم زارعی": "Karim Zarei", "استاد جواد رحیمی": "Master Javad Rahimi"});
 Object.assign(I18N.dict,{'و':'and','یا':'or','از':'of','تا':'to','به':'to','در':'in'});
 Object.assign(I18N.dict,{
 "+ افزودن": "+ Add",
@@ -5765,7 +5768,7 @@ Object.assign(I18N.dict,{
 "سقف دوم ویلای {@}": "Second slab, {@} villa",
 "سقف‌ها": "Slabs",
 "سلام استاد، برای سقف دوم ویلای {@} حدود {#} تن آرماتور داریم. از کی می‌توانی؟": "Hi master, for the second slab of the {@} villa we have about {#} tons of rebar. When can you start?",
-"سلام مجید، نقشهٔ اصلاحی آرماتور سقف دوم را فرستادم.": "Hi Majid, I sent the revised rebar drawing for the second slab.",
+"سلام حسین، نقشهٔ اصلاحی آرماتور سقف دوم را فرستادم.": "Hi Hossein, I sent the revised rebar drawing for the second slab.",
 "سلام، از دوشنبه آزادم. شرایط را این‌طور پیشنهاد می‌دهم:": "Hi, I'm free from Monday. I propose these terms:",
 "سلام، اگر مشکلی در همکاری یا پرداخت پیش آمد، همین‌جا بنویسید.": "Hi, if any issue comes up with the work or payment, write here.",
 "سلام، ما {#} نفریم و آماده‌ایم.": "Hi, there are {#} of us and we're ready.",
@@ -5874,7 +5877,7 @@ Object.assign(I18N.dict,{
 "ظاهر": "Appearance",
 "ظرفیت": "Capacity",
 "ظرفیت نیروی این هفته": "Crew capacity this week",
-"ظهر بخیر، مجید": "Good afternoon, Majid",
+"ظهر بخیر، حسین": "Good afternoon, Hossein",
 "عادی": "Normal",
 "عدد": "pcs",
 "عضو بلوک از": "Block member since",
@@ -6049,11 +6052,11 @@ Object.assign(I18N.dict,{
 "مثلاً رضا امیری": "e.g. Reza Amiri",
 "مثلاً ساحل‌سازان هرمز": "e.g. Sahel Sazan Hormoz",
 "مثلاً سقف دوم ویلا در {@}، حدود {#} روز": "e.g. Second slab of a villa in {@}, about {#} days",
-"مثلاً مجید": "e.g. Majid",
+"مثلاً حسین": "e.g. Hossein",
 "مثلاً مدیر پروژه": "e.g. Project manager",
 "مثلاً ویلای {@}": "e.g. {@} villa",
 "مثلاً کاشی حمام واحد {#} متری": "e.g. Bathroom tiling for a {#} m² unit",
-"مثلاً یحیایی": "e.g. Yahyaei",
+"مثلاً صالحی": "e.g. Salehi",
 "مثلاً: بتن‌ریزی ستون‌های طبقهٔ دوم": "e.g. Pouring 2nd-floor columns",
 "مثلاً: سیمان تمام شد": "e.g. Out of cement",
 "مجتمع تجاری {#} طبقه": "{#}-floor commercial complex",
@@ -6065,8 +6068,8 @@ Object.assign(I18N.dict,{
 "مجری ذی‌صلاح": "Qualified builder",
 "مجری ذی‌صلاح حقوقی": "Qualified legal-entity builder",
 "مجوزها": "Licenses",
-"مجید یحیایی": "Majid Yahyaei",
-"مجید یحیایی · هفتهٔ پیش": "Majid Yahyaei · Last week",
+"حسین صالحی": "Hossein Salehi",
+"حسین صالحی · هفتهٔ پیش": "Hossein Salehi · Last week",
 "محاسبات": "Calculations",
 "محاسبات سازه": "Structural calculations",
 "محاسبهٔ سازه، نظارت مرحله‌ای و گزارش بازدید مکتوب. بازدید اول داخل {@} رایگان است.": "Structural calculations, staged supervision and written inspection reports. First visit within {@} is free.",
@@ -7155,8 +7158,8 @@ Object.assign(I18N.dict,{
 "اگر در فهرست نیست، این‌جا بنویس": "Not in the list? Type it here",
 "نام شهر یا روستا را بنویس": "Type the city or village name",
 "اول استان را انتخاب کن؛ شهرهای همان استان این‌جا می‌آید.": "Choose a province first; its cities will appear here.",
-"شب بخیر، مجید": "Good evening, Majid",
-"صبح بخیر، مجید": "Good morning, Majid",
+"شب بخیر، حسین": "Good evening, Hossein",
+"صبح بخیر، حسین": "Good morning, Hossein",
 "صبح بخیر، {@}": "Good morning, {@}",
 "ظهر بخیر، {@}": "Good afternoon, {@}",
 "عصر بخیر، {@}": "Good evening, {@}",
@@ -7397,7 +7400,7 @@ Object.assign(I18N.dict,{
 });
 Object.assign(I18N.dict,{"اکوسیستم هوشمند صنعت ساخت و ساز":"Smart construction industry ecosystem","نشان اصلی بلوک":"Block main logo"});
 Object.assign(I18N.dict,{"رفتن به حالت روشن":"Switch to light mode","رفتن به حالت تیره":"Switch to dark mode"});
-Object.assign(I18N.names,{"مهندس فرهاد سلیمانی":"Eng. Farhad Soleimani","مهندس لیلا امیری":"Eng. Leila Amiri","استاد حمید نجفی":"Master Hamid Najafi","مهندس سعید رستمی":"Eng. Saeed Rostami","مهندس کامران زارعی":"Eng. Kamran Zarei","مجید":"Majid","علی":"Ali","مجید یحیایی":"Majid Yahyaei","علی رضایی":"Ali Rezaei","ساحل‌سازان هرمز":"Sahel Sazan Hormoz"});
+Object.assign(I18N.names,{"مهندس فرهاد سلیمانی":"Eng. Farhad Soleimani","مهندس لیلا امیری":"Eng. Leila Amiri","استاد حمید نجفی":"Master Hamid Najafi","مهندس سعید رستمی":"Eng. Saeed Rostami","مهندس کامران زارعی":"Eng. Kamran Zarei","مجید":"Majid","علی":"Ali","حسین صالحی":"Hossein Salehi","علی رضایی":"Ali Rezaei","ساحل‌سازان هرمز":"Sahel Sazan Hormoz"});
 /* =================== ROUND 15: تنظیمات نمایش، زبان و دسترسی‌پذیری =================== */
 const PREF_DEF={fs:'md',lang:'fa',contrast:false,motion:false,bold:false,latin:false,big:false,saver:false,haptic:true};
 S.prefs=Object.assign({},PREF_DEF);
@@ -7911,12 +7914,12 @@ window.renderRegStep=function(){const r=S.reg;if(r&&r.step==='edit'){renderEditA
 (function(){const f0=window.fieldHTML;window.fieldHTML=function(f,d){let h=f0(f,d);if(f.t==='prov'&&f.k==='prov')h=h.replace(`onchange="S.reg.d['prov']=this.value;renderRegStep()"`,`onchange="S.reg.d.prov=this.value;S.reg.d.city=undefined;S.reg.d._cityOther=0;renderRegStep()"`);return h}})();
 
 /* ---------- ۳) پروفایل از روی ثبت‌نام + ME ---------- */
-function demoProfileD(role){const base={fn:'مجید',ln:'یحیایی',nat:'ایرانی',prov:'هرمزگان',city:'قشم',range:'کل استان',days:[0,2,3],pub:true};
+function demoProfileD(role){const base={fn:'حسین',ln:'صالحی',nat:'ایرانی',prov:'هرمزگان',city:'قشم',range:'کل استان',days:[0,2,3],pub:true};
   return Object.assign(base,{worker:{skills:['بنایی و دیوارچینی','بتن‌ریزی'],exp:'۵ تا ۱۰ سال',wage:'۲.۰۰۰.۰۰۰',team:'با یک همکار',hours:'تمام روز'},
     specialist:{skills:['قالب‌بندی','آرماتوربندی'],exp:'۵ تا ۱۰ سال',cert:'دارم',rateType:'متری',rate:'۳۵۰.۰۰۰',team:'با شاگرد'},
     engineer:{field:'عمران',grade:'پایه ۱',comp:['نظارت','محاسبات'],services:['نظارت ساختمان','محاسبات سازه'],visit:'۳.۰۰۰.۰۰۰',cap:'۳ تا ۵'},
     contractor:{kinds:['اسکلت بتنی','سفت‌کاری'],exp:'بیش از ۱۰ سال',contract:['درصدی (امانی)','متری'],max:'۴ تا ۶ طبقه',crew:'۸',bio:'پروژه‌های مسکونی و ویلایی در قشم؛ تیم ثابت آرماتور و قالب دارم.'},
-    company:{cname:'ساحل‌سازان هرمز',ctype:'سهامی خاص',nid:'10861234567',rank:'رتبه ۳',areas:['مسکونی','صنعتی و سوله'],staff:'۱۰ تا ۵۰',fn:'مجید یحیایی',pos:'مدیر پروژه'},
+    company:{cname:'ساحل‌سازان هرمز',ctype:'سهامی خاص',nid:'10861234567',rank:'رتبه ۳',areas:['مسکونی','صنعتی و سوله'],staff:'۱۰ تا ۵۰',fn:'حسین صالحی',pos:'مدیر پروژه'},
     general:{need:'ساخت ویلا یا ساختمان',land:'پروانه گرفته‌ام'}}[role]||{})}
 function profileSync(){const p=S.profile||(S.profile={});const d=p.d||(p.d=demoProfileD(S.role));
   p.name=S.role==='company'?(d.cname||p.name):(((d.fn||'')+' '+(d.ln||'')).trim()||p.name);
