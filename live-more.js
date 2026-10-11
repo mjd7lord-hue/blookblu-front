@@ -71,7 +71,7 @@
     L.loaded[k] = Date.now();
     const d = await api('GET', '/ads/mine');
     for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].who === 'me') ADS.splice(i, 1);
-    d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: myAuthor() })), { who: 'me', st: x.status, views: x.views })));
+    d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: myAuthor() })), { who: 'me', st: x.status, views: x.views, _x: x, _mine: true })));
   }
   L.loadMyAds = loadMyAds;
   wrap('renderMyAds', function (prev) {
@@ -1522,7 +1522,7 @@
     L.loaded['mp:' + S.role] = Date.now(); // صفحهٔ «آگهی‌های من» باز هم خودش تازه می‌کند
     api('GET', '/ads/mine').then((d) => {
       for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].who === 'me') ADS.splice(i, 1);
-      d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: { code: L.pub && L.pub.code, role: S.role, name: (L.pub && L.pub.name) || '' } })), { who: 'me', st: x.status, views: x.views })));
+      d.items.forEach((x) => ADS.push(Object.assign(L.mapAd(Object.assign({}, x, { author: { code: L.pub && L.pub.code, role: S.role, name: (L.pub && L.pub.name) || '' } })), { who: 'me', st: x.status, views: x.views, _x: x, _mine: true })));
       // هنوز در قدم اول فرم است و آگهی فعال دارد ← همان پیام محدودیت (پیش از پر کردن فرم)
       if (S.cur === 'new' && S.w && (S.w.step || 0) <= 1 && myActiveAds().length >= ((L.cfg && L.cfg.limits && L.cfg.limits.freeAds) || FREE_AD_LIMIT)) adLimitSheet();
     }).catch(() => {});

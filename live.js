@@ -212,8 +212,9 @@
     if (!force && L.loaded[k] && Date.now() - L.loaded[k] < 15000) return;
     L.loaded[k] = Date.now();
     const d = await api('GET', '/ads?type=' + type + '&limit=50');
-    for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].type === type && ADS[i]._live) ADS.splice(i, 1);
-    d.items.forEach((x) => ADS.push(mapAd(x)));
+    // آگهی‌های خودم («آگهی‌های من») دست نخورند؛ تکراری‌شان هم اضافه نشود
+    for (let i = ADS.length - 1; i >= 0; i--) if (ADS[i].type === type && ADS[i]._live && !ADS[i]._mine) ADS.splice(i, 1);
+    d.items.forEach((x) => { if (!ADS.some((a) => a._mine && a.id === x.id)) ADS.push(mapAd(x)); });
   }
   const skillRow = (s) => [s.title, s.experience || '—', EXP_Y[s.experience] || 0, s.rateType || 'توافقی', s.rateAmount ? money(s.rateAmount) : 'توافقی'];
   const revRow = (r) => [r.fromName, r.rating, r.text || '', rel(r.createdAt)];

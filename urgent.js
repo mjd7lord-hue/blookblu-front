@@ -206,6 +206,8 @@
       const d = await api('POST', `/urgent/${o.id}/accept`);
       closeSheet(); drop();
       toast('⚡ کار مال تو شد! پروژه ساخته شد؛ قرارداد را امضا کن');
+      // سرور آگهی آمادگی را با این قرارداد خاموش کرد؛ اپ هم همین را نشان دهد
+      ADS.forEach((x) => { if (x.who === 'me' && x.type === 'work' && (x.st || 'active') === 'active') x.st = 'closed'; });
       if (LIVE.loadProjects) await LIVE.loadProjects(true).catch(() => {});
       if (d.conversationId && LIVE.openConv) LIVE.openConv(d.conversationId); else go('proj');
     } catch (e) {

@@ -205,43 +205,165 @@
   .rd-strip{display:flex;align-items:center;gap:8px;margin:10px 16px 0;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--ok) 10%,var(--surface));font-size:13.5px}
   .rd-strip b{color:var(--ok)}`;
   document.head.appendChild(rdCss);
+  const rd2Css = document.createElement('style');
+  rd2Css.textContent = `
+  .rd-box{background:var(--surface);box-shadow:var(--shadow);border-radius:22px;overflow:hidden}
+  .rd-box.on{box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 55%,transparent),var(--shadow)}
+  .rd-box .rd-card{box-shadow:none;border-radius:0}
+  .rd-prev{padding:0 12px}.rd-prev .acard{margin:0;box-shadow:none;border:1px solid var(--line);animation:none}
+  .rd-prev .lbl{display:block;font-size:12px;color:var(--muted);margin:2px 4px 6px}
+  .rd-meta{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 16px 0;font-size:12.5px;color:var(--muted)}
+  .rd-meta b{color:var(--ink)}
+  .rd-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+  .rd-acts button{min-height:44px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font:700 14px inherit;font-family:inherit;color:var(--ink)}
+  .rd-acts button.p{background:var(--accent);border-color:var(--accent);color:#fff}
+  .rd-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .rd-week button{min-height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-family:inherit;color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .rd-week button b{font-size:15px;color:var(--ink)}
+  .rd-week button[aria-pressed=true]{background:color-mix(in srgb,var(--ok) 16%,var(--surface));border-color:var(--ok);color:var(--ok)}
+  .rd-mine{border:2px dashed color-mix(in srgb,var(--ok) 55%,transparent);border-radius:22px;padding:8px;margin-bottom:12px}
+  .rd-mine .lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ok);font-weight:800;margin:2px 6px 8px}
+  .rd-mine .acard{margin:0}`;
+  document.head.appendChild(rd2Css);
   const myReady = () => {
     const L = ADS.filter((a) => a.who === 'me' && a.type === 'work' && (a.st || 'active') !== 'removed');
     return L.find((a) => (a.st || 'active') === 'active') || L.find((a) => a.st === 'paused') || L.find((a) => a.st === 'closed') || null;
   };
+  window.myReady = myReady;
   const busyNow = () => (S.projs[S.role] || []).some((p) => p.stage >= 1 && p.stage < 3 && (!p.status || p.status === 'active'));
+  const myWeek = () => ((live() && LIVE.pub && LIVE.pub.week) || ME().week || ['o', 'o', 'o', 'o', 'o', 'o', 'o']).slice(0, 7);
+  const daysLeft = (a) => { const e = a && a._x && a._x.expiresAt; return e ? Math.max(0, Math.ceil((new Date(e).getTime() - Date.now()) / 864e5)) : 30; };
+  // گزینه‌های مهارت هر نقش (همان فرم ثبت‌نام)
+  const SKILL_KEY = { worker: 'skills', specialist: 'skills', engineer: 'services', contractor: 'kinds', company: 'areas' };
+  const skillOpts = () => (((REG[S.role] || []).flatMap((s) => s.f || []).find((f) => f.k === SKILL_KEY[S.role]) || {}).opts || []);
   window.readyCard = function () {
     if (!S.auth || !READY_ROLES.includes(S.role)) return '';
     const a = myReady(), on = !!a && (a.st || 'active') === 'active';
-    const sub = !a ? 'یک بار آگهی آمادگی بساز؛ بعد فقط این کلید را روشن و خاموش کن.'
+    const sub = !a ? 'یک بار در یک صفحهٔ کوتاه بساز؛ بعد فقط این کلید را روشن و خاموش کن.'
       : on ? 'کارفرماها الان در کاوش تو را با نشان سبز می‌بینند.'
-      : a.st === 'closed' && busyNow() ? 'سر کاری؛ آگهی‌ات بعد از قرارداد خودکار خاموش شد. کار که تمام شد روشنش کن.'
+      : a.st === 'closed' && busyNow() ? 'سر کاری؛ بعد از قرارداد خودکار خاموش شد. کار که تمام شد روشنش کن.'
       : 'خاموشی؛ در کاوش دیده نمی‌شوی. روشنش کن تا کار پیدا کنی.';
-    return `<div class="section" id="rdSec"><button class="rd-card ${on ? 'on' : ''}" role="switch" aria-checked="${on}" onclick="readyToggle()">
-      <span class="t"><b>${on ? '<span class="rd-dot"></span>' : ''}آماده به کار ${on ? '· روشن' : a ? '· خاموش' : ''}</b><small>${esc(sub)}</small></span><span class="rd-sw" aria-hidden="true"><i></i></span></button></div>`;
+    const head = `<button class="rd-card ${on ? 'on' : ''}" role="switch" aria-checked="${on}" onclick="readyToggle()">
+      <span class="t"><b>${on ? '<span class="rd-dot"></span>' : ''}آماده به کار ${on ? '— روشن' : a ? '— خاموش' : ''}</b><small>${esc(sub)}</small></span><span class="rd-sw" aria-hidden="true"><i></i></span></button>`;
+    if (!a) return `<div class="section" id="rdSec"><div class="rd-box">${head}<div class="rd-acts" style="grid-template-columns:1fr"><button class="p" onclick="readySheet()">ساخت آگهی آمادگی (۱ دقیقه)</button></div></div></div>`;
+    const views = (a._x && a._x.views) || a.views || 0, resp = (a._x && a._x.responsesCount) || a.resp || 0;
+    return `<div class="section" id="rdSec"><div class="rd-box ${on ? 'on' : ''}">${head}
+      <div class="rd-prev"><span class="lbl">${on ? 'کارفرماها تو را این‌طور می‌بینند:' : 'وقتی روشن باشی این‌طور دیده می‌شوی:'}</span>${adCard(a, ME(), 0, true)}</div>
+      <div class="rd-meta"><span>👁 <b class="num">${fa(views)}</b> بازدید</span><span>💬 <b class="num">${fa(resp)}</b> درخواست</span>${on ? `<span>روشن تا <b class="num">${fa(daysLeft(a))}</b> روز دیگر</span>` : ''}</div>
+      <div class="rd-acts"><button onclick="readySheet()">✎ ویرایش</button><button class="p" onclick="readySee()">ببین در کاوش ‹</button></div></div></div>`;
+  };
+  window.readySee = function () {
+    S.mode = 'workers'; S.roleF = 'all'; S.provF = null; S.cityF = null; S.cat = null;
+    go('explore');
+    setTimeout(() => { const m = $('rdMine'); if (m) m.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 450);
   };
   window.readyToggle = async function () {
     const a = myReady();
-    if (!a) {
-      const aud = S.role === 'worker' ? ['contractor', 'company', 'general'] : S.role === 'engineer' ? ['general', 'contractor', 'company'] : ['contractor', 'company', 'general'];
-      const sk = (ME().skills || [])[0];
-      postWith('work', sk ? `${sk[0]}، آماده به کار` : 'آماده به کار', aud);
-      toast('آگهی آمادگی را یک بار کامل کن؛ بعد فقط کلید را بزن');
-      return;
-    }
+    if (!a) { readySheet(); return; }
     const on = (a.st || 'active') === 'active', st = on ? 'paused' : 'active';
     const old = a.st;
     ADS.forEach((x) => { if (x.id === a.id) x.st = st; });
     if (S.cur === 'home') renderHome();
     if (live() && a._live) {
       try {
-        await api('PATCH', '/ads/' + a.id, { status: st });
+        const d = await api('PATCH', '/ads/' + a.id, { status: st });
+        if (d && d.ad) ADS.forEach((x) => { if (x.id === a.id) x._x = Object.assign(x._x || {}, d.ad); });
         LIVE.loaded['ads:work'] = 0;
       } catch (e) { ADS.forEach((x) => { if (x.id === a.id) x.st = old; }); if (S.cur === 'home') renderHome(); err(e); return; }
     }
+    if (S.cur === 'home') renderHome();
     toast(on ? 'خاموش شدی؛ در کاوش دیده نمی‌شوی' : 'روشن شدی! کارفرماها الان تو را با نشان سبز می‌بینند');
     if (!on && S.prefs && S.prefs.haptic && navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
   };
+
+  /* ---- ساخت / ویرایش در یک صفحه ---- */
+  const WT = [['روزانه', 'روزانه'], ['متری', 'متری'], ['توافقی', 'توافقی']];
+  window.readySheet = function () {
+    const a = myReady(), x = (a && a._x) || {};
+    const prof = (ME().skills || []).map((s) => s[0]).filter(Boolean);
+    S.rs = S.rs && S.rs._for === (a ? a.id : 'new') ? S.rs : {
+      _for: a ? a.id : 'new',
+      skills: (x.skills || (a && a.skills) || prof).slice(0, 3),
+      wt: x.wageType || (a && a.wageType) || 'روزانه',
+      wage: x.wageAmount || (a ? +digits(a.wage) || 0 : 0),
+      city: x.city || (a && a.place) || ME().place || 'قشم',
+      range: x.range || (a && a.range === 'استان' ? 'province' : 'city'),
+      week: myWeek(),
+      desc: x.description || (a && a.desc && a.desc !== 'توضیحی ثبت نشده.' ? a.desc : '') || '',
+    };
+    const s = S.rs, opts = [...new Set([...s.skills, ...prof, ...skillOpts()])].slice(0, 30);
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">${a ? 'ویرایش آگهی آمادگی' : 'آگهی آمادگی'}</h3><p class="sub">همین یک صفحه؛ بعد فقط کلید «آماده به کار» را روشن و خاموش کن.</p>
+      <span class="label" style="margin-top:0">چه کاری بلدی؟ (تا ۳ تا)</span><div class="chips" id="rsK">${opts.map((o) => `<button class="chip" aria-pressed="${s.skills.includes(o)}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      <span class="label">دستمزد</span><div class="chips" id="rsT">${WT.map(([k, n]) => `<button class="chip" aria-pressed="${s.wt === k}" data-v="${k}">${n}</button>`).join('')}</div>
+      <div id="rsWBox" ${s.wt === 'توافقی' ? 'hidden' : ''}><div class="numf" style="margin-top:8px"><input class="field" id="rsW" data-money="1" inputmode="numeric" value="${s.wage ? moneyFa(s.wage) : ''}" placeholder="${s.wt === 'متری' ? 'مثلاً ۴۵۰.۰۰۰ هر متر' : 'مثلاً ۲.۰۰۰.۰۰۰ در روز'}"><span>تومان</span></div></div>
+      <span class="label">کجا کار می‌کنی؟</span><input class="field" id="rsC" list="citylist" value="${esc(s.city)}" placeholder="شهر">
+      <div class="chips" id="rsR" style="margin-top:8px">${[['city', 'فقط شهر خودم'], ['province', 'کل استان']].map(([k, n]) => `<button class="chip" aria-pressed="${s.range === k}" data-v="${k}">${n}</button>`).join('')}</div>
+      <span class="label">روزهای آزاد این هفته</span><div class="rd-week" id="rsD">${DAYS.map((d, i) => `<button aria-pressed="${s.week[i] === 'a'}" data-i="${i}">${d[0]}<b class="num">${d[1]}</b></button>`).join('')}</div>
+      <span class="label">یک جملهٔ کوتاه (اختیاری)</span><input class="field" id="rsX" maxlength="200" value="${esc(s.desc)}" placeholder="مثلاً ۸ سال سابقه، ابزار کامل دارم">
+      <button class="cta" id="rsGo">${a ? 'ذخیرهٔ تغییرات' : 'ساختن و روشن کردن'}</button>
+      ${a ? '<button class="ghost" style="width:100%;margin-top:8px;color:var(--bad)" id="rsDel">حذف آگهی آمادگی</button>' : ''}`;
+    show();
+    if ($('rsW') && window.moneyField) moneyField($('rsW'));
+    const read = () => { s.wage = +digits(($('rsW') || {}).value || '') || 0; s.city = $('rsC').value.trim() || s.city; s.desc = $('rsX').value.trim(); };
+    $('rsK').onclick = (e) => { const b = e.target.closest('.chip'); if (!b) return; const v = b.dataset.v, on = s.skills.includes(v); if (!on && s.skills.length >= 3) { toast('حداکثر ۳ مهارت'); return; } s.skills = on ? s.skills.filter((k) => k !== v) : s.skills.concat(v); b.setAttribute('aria-pressed', !on); };
+    $('rsT').onclick = (e) => { const b = e.target.closest('.chip'); if (!b) return; s.wt = b.dataset.v; $('rsT').querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === b)); $('rsWBox').hidden = s.wt === 'توافقی'; };
+    $('rsR').onclick = (e) => { const b = e.target.closest('.chip'); if (!b) return; s.range = b.dataset.v; $('rsR').querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === b)); };
+    $('rsD').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i; s.week[i] = s.week[i] === 'a' ? 'o' : 'a'; b.setAttribute('aria-pressed', s.week[i] === 'a'); };
+    $('rsGo').onclick = () => { read(); readySave(); };
+    if ($('rsDel')) $('rsDel').onclick = () => readyDelete();
+  };
+  async function readySave(closeOthers) {
+    const s = S.rs, a = myReady();
+    if (!s.skills.length) { toast('حداقل یک مهارت انتخاب کن'); return; }
+    if (s.wt !== 'توافقی' && s.wage < 10000) { toast('مبلغ دستمزد را بنویس'); return; }
+    const prov = (typeof provOf === 'function' && provOf(s.city)) || (live() && LIVE.pub && LIVE.pub.province) || 'هرمزگان';
+    const body = {
+      title: `${s.skills.join('، ')} — آماده به کار`.slice(0, 120),
+      description: s.desc || null, province: prov, city: s.city, wageType: s.wt, wageAmount: s.wt === 'توافقی' ? null : s.wage,
+      startWhen: 'فوری', range: s.range, audience: ['contractor', 'company', 'general'], skills: s.skills,
+    };
+    const weekChanged = myWeek().join() !== s.week.join();
+    if (!live()) {
+      const it = a || { id: 'rd' + Date.now(), type: 'work', who: 'me', resp: 0, views: 0, posted: 'همین حالا', aud: body.audience };
+      Object.assign(it, { title: body.title, place: s.city, wageType: s.wt, wage: s.wt === 'توافقی' ? 'پس از گفت‌وگو' : moneyFa(s.wage) + ' تومان', start: 'فوری', range: s.range === 'province' ? 'استان' : 'شهر', skills: s.skills, desc: s.desc || 'توضیحی ثبت نشده.', st: a ? it.st : 'active' });
+      if (!a) ADS.push(it);
+      if (weekChanged) ME().week = s.week.slice();
+      closeSheet(); S.rs = null; if (S.cur === 'home') renderHome(); toast(a ? 'ذخیره شد' : 'ساخته شد و روشن است!');
+      return;
+    }
+    const b = $('rsGo'); if (b) b.disabled = true;
+    try {
+      if (closeOthers) {
+        const m = await api('GET', '/ads/mine');
+        for (const o of m.items.filter((o) => o.status === 'active' && o.type !== 'consult' && (!a || o.id !== a.id))) await api('PATCH', '/ads/' + o.id, { status: 'closed' });
+      }
+      if (a && a._live) await api('PATCH', '/ads/' + a.id, Object.assign(body, a.st === 'active' ? {} : {}));
+      else await api('POST', '/ads', Object.assign({ type: 'work' }, body));
+      if (weekChanged) { await api('PUT', '/me/roles/' + S.role + '/week', { week: s.week.map((d) => (d === 'a' ? 'a' : 'o')) }); if (LIVE.loadMe) await LIVE.loadMe().catch(() => {}); }
+      await LIVE.loadMyAds(true); LIVE.loaded['myads:' + S.role] = 0; LIVE.loaded['ads:work'] = 0;
+      closeSheet(); S.rs = null; if (S.cur === 'home') renderHome();
+      toast(a ? 'ذخیره شد' : 'ساخته شد و روشن است! کارفرماها تو را در کاوش می‌بینند');
+    } catch (e) {
+      if (b) b.disabled = false;
+      if (e && e.code === 'FREE_AD_LIMIT') {
+        sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">یک آگهی فعال دیگر داری</h3><p class="sub">با آگهی رایگان فقط یک آگهی فعال می‌شود. آگهی قبلی را ببندم و آگهی آمادگی را بسازم؟ (بعداً از «آگهی‌های من» دوباره فعال می‌شود)</p>
+          <button class="cta" id="rsYes">بله، قبلی بسته شود</button><button class="ghost" style="width:100%;margin-top:8px" onclick="closeSheet()">نه</button>`;
+        show(); $('rsYes').onclick = () => readySave(true);
+        return;
+      }
+      err(e);
+    }
+  }
+  async function readyDelete() {
+    const a = myReady(); if (!a) return;
+    if (live() && a._live) { try { await api('DELETE', '/ads/' + a.id); await LIVE.loadMyAds(true); LIVE.loaded['ads:work'] = 0; } catch (e) { err(e); return; } }
+    else { const i = ADS.indexOf(a); if (i > -1) ADS.splice(i, 1); }
+    closeSheet(); S.rs = null; if (S.cur === 'home') renderHome(); toast('آگهی آمادگی حذف شد');
+  }
+
+  // آگهی‌های خودم: هر ورود به خانه (بیش از ۵ ثانیه بعد از بار قبل) تازه شود؛ بازرسم‌های پشت‌سرهم نه
+  let rdAt = 0;
+  wrapW('go', function (prev, name, ...a) { if (name === 'home' && Date.now() - rdAt > 5000) rdAt = 0; return prev(name, ...a); });
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
     const host = $('s-home');
@@ -250,13 +372,22 @@
     const html = readyCard();
     if (html) { const hd = host.querySelector(':scope > header'); if (hd) hd.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
     // آگهی‌های خودم لازم است (کلید از روی آن ساخته می‌شود)
-    if (live() && READY_ROLES.includes(S.role) && LIVE.loadMyAds && !renderHome._rd) {
-      renderHome._rd = 1;
+    if (live() && READY_ROLES.includes(S.role) && LIVE.loadMyAds && !renderHome._rd && Date.now() - rdAt > 15000) {
+      renderHome._rd = 1; rdAt = Date.now();
       // بارگذاری خانه کش «آگهی‌های من» را نگه ندارد (آگهی تازه‌ثبت‌شده باید در آن صفحه بیاید)
       const rk = 'myads:' + S.role;
       LIVE.loadMyAds(true).then(() => { LIVE.loaded[rk] = 0; if (S.cur === 'home') renderHome(); else if (S.cur === 'myads' && typeof renderMyAds === 'function') renderMyAds(); })
-        .catch(() => { LIVE.loaded[rk] = 0; }).finally(() => setTimeout(() => { renderHome._rd = 0; }, 60000));
+        .catch(() => { LIVE.loaded[rk] = 0; }).finally(() => { renderHome._rd = 0; });
     }
+    return r;
+  });
+  // کاوش (حالت نیرو): آگهی آمادگی خودم بالای فهرست — «این تویی»
+  wrapW('renderResults', function (prev, ...a) {
+    const r = prev(...a);
+    const el = $('results'), me = myReady();
+    if (!el || S.mode !== 'workers' || !S.auth || !me || (me.st || 'active') !== 'active' || $('rdMine')) return r;
+    el.insertAdjacentHTML('afterbegin', `<div class="section" style="margin-top:14px"><div class="rd-mine" id="rdMine"><span class="lbl"><span class="rd-dot"></span>این تویی؛ کارفرماها این‌طور می‌بینند</span>${adCard(me, ME(), 0, true)}
+      <div class="rd-acts" style="padding:8px 0 0"><button onclick="readySheet()">✎ ویرایش</button><button onclick="readyToggle().then(()=>renderExplore())">خاموش کن</button></div></div></div>`);
     return r;
   });
   // کاوش: آگهی آمادگیِ روشن = نشان سبز «آماده به کار» + نوار شمارش
