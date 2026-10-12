@@ -650,7 +650,7 @@
       k: 'unit', n: 'بازسازی واحد مسکونی', unit: 'واحد',
       inputs: [{ k: 'area', n: 'متراژ واحد', u: 'متر', min: 30, max: 400, step: 5, d: 90 }, { k: 'lv', n: 'حجم بازسازی', opts: { light: 'سبک (رنگ و کف)', mid: 'متوسط (+کاشی و برق)', full: 'کامل (+لوله‌کشی و کابینت)' }, d: 'mid' }, { k: 'q', n: 'کیفیت', opts: Q3, d: 'mid' }],
       calc(e) {
-        const P2 = { light: { eco: 3, mid: 5, lux: 9 }, mid: { eco: 7, mid: 11, lux: 18 }, full: { eco: 12, mid: 18, lux: 30 } }[e.lv][e.q];
+        const P2 = { light: { eco: 5, mid: 7, lux: 12 }, mid: { eco: 10, mid: 15, lux: 24 }, full: { eco: 18, mid: 24, lux: 35 } }[e.lv][e.q]; // قیمت مهر ۱۴۰۵
         const cost = e.area * P2, days = Math.round(e.area / { light: 6, mid: 3.5, full: 2.2 }[e.lv]);
         const rows = [['رنگ', Math.round(e.area * 0.9), 'لیتر'], ['کف‌پوش یا سرامیک', Math.round(e.area * 1.08), 'متر مربع']];
         if (e.lv !== 'light') rows.push(['کاشی دیوار', Math.round(e.area * 0.35), 'متر مربع'], ['سیم و لوازم برق', Math.round(e.area * 0.8), 'متر سیم']);
@@ -669,7 +669,7 @@
       k: 'kitchen', n: 'بازسازی آشپزخانه', unit: 'آشپزخانه',
       inputs: [{ k: 'area', n: 'متراژ آشپزخانه', u: 'متر', min: 4, max: 40, step: 1, d: 10 }, { k: 'cab', n: 'طول کابینت', u: 'متر', min: 2, max: 14, step: 1, d: 5 }, { k: 'q', n: 'کیفیت', opts: Q3, d: 'mid' }],
       calc(e) {
-        const cab = e.cab * { eco: 9, mid: 16, lux: 30 }[e.q], rest = e.area * { eco: 4, mid: 7, lux: 12 }[e.q], cost = cab + rest, days = 10 + e.cab * 2;
+        const cab = e.cab * { eco: 13, mid: 22, lux: 32 }[e.q], rest = e.area * { eco: 6, mid: 10, lux: 16 }[e.q], cost = cab + rest, days = 10 + e.cab * 2;
         return { tot: e.area, lo: cost * 0.9, hi: cost * 1.15, mon: 1, days,
           rows: [['کابینت', e.cab, 'متر طول'], ['صفحهٔ روی کابینت', e.cab, 'متر طول'], ['کاشی بین کابینت', Math.round(e.cab * 0.7 * 10) / 10, 'متر مربع'], ['سرامیک کف', Math.round(e.area * 1.08), 'متر مربع'], ['لوله و اتصالات', 12, 'متر'], ['نیروی کار', Math.round(days * 2), 'نفر-روز']],
           parts: [['کابینت و صفحه', Math.round((cab / cost) * 100), 'var(--r-specialist)'], ['کاشی و کف', Math.round((rest / cost) * 55), 'var(--r-contractor)'], ['لوله‌کشی و برق', 100 - Math.round((cab / cost) * 100) - Math.round((rest / cost) * 55), 'var(--r-engineer)']] };
@@ -683,7 +683,7 @@
       k: 'bath', n: 'بازسازی سرویس بهداشتی و حمام', unit: 'سرویس',
       inputs: [{ k: 'cnt', n: 'تعداد سرویس و حمام', u: 'عدد', min: 1, max: 4, step: 1, d: 1 }, { k: 'area', n: 'متراژ هر کدام', u: 'متر', min: 2, max: 15, step: 1, d: 5 }, { k: 'q', n: 'کیفیت', opts: Q3, d: 'mid' }],
       calc(e) {
-        const body = e.cnt * e.area * { eco: 9, mid: 15, lux: 26 }[e.q], fix = e.cnt * { eco: 15, mid: 30, lux: 60 }[e.q], cost = body + fix, days = e.cnt * 9;
+        const body = e.cnt * e.area * { eco: 13, mid: 20, lux: 32 }[e.q], fix = e.cnt * { eco: 22, mid: 40, lux: 75 }[e.q], cost = body + fix, days = e.cnt * 9;
         const tile = Math.round(e.cnt * e.area * 3.6);
         return { tot: e.cnt * e.area, lo: cost * 0.9, hi: cost * 1.15, mon: 1, days,
           rows: [['کاشی و سرامیک', tile, 'متر مربع'], ['عایق رطوبتی', Math.round(e.cnt * e.area * 1.6), 'متر مربع'], ['لوله و اتصالات', e.cnt * 15, 'متر'], ['شیرآلات و چینی', e.cnt, 'سری'], ['نیروی کار', Math.round(days * 2), 'نفر-روز']],
@@ -717,7 +717,7 @@
     <div class="section"><div class="sec-head"><h3>هزینه به تفکیک مرحله</h3></div><div class="card">
       <div class="est-stack">${r.parts.map((x, k) => `<i style="--w:${x[1]}%;--c:${x[2]};--k:${k}"></i>`).join('')}</div>
       ${r.parts.map((x) => `<div class="est-leg"><i style="background:${x[2]}"></i><span>${x[0]}</span><b class="num">${toman(((r.lo + r.hi) / 2) * x[1] / 100)}</b></div>`).join('')}</div></div>
-    <div class="section"><p class="est-note">این برآورد با ضرایب میانگین بازار محاسبه شده و جای متره و برآورد مهندس را نمی‌گیرد. قیمت روز مصالح را از فروشنده بپرسید.</p>
+    <div class="section"><p class="est-note">این برآورد با قیمت‌های میانگین بازار (مهر ۱۴۰۵: میلگرد حدود ۱۱۰ هزار تومان هر کیلو، سیمان پاکتی حدود ۲۵۰ هزار تومان) محاسبه شده و جای متره و برآورد مهندس را نمی‌گیرد. قیمت روز مصالح را از فروشنده بپرسید.</p>
       <button class="cta" onclick="gate('post',estGo)">نیروی این پروژه را پیدا کن</button>
       <button class="ghost" style="width:100%;margin-top:8px" onclick="gate('est',saveEst)">ذخیرهٔ برآورد</button>
       <button class="ghost" style="width:100%;margin-top:8px" onclick="exploreMode('consult')">پرسیدن از مهندس</button></div>
@@ -944,12 +944,40 @@
     <button class="cta" onclick="roleChangeReq()">درخواست تغییر نقش</button><button class="ghost" style="width:100%;margin-top:8px" onclick="closeSheet()">بستن</button>`;
     show();
   };
+  // دور ۳۴: با سرور، درخواست تغییر نقش به پنل مدیریت می‌رود (نه پیام پشتیبانی)؛ مدیر تأیید کند ← فرم نقش تازه باز می‌شود
+  const addRole0 = window.addRole;
+  const rqLive = () => !!(live() && S.auth);
+  const roleFa = (k) => (k === 'general' ? 'کارفرما' : ROLES[k] ? ROLES[k].n : k);
+  S.rreq = S.rreq || { items: [], unlock: null, at: 0 };
+  async function loadRReq(force) {
+    if (!rqLive() || (!force && Date.now() - S.rreq.at < 5000)) return;
+    S.rreq.at = Date.now();
+    try { const d = await LIVE.api('GET', '/me/role-requests'); S.rreq.items = d.items || []; S.rreq.unlock = d.roleUnlock || null; } catch (e) { S.rreq.at = 0; }
+  }
   window.roleChangeReq = function () {
-    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">تغییر نقش به…</h3><p class="sub">درخواست برای پشتیبانی بلوک فرستاده می‌شود.</p>
-    <div class="chips">${Object.keys(ROLES).filter((k) => k !== S.role).map((k) => `<button class="chip" onclick="roleReqSend('${k}')"><i style="background:${ROLES[k].c}"></i>${k === 'general' ? 'کارفرما' : ROLES[k].n}</button>`).join('')}</div>`;
+    let pick = null, keep = false;
+    sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">تغییر نقش به…</h3><p class="sub">${rqLive() ? 'درخواست به مدیران بلوک می‌رود؛ بعد از تأیید، فرم نقش تازه را پر می‌کنی.' : 'درخواست برای پشتیبانی بلوک فرستاده می‌شود.'}</p>
+    <div class="chips" id="rqR">${Object.keys(ROLES).filter((k) => k !== S.role && !(S.roles || []).includes(k)).map((k) => `<button class="chip" data-v="${k}"><i style="background:${ROLES[k].c}"></i>${roleFa(k)}</button>`).join('')}</div>
+    ${rqLive() ? `<label class="agree" style="margin-top:10px"><input type="checkbox" id="rqK"><span>نقش فعلی هم بماند (هر دو نقش را دارم)</span></label>
+    <span class="label">توضیح کوتاه (اختیاری)</span><input class="field" id="rqN" maxlength="200" placeholder="مثلاً تیم گرفته‌ام و پیمانکاری می‌کنم">
+    <button class="cta" id="rqGo" disabled>ارسال درخواست</button>` : ''}`;
     show();
+    $('rqR').onclick = (e) => {
+      const b = e.target.closest('.chip'); if (!b) return;
+      if (!rqLive()) { roleReqSend(b.dataset.v); return; }
+      pick = b.dataset.v; $('rqR').querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === b)); $('rqGo').disabled = false;
+    };
+    if ($('rqGo')) $('rqGo').onclick = async () => {
+      keep = $('rqK').checked;
+      $('rqGo').disabled = true;
+      try {
+        await LIVE.api('POST', '/me/role-requests', { toRole: pick, mode: keep ? 'add' : 'switch', note: $('rqN').value.trim() || undefined });
+        closeSheet(); toast('درخواست فرستاده شد؛ نتیجه با اعلان می‌آید'); await loadRReq(true); if (S.cur === 'roles') renderRoles();
+      } catch (e) { $('rqGo').disabled = false; LIVE.err(e); }
+    };
   };
   window.roleReqSend = function (k) {
+    if (rqLive()) { roleChangeReq(); return; }
     closeSheet();
     const txt = `درخواست تغییر نقشم از «${ROLES[S.role].n}» به «${ROLES[k].n}» را دارم.`;
     openChat('c-support');
@@ -957,7 +985,17 @@
     const fill = () => { const i = $('cIn'); if (S.cur === 'chat' && i) { i.value = txt; i.dispatchEvent(new Event('input')); toast('متن درخواست آماده است؛ «فرستادن» را بزن'); } else if (n++ < 20) setTimeout(fill, 150); };
     setTimeout(fill, 100);
   };
-  window.addRole = (k) => roleReqSend(k);
+  // نقشی که مدیر باز کرده ← فرم ثبت‌نام همان نقش؛ بقیه ← درخواست
+  window.addRole = (k) => (rqLive() && S.rreq.unlock === k && typeof addRole0 === 'function' ? addRole0(k) : roleReqSend(k));
+  window.cancelRoleReq = async (id) => { try { await LIVE.api('DELETE', '/me/role-requests/' + id); await loadRReq(true); renderRoles(); toast('درخواست لغو شد'); } catch (e) { LIVE.err(e); } };
+  function roleReqCard() {
+    if (!rqLive()) return '';
+    const u = S.rreq.unlock, last = S.rreq.items[0];
+    if (u) return `<div class="card" style="border:2px solid var(--ok);margin-bottom:12px"><b style="display:block">نقش «${roleFa(u)}» برایت باز شد ✓</b><span style="font-size:13px;color:var(--muted)">یک بار فرم همین نقش را پر کن؛ بعد از ثبت، نقش تازه فعال می‌شود.</span>${last && last.adminNote ? `<p class="hint" style="margin:6px 0 0">پیام مدیر: ${esc(last.adminNote)}</p>` : ''}<button class="cta" style="margin-top:10px" onclick="addRole('${u}')">پر کردن فرم «${roleFa(u)}»</button></div>`;
+    if (last && last.status === 'pending') return `<div class="card" style="margin-bottom:12px"><b style="display:block">درخواست تغییر به «${roleFa(last.toRole)}» در حال بررسی</b><span style="font-size:13px;color:var(--muted)">نتیجه با اعلان می‌آید.</span><button class="ghost" style="width:100%;margin-top:8px" onclick="cancelRoleReq('${last.id}')">لغو درخواست</button></div>`;
+    if (last && last.status === 'rejected' && Date.now() - new Date(last.decidedAt || last.createdAt).getTime() < 14 * 864e5) return `<div class="note" style="margin-bottom:12px">${I.warn}<span>درخواست «${roleFa(last.toRole)}» رد شد${last.adminNote ? ': ' + esc(last.adminNote) : ''}</span></div>`;
+    return '';
+  }
   window.renderRoles = function () {
     const r = ROLES[S.role];
     // چند نقش ثبت‌شده (مثل حساب آزمایشی یا وقتی مدیر «چند نقش» را روشن کرده) ← جابه‌جایی با یک لمس
@@ -972,6 +1010,17 @@
     <div class="section" style="margin-top:8px"><div class="card" style="display:flex;gap:12px;align-items:center"><div class="hex" style="background:${r.c}">${r.n[0]}</div><div style="flex:1"><b style="display:block">${S.role === 'general' ? 'کارفرما' : r.n}</b><span style="font-size:13px;color:var(--muted)">نقش هنگام ثبت‌نام انتخاب شده</span></div></div>
     <p class="hint">برای تغییر نقش، درخواست به پشتیبانی می‌رود و بعد از بررسی انجام می‌شود.</p><button class="cta" onclick="roleChangeReq()">درخواست تغییر نقش</button></div>`;
   };
+  // هر ورود به «نقش‌ها» وضعیت درخواست از سرور تازه شود (مثلاً بعد از پر کردن فرم نقش تازه)
+  wrapW('go', function (prev, name, ...x) { if (name === 'roles') S.rreq.at = 0; return prev(name, ...x); });
+  // کارت وضعیت درخواست/نقشِ باز شده بالای صفحهٔ نقش‌ها (بعد از تعریف renderRoles)
+  wrapW('renderRoles', function (prev, ...a) {
+    const r = prev(...a);
+    const sec = $('s-roles') && $('s-roles').querySelector('.section');
+    const html = roleReqCard();
+    if (sec && html) sec.insertAdjacentHTML('afterbegin', html);
+    if (rqLive() && Date.now() - S.rreq.at > 5000) loadRReq().then(() => { if (S.cur === 'roles') renderRoles(); });
+    return r;
+  });
   // نشانهٔ «فهرست بازشونده» کنار نقش در سربرگ‌ها حذف (نقش یکی است)
   ['renderHome', 'renderExplore', 'renderMe'].forEach((fn) => wrapW(fn, function (prev, ...a) {
     const r = prev(...a);

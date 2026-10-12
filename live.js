@@ -448,6 +448,7 @@
     if (link.screen === 'docs') return "go('docs')";
     if (link.screen === 'urgent' && link.id) return `openUrgent('${link.id}')`;
     if (link.screen === 'home') return "go('home')";
+    if (link.screen === 'roles') return "go('roles')";
     if (link.screen === 'myads') return "go('myads')";
     return "go('notif')";
   }
@@ -900,11 +901,21 @@
       if (snap && snap.v === 1 && snap.me && snap.me.user && !snap.me.needsRegistration) { try { applySnap(snap); } catch (e) { console.warn(e); } }
       else render();
     }
-    try {
-      const r = await fetch(L.base + '/api/health', { signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined });
-      if (!r.ok) throw new Error('down');
-    } catch (e) {
-      console.warn('[بلوک] سرور در دسترس نیست', L.base);
+    // سرور رایگان Render بعد از بی‌کاری می‌خوابد و بیدار شدنش تا ~۵۰ ثانیه طول می‌کشد:
+    // به‌جای یک بار تلاش و رها کردن (که چند رفرش لازم داشت)، چند بار با فاصلهٔ بیشتر تلاش می‌کنیم
+    let up = false;
+    for (let i = 0; i < 8 && !up; i++) {
+      try {
+        const r = await fetch(L.base + '/api/health', { signal: AbortSignal.timeout ? AbortSignal.timeout(i ? 15000 : 8000) : undefined });
+        up = r.ok;
+      } catch (e) { up = false; }
+      if (!up) {
+        if (i === 0) { console.warn('[بلوک] سرور در دسترس نیست', L.base); toast(L.on ? 'در حال وصل شدن به سرور… آخرین اطلاعات ذخیره‌شده را می‌بینی' : 'در حال وصل شدن به سرور بلوک…'); }
+        if (!L.tok && i >= 1) break; // مهمان: نسخهٔ نمایشی کافی است
+        await new Promise((res) => setTimeout(res, Math.min(10000, 2500 * (i + 1))));
+      }
+    }
+    if (!up) {
       toast(L.on ? 'اتصال به سرور برقرار نشد؛ آخرین اطلاعات ذخیره‌شده را می‌بینی' : 'سرور بلوک در دسترس نیست؛ نسخهٔ نمایشی');
       return;
     }

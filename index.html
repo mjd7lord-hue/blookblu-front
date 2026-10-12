@@ -4230,7 +4230,8 @@ Object.assign(GATE,{est:'ذخیرهٔ برآورد',ctr:'تنظیم و امضا�
 S.est={area:120,fl:3,fr:'c',q:'mid',saved:[]};
 const EST={
   fr:{c:{n:'اسکلت بتنی',con:.42,reb:42,stl:0,lab:3.2,k:1},s:{n:'اسکلت فلزی',con:.28,reb:22,stl:48,lab:2.8,k:1.06}},
-  q:{eco:{n:'اقتصادی',p:26},mid:{n:'متوسط',p:34},lux:{n:'لوکس',p:48}},
+  /* میلیون تومان هر متر مربع — قیمت مهر ۱۴۰۵ (میانگین کشور ۳۵ تا ۶۵؛ تهران ۵۵ تا ۷۵؛ هرمزگان کمی زیر تهران) */
+  q:{eco:{n:'اقتصادی',p:36},mid:{n:'متوسط',p:48},lux:{n:'لوکس',p:70}},
   parts:[['اسکلت و فونداسیون',30,'var(--accent)'],['سفت‌کاری',20,'var(--r-contractor)'],['تأسیسات',18,'var(--r-engineer)'],['نازک‌کاری',22,'var(--gold)'],['پروانه و نظارت',10,'var(--concrete-2)']]};
 function estCalc(){const e=S.est,f=EST.fr[e.fr],tot=e.area*e.fl,con=tot*f.con;
   const cost=tot*EST.q[e.q].p*f.k; /* میلیون تومان */

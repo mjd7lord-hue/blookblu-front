@@ -376,7 +376,7 @@
    * پروژه‌ها، آگهی‌های خودم (کلید آماده به کار) و کار فوری با هم و موازی بار می‌شوند و در پایان یک بار بازرسم.
    * شکست ← دفعهٔ بعد دوباره (قبلاً هر کدام جدا با مهلت ۱۵–۶۰ ثانیه بود و چند رفرش لازم داشت).
    * هر ورود به خانه، برگشت اپ از پس‌زمینه و عوض شدن نقش ← تازه. */
-  let hsAt = 0, hsBusy = null, hsRole = '', hsSkip = false;
+  let hsAt = 0, hsBusy = null, hsRole = '', hsSkip = false, hsTry = 0;
   window.homeSync = function (force) {
     if (!live()) return Promise.resolve();
     if (hsBusy) return hsBusy;
@@ -388,7 +388,12 @@
     if (typeof window.urgSync === 'function') jobs.push(window.urgSync());
     hsBusy = Promise.allSettled(jobs).then((rs) => {
       hsBusy = null;
-      if (rs.every((x) => x.status === 'fulfilled')) { hsAt = Date.now(); hsRole = role; } else hsAt = 0;
+      if (rs.every((x) => x.status === 'fulfilled')) { hsAt = Date.now(); hsRole = role; hsTry = 0; }
+      else {
+        // شکست (سرور خواب/کند): خودکار دوباره، بدون نیاز به زدن «خانه»
+        hsAt = 0;
+        if (hsTry < 6) { const d = Math.min(15000, 2500 * ++hsTry); setTimeout(() => { if (S.cur === 'home' && S.auth) homeSync(true); }, d); }
+      }
       if (S.cur === 'home' && S.role === role) { hsSkip = true; try { renderHome(); } finally { hsSkip = false; } }
       if (window.urgAfterSync) window.urgAfterSync();
     });
@@ -1047,17 +1052,76 @@
   };
   S.hpi = S.hpi || 0;
   window.heroNav = (d, ev) => { if (ev) ev.stopPropagation(); S.hpi += d; renderHome(); };
+  // خانه: پیشنهاد آگهی نشان داده نشود (به خواست مجید)؛ همهٔ آگهی‌ها و افراد در «کاوش»
+  const HOME_ADS = /^(نیروی آماده نزدیک تو|کار مناسب مهارت‌هایت|پرسش‌هایی که شاید بلدی|درخواست‌های تازه در رشتهٔ تو|پرسش‌های .+|کار نزدیک تو|متخصص‌های مورد اعتماد نزدیک تو|نیروی پیشنهادی برای تو|کار مناسب تو|پرسش‌های منتظر پاسخ|مناسب پروژه‌هایت|مناسب مهارت‌هایت)$/;
+  function noHomeAds(host) {
+    [...host.querySelectorAll(':scope > .section')].forEach((sec) => {
+      const h = sec.querySelector('.sec-head h3'), t = h ? h.textContent.trim() : '';
+      if (HOME_ADS.test(t) || (sec.querySelector('.acard, .scard') && !sec.querySelector('.rd-prev'))) sec.remove();
+    });
+  }
+  window.noHomeAds = noHomeAds;
+  // دکمه‌های سریع روی کارت اصلی: مجری (تیک کار بعدی، گزارش امروز، شروع کار) · کارفرما (ثبت پرداخت، صورت‌وضعیت، پایان کار) · چت برای هر دو
+  window.heroAct = function (act, i, ev) {
+    if (ev) ev.stopPropagation();
+    const p = (S.projs[S.role] || [])[i]; if (!p) return;
+    S.pi = i;
+    const key = S.role + ':' + i;
+    if (act === 'tick') { const inf = projInfo(p), k = inf.steps.findIndex((s) => !s.done); if (k > -1) pgTick(i, k); else toast('همهٔ کارها تیک خورده'); return; }
+    if (act === 'list') { pgEdit(i); return; }
+    if (act === 'daily' && typeof addDaily === 'function') { addDaily(key); return; }
+    if (act === 'pay' && typeof addPay === 'function') { addPay(key); return; }
+    if (act === 'sov' && typeof openSov === 'function') { openSov(i); return; }
+    if (act === 'stage' && typeof advProj === 'function') { advProj(i); return; }
+    if (act === 'chat') { if (p.cid && window.LIVE && LIVE.openConv && p._live) LIVE.openConv(p.cid); else if (p.who && typeof openChatWith === 'function') openChatWith(p.who); return; }
+    if (act === 'ctr' && typeof openContract === 'function') { openContract(i); return; }
+  };
+  function heroActs(p, i, inf) {
+    const prov = isProvider(p), b = (act, ic, t, main) => `<button class="pa ${main ? 'm' : ''}" onclick="heroAct('${act}',${i},event)"><span aria-hidden="true">${ic}</span>${t}</button>`;
+    const L = [];
+    if (prov) {
+      if (p.stage < 2) L.push(b('stage', '▶', 'شروع کار', 1));
+      if (inf.steps.length && inf.steps.some((s) => !s.done)) L.push(b('tick', '✓', 'تیک کار بعدی', p.stage >= 2));
+      if (!inf.steps.length) L.push(b('list', '☰', 'فهرست کار'));
+      if (p.stage >= 2) L.push(b('daily', '📝', 'گزارش امروز'));
+      L.push(b('sov', '📋', 'صورت‌وضعیت'));
+    } else {
+      if (p.stage < 2) L.push(b('stage', '▶', 'شروع کار', 1));
+      L.push(b('pay', '💳', 'ثبت پرداخت', p.stage >= 2));
+      L.push(b('sov', '📋', 'صورت‌وضعیت'));
+      if (p.stage === 2) L.push(b('stage', '🏁', 'پایان کار'));
+    }
+    L.push(b('chat', '💬', 'چت'));
+    return `<div class="ph-acts">${L.join('')}</div>`;
+  }
+  const phCss2 = document.createElement('style');
+  phCss2.textContent = `
+  .ph-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px;scrollbar-width:none;position:relative}
+  .ph-tabs::-webkit-scrollbar{display:none}
+  .ph-tabs button{flex:none;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#E5E7EB;border-radius:12px;min-height:34px;padding:0 10px;font:600 12.5px inherit;font-family:inherit}
+  .ph-tabs button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#1a1205}
+  .ph-tabs button i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-inline-end:5px;background:#8FE3B8}
+  .ph-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px;margin-top:12px;position:relative}
+  .ph-acts .pa{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;min-height:58px;font:700 12px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px}
+  .ph-acts .pa span{font-size:17px;line-height:1}
+  .ph-acts .pa.m{background:var(--gold);border-color:var(--gold);color:#1a1205}`;
+  document.head.appendChild(phCss2);
+  window.heroGo = (k, ev) => { if (ev) ev.stopPropagation(); S.hpi = k; renderHome(); };
   function heroHTML(L) {
     const at = ((S.hpi % L.length) + L.length) % L.length, [p, i] = L[at], w = p.who && person(p.who), inf = projInfo(p);
     const prog = inf.pct != null ? inf.pct : p.stage >= 2 ? 50 : 0;
     const left = !inf.started ? `${fa(inf.durD)} روز` : inf.left == null ? '—' : `${fa(Math.abs(inf.left))} روز`;
     const next = p.stage < 2 ? 'شروع کار را بزنید' : inf.steps.length ? (inf.steps.find((s) => !s.done) ? 'بعدی: ' + inf.steps.find((s) => !s.done).t : 'همهٔ کارها تیک خورد') : 'در حال اجرا';
+    // چند کار همزمان: زبانه برای هر پروژه
+    const tabs = L.length > 1 ? `<div class="ph-tabs" role="tablist">${L.map(([q], k) => `<button role="tab" aria-pressed="${k === at}" onclick="heroGo(${k},event)">${q.stage >= 2 ? '<i></i>' : ''}${esc(q.t)}</button>`).join('')}</div>` : '';
     return `<div class="hcard ph-hero" id="phHero" role="button" tabindex="0" onclick="openProjPage(${i})"><div class="stars"></div>
+      ${tabs}
       <div class="ph-top"><div class="ph-t"><small>${L.length > 1 ? `پروژهٔ ${fa(at + 1)} از ${fa(L.length)} در جریان` : 'پروژهٔ در جریان'}</small><h2>${esc(p.t)}</h2><div class="ph-who">${w ? esc(w.name) + ' · ' : ''}${esc(next)}</div></div>${projArt(p)}</div>
       <div class="ph-bar" aria-label="پیشرفت ${fa(prog)} درصد"><i data-w="${prog}"></i></div>
       ${inf.steps.length ? stepsHTML(i, inf, 8) : ''}
       <div class="ph-kpi"><div><b class="num">${fa(prog)}٪</b><small>پیشرفت</small></div><div><b class="num">${inf.total ? moneyM(inf.paid) : '—'}</b><small>دریافت${inf.total ? ' از ' + moneyM(inf.total) : ''}</small></div><div><b class="num" style="${inf.left != null && inf.left < 0 ? 'color:#FF8A80' : ''}">${left}</b><small>${!inf.started ? 'مدت قرارداد' : inf.left != null && inf.left < 0 ? 'تأخیر' : 'مانده'}</small></div></div>
-      <div class="ph-row">${L.length > 1 ? `<div class="ph-nav"><button onclick="heroNav(-1,event)" aria-label="پروژهٔ قبلی">${S.prefs && S.prefs.lang === 'en' ? '←' : '→'}</button><button onclick="heroNav(1,event)" aria-label="پروژهٔ بعدی">${S.prefs && S.prefs.lang === 'en' ? '→' : '←'}</button></div>` : ''}<button class="go" onclick="event.stopPropagation();openProjPage(${i})">ادامهٔ کار ‹</button></div></div>`;
+      ${heroActs(p, i, inf)}
+      <div class="ph-row"><span></span><button class="go" onclick="event.stopPropagation();openProjPage(${i})">همهٔ جزئیات ‹</button></div></div>`;
   }
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
@@ -1065,6 +1129,7 @@
     if (!S.auth || !host) return r;
     const L = (S.projs[S.role] || []).map((p, i) => [p, i]).filter(([p]) => p.stage >= 1 && p.stage < 3 && (!p.status || p.status === 'active'));
     const old = $('phHero'); if (old) old.remove();
+    noHomeAds(host);
     if (!L.length) return r;
     const hero = host.querySelector(':scope > .hcard');
     const html = heroHTML(L);
@@ -1072,10 +1137,8 @@
     if (hero && (hero.id === 'csite' || /^\s*(شیفت امروز|پروژهٔ من)/.test(hero.textContent))) hero.outerHTML = html;
     else if (hero) hero.insertAdjacentHTML('beforebegin', html);
     else { const anchor = $('rdSec') || host.querySelector(':scope > header'); if (anchor) anchor.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
-    // کارت همین پروژه در فهرست پایین تکرار نشود
-    const at = ((S.hpi % L.length) + L.length) % L.length, cur = L[at][1];
-    const list = $('hmProj');
-    if (list) { list.querySelectorAll('.hp-card').forEach((c) => { if ((c.getAttribute('onclick') || '') === `openProjPage(${cur})`) c.remove(); }); if (!list.querySelector('.hp-card')) list.remove(); else { const h = list.querySelector('.sec-head h3'); if (h) h.textContent = 'پروژه‌های دیگر'; } }
+    // چند پروژه = زبانه‌های کارت اصلی؛ فهرست جدا لازم نیست
+    const list = $('hmProj'); if (list) list.remove();
     requestAnimationFrame(() => requestAnimationFrame(() => { const b = document.querySelector('#phHero .ph-bar i'); if (b) b.style.width = b.dataset.w + '%'; }));
     return r;
   });
