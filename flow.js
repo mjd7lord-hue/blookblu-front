@@ -34,7 +34,7 @@
   .snd .i-snd{display:none}.snd.has .i-snd{display:contents}.snd.has .i-mic{display:none}.snd .i-mic{display:contents}
   /* ۴: قرارداد در چت */
   .qr .qr-ctr{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
-  .ctr-hint{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 8px;padding:10px 12px;border:1px dashed var(--accent);border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--ink);font:500 14px/1.5 inherit;font-family:inherit;text-align:right;cursor:pointer}
+  .ctr-hint{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 8px;padding:10px 12px;border:1px dashed var(--accent);border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--ink);font:500 14px/1.5 inherit;font-family:inherit;text-align:start;cursor:pointer}
   .ctr-hint b{color:var(--accent)}.ctr-hint .go{margin-inline-start:auto;color:var(--accent);font-size:18px}
   .cw-steps{display:flex;gap:6px;margin:4px 0 14px}.cw-steps div{flex:1;text-align:center;font-size:12px;color:var(--muted)}
   .cw-steps i{display:block;height:4px;border-radius:2px;background:var(--line);margin-bottom:6px}.cw-steps .on i{background:var(--accent)}.cw-steps .on{color:var(--ink);font-weight:700}
@@ -44,10 +44,10 @@
   .cw-row{display:flex;gap:8px}.cw-row>*{flex:1}
   .dl-st{display:block;font-size:12.5px;margin-top:4px;opacity:.85}
   /* ۵ و ۶: صفحهٔ تأیید یکسان و مرکز درخواست‌ها */
-  .rd-next{background:var(--bg);border-radius:14px;padding:10px 14px;margin:10px 0;text-align:right}
+  .rd-next{background:var(--bg);border-radius:14px;padding:10px 14px;margin:10px 0;text-align:start}
   .rd-next b{display:block;font-size:14px;margin-bottom:4px}.rd-next li{font-size:13.5px;color:var(--muted);margin:4px 0}
   .rd-next ol{margin:0;padding-inline-start:18px}.rd-where{font-size:13.5px;color:var(--muted);text-align:center;margin:-4px 0 6px}
-  .rq-sum{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:12px 14px;font-family:inherit;color:var(--ink);text-align:right;cursor:pointer}
+  .rq-sum{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:12px 14px;font-family:inherit;color:var(--ink);text-align:start;cursor:pointer}
   .rq-sum .n{flex:none;min-width:30px;height:30px;padding:0 6px;border-radius:10px;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:14px}
   .rq-sum .n.z{background:var(--soft);color:var(--muted)}
   .rq-sum .t{flex:1}.rq-sum b{display:block;font-size:15px}.rq-sum small{display:block;font-size:12.5px;color:var(--muted)}.rq-sum .go{color:var(--muted);font-size:20px}
@@ -93,7 +93,7 @@
   .est-types button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;padding:0 14px;min-height:44px;font:600 14px inherit;font-family:inherit;white-space:nowrap}
   .est-types button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
   .eg-steps{display:flex;gap:6px;margin:4px 16px 0}.eg-steps div{flex:1;font-size:12px;color:var(--muted);text-align:center}.eg-steps i{display:block;height:4px;border-radius:2px;background:var(--accent);margin-bottom:6px}
-  .eg-p{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:10px 0;font-family:inherit;color:var(--ink);text-align:right;cursor:pointer}
+  .eg-p{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:10px 0;font-family:inherit;color:var(--ink);text-align:start;cursor:pointer}
   .eg-p:first-child{border-top:0}.eg-p .t{flex:1;min-width:0}.eg-p b{display:block;font-size:14.5px}.eg-p small{display:block;font-size:12.5px;color:var(--muted)}
   .eg-p .ck{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;font-weight:900}
   .eg-p[aria-pressed=true] .ck{background:var(--accent);border-color:var(--accent)}
@@ -430,7 +430,7 @@
     const host = $('s-pdet'), p = (S.projs[S.role] || [])[S.pi];
     if (!host || !p || p.stage >= 3 || !['general', 'contractor', 'company'].includes(S.role) || host.querySelector('#pdVisit')) return r;
     const other = p.who && P[p.who], eng = other && other.role === 'engineer';
-    const html = `<div class="section" id="pdVisit"><button class="card vis-link" style="display:flex;align-items:center;gap:12px;width:100%;border:0;text-align:right;font-family:inherit;color:var(--ink)" onclick="${eng ? `S.visit.t=1;openVisit('${p.who}')` : "S.roleF='engineer';exploreMode('workers')"}"><span class="nt-ic">${QI.cal}</span><div style="flex:1"><b style="display:block">پیش از بتن‌ریزی: کنترل آرماتور را رزرو کن</b><span style="font-size:13px;color:var(--muted)">${eng ? 'بازدید حضوری ' + esc(other.name) : 'یک مهندس ناظر نزدیک پیدا کن و بازدید رزرو کن'}</span></div><span style="color:var(--muted)">‹</span></button></div>`;
+    const html = `<div class="section" id="pdVisit"><button class="card vis-link" style="display:flex;align-items:center;gap:12px;width:100%;border:0;text-align:start;font-family:inherit;color:var(--ink)" onclick="${eng ? `S.visit.t=1;openVisit('${p.who}')` : "S.roleF='engineer';exploreMode('workers')"}"><span class="nt-ic">${QI.cal}</span><div style="flex:1"><b style="display:block">پیش از بتن‌ریزی: کنترل آرماتور را رزرو کن</b><span style="font-size:13px;color:var(--muted)">${eng ? 'بازدید حضوری ' + esc(other.name) : 'یک مهندس ناظر نزدیک پیدا کن و بازدید رزرو کن'}</span></div><span style="color:var(--muted)">‹</span></button></div>`;
     const anchor = [...host.querySelectorAll('.section')].find((s) => /دفترچهٔ پرداخت|گزارش روزانه/.test(s.textContent));
     if (anchor) anchor.insertAdjacentHTML('beforebegin', html); else host.insertAdjacentHTML('beforeend', html);
     return r;
@@ -828,7 +828,7 @@
   .sp-week{display:flex;gap:6px}.sp-week span{flex:1;text-align:center;border-radius:12px;padding:8px 0;font-size:12px;background:var(--soft);color:var(--muted)}
   .sp-week span b{display:block;font-size:15px;color:var(--ink)}.sp-week span.a{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
   .sp-week span.b{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)}
-  .sp-job{display:flex;align-items:center;gap:12px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:14px;width:100%;border:0;font-family:inherit;color:var(--ink);text-align:right;cursor:pointer}
+  .sp-job{display:flex;align-items:center;gap:12px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:14px;width:100%;border:0;font-family:inherit;color:var(--ink);text-align:start;cursor:pointer}
   .sp-job .t{flex:1;min-width:0}.sp-job b{display:block;font-size:15px}.sp-job small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
   .sp-job .go{color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}`;
   document.head.appendChild(specCss);

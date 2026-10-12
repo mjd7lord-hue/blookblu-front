@@ -17,7 +17,9 @@
 
   /* ================= ۱) مبلغ: نقطه + حروف ================= */
   const g3 = (s) => s.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  window.moneyFa = (n) => fa(g3(String(Math.round(Math.abs(+n || 0)))));
+  // ارقام: فارسی، یا لاتین در حالت انگلیسی / «ارقام لاتین»
+  const dg = (x) => (S.prefs && (S.prefs.lang === 'en' || S.prefs.latin) ? x : fa(x));
+  window.moneyFa = (n) => dg(g3(String(Math.round(Math.abs(+n || 0)))));
   const ONES = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
   const TEENS = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
   const TENS = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
@@ -30,8 +32,17 @@
     else { if (r >= 20) o.push(TENS[Math.floor(r / 10)]); if (r % 10) o.push(ONES[r % 10]); }
     return o.join(' و ');
   }
+  // انگلیسی: «eight hundred fifty million two hundred thousand»
+  const E1 = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+  const E10 = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  const ESC = ['', 'thousand', 'million', 'billion', 'trillion'];
+  const e3 = (n) => { const h = Math.floor(n / 100), r = n % 100, o = []; if (h) o.push(E1[h] + ' hundred'); if (r) o.push(r < 20 ? E1[r] : E10[Math.floor(r / 10)] + (r % 10 ? '-' + E1[r % 10] : '')); return o.join(' '); };
+  const numWordsEn = (n) => { if (!n) return 'zero'; const p = []; for (let i = 0; n > 0 && i < ESC.length; i++, n = Math.floor(n / 1000)) { const c = n % 1000; if (c) p.unshift(e3(c) + (ESC[i] ? ' ' + ESC[i] : '')); } return p.join(' '); };
+  // مبلغ به حروف + «تومان» (انگلیسی: tomans)
+  window.numWordsT = (n) => numWords(n) + (S.prefs && S.prefs.lang === 'en' ? ' tomans' : ' تومان');
   window.numWords = function (n) {
     n = Math.floor(+n || 0);
+    if (S.prefs && S.prefs.lang === 'en') return numWordsEn(n);
     if (!n) return 'صفر';
     const parts = [];
     for (let i = 0; n > 0 && i < SCALE.length; i++, n = Math.floor(n / 1000)) {
@@ -46,7 +57,7 @@
   const isMoney = (el) => el && el.tagName === 'INPUT' && (MONEY.has(el.id) || el.dataset.money === '1');
   const isMoneyTxt = (el) => el && el.tagName === 'INPUT' && (MONEY_TXT.has(el.id) || el.dataset.money === 'txt');
   // اعداد ۵ رقم به بالا در متن سه‌رقم‌سه‌رقم (سال ۱۴۰۵ دست نمی‌خورد)
-  const fmtTxt = (v) => v.replace(/[0-9۰-۹](?:[0-9۰-۹]|[.,٬](?=[0-9۰-۹]{3}))*/g, (m) => { const d = digits(m); return d.length >= 5 ? fa(g3(d)) : m; });
+  const fmtTxt = (v) => v.replace(/[0-9۰-۹](?:[0-9۰-۹]|[.,٬](?=[0-9۰-۹]{3}))*/g, (m) => { const d = digits(m); return d.length >= 5 ? dg(g3(d)) : m; });
   function setKeepCaret(el, nv) {
     if (el.value === nv) return;
     const pos = el.selectionStart == null ? el.value.length : el.selectionStart;
@@ -65,11 +76,11 @@
   function moneyWords(el) {
     const m = isMoney(el) ? digits(el.value) : ((toEnD(el.value).replace(/[.,٬]/g, '').match(/\d{5,}/) || [''])[0]);
     const w = wordsEl(el);
-    w.textContent = m && +m > 0 ? numWords(+m) + ' تومان' : '';
+    w.textContent = m && +m > 0 ? numWordsT(+m) : '';
   }
   window.moneyField = function (el) {
     if (!el) return;
-    if (isMoney(el)) { const d = digits(el.value); setKeepCaret(el, d ? fa(g3(d)) : ''); }
+    if (isMoney(el)) { const d = digits(el.value); setKeepCaret(el, d ? dg(g3(d)) : ''); }
     else if (isMoneyTxt(el)) setKeepCaret(el, fmtTxt(el.value));
     else return;
     moneyWords(el);
@@ -82,12 +93,12 @@
   css.textContent = `
   .mwords{display:block;margin:4px 4px 0;font-size:12.5px;color:var(--accent);line-height:1.6;min-height:0}
   .mwords:empty{display:none}
-  .hp-card{display:block;width:100%;text-align:right;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:20px;padding:14px;font-family:inherit;color:var(--ink);cursor:pointer;margin-bottom:10px}
+  .hp-card{display:block;width:100%;text-align:start;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:20px;padding:14px;font-family:inherit;color:var(--ink);cursor:pointer;margin-bottom:10px}
   .hp-top{display:flex;align-items:flex-start;gap:10px}
   .hp-top .nt-ic{flex:none}
   .hp-top .t{flex:1;min-width:0}.hp-top b{display:block;font-size:15.5px;line-height:1.5}.hp-top small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
   .hp-bar{height:10px;border-radius:6px;background:var(--soft);overflow:hidden;margin:12px 0 6px;position:relative}
-  .hp-bar i{position:absolute;inset:0 0 0 auto;border-radius:6px;background:var(--accent);transition:width .8s cubic-bezier(.3,1,.4,1)}
+  .hp-bar i{position:absolute;top:0;bottom:0;inset-inline-start:0;border-radius:6px;background:var(--accent);transition:width .8s cubic-bezier(.3,1,.4,1)}
   .hp-bar i.pay{background:var(--gold);opacity:.9}
   .hp-row{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted)}
   .hp-row b{color:var(--ink);font-size:13px}
@@ -100,7 +111,7 @@
   .hp-steps span.d{background:color-mix(in srgb,var(--ok) 14%,transparent);border-color:color-mix(in srgb,var(--ok) 45%,transparent);color:var(--ok)}
   .hp-steps span[role=button]{cursor:pointer}
   .hp-last{margin-top:10px;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;line-height:1.7}
-  .pg-row{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px 0;min-height:52px;font-family:inherit;font-size:15px;color:var(--ink);text-align:right}
+  .pg-row{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px 0;min-height:52px;font-family:inherit;font-size:15px;color:var(--ink);text-align:start}
   .pg-row+.pg-row{border-top:1px solid var(--line)}
   .pg-row .m{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:#fff;font-size:15px}
   .pg-row.d .m{background:var(--ok);border-color:var(--ok)}
@@ -132,7 +143,7 @@
   .sg-art{display:block;width:100%;max-width:240px;margin-top:6px}
   .sg-note{margin:0 14px 14px;font-size:12.5px;color:var(--muted);line-height:1.8;border-top:1px dashed var(--line);padding-top:8px}
   .sov-auto{display:grid;gap:8px}
-  .sov-auto button{display:flex;gap:12px;align-items:center;text-align:right;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:12px 14px;font-family:inherit;color:var(--ink);width:100%}
+  .sov-auto button{display:flex;gap:12px;align-items:center;text-align:start;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:12px 14px;font-family:inherit;color:var(--ink);width:100%}
   .sov-auto button b{display:block;font-size:14.5px}.sov-auto button small{display:block;font-size:12.5px;color:var(--muted);line-height:1.6}
   .sov-auto .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,transparent);font-size:20px}`;
   document.head.appendChild(css);
@@ -193,7 +204,7 @@
   const READY_ROLES = ['worker', 'specialist', 'engineer', 'contractor'];
   const rdCss = document.createElement('style');
   rdCss.textContent = `
-  .rd-card{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:14px;font-family:inherit;text-align:right;cursor:pointer;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
+  .rd-card{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:14px;font-family:inherit;text-align:start;cursor:pointer;background:var(--surface);box-shadow:var(--shadow);color:var(--ink)}
   .rd-card.on{background:linear-gradient(135deg,color-mix(in srgb,var(--ok) 22%,var(--surface)),var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 55%,transparent),var(--shadow)}
   .rd-card .t{flex:1;min-width:0}.rd-card b{display:block;font-size:16px}.rd-card small{display:block;font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:2px}
   .rd-sw{flex:none;width:64px;height:36px;border-radius:20px;background:var(--line);position:relative;transition:background .25s}
@@ -727,7 +738,7 @@
       const sum = document.querySelector('#sb .cw-sum');
       const st = stepState('cw') || { k: 'none' }, list = stepsFor(st.k, st.n);
       if (sum && !sum.querySelector('.cw-amt')) {
-        sum.insertAdjacentHTML('beforeend', `<div class="cw-amt"><span>مبلغ کل</span><b>${moneyFa(w.amount)} تومان<br><small style="font-weight:400;color:var(--accent)">${numWords(w.amount)} تومان</small></b></div>${list.length ? `<div><span>فهرست کار</span><b>${list.map(esc).join('، ')}</b></div>` : ''}`);
+        sum.insertAdjacentHTML('beforeend', `<div class="cw-amt"><span>مبلغ کل</span><b>${moneyFa(w.amount)} تومان<br><small style="font-weight:400;color:var(--accent)">${numWordsT(w.amount)}</small></b></div>${list.length ? `<div><span>فهرست کار</span><b>${list.map(esc).join('، ')}</b></div>` : ''}`);
       }
     }
   }
@@ -772,7 +783,7 @@
   window.csUpd = function () {
     csRead();
     const t = csTotal(), box = $('csTot');
-    if (box) box.innerHTML = t > 0 ? `<small>جمع کل قرارداد</small><b class="num">${moneyFa(t)} تومان</b><span>${numWords(t)} تومان</span>` : `<small>جمع کل قرارداد</small><b>—</b><span>مبلغ را بنویس</span>`;
+    if (box) box.innerHTML = t > 0 ? `<small>جمع کل قرارداد</small><b class="num">${moneyFa(t)} تومان</b><span>${numWordsT(t)}</span>` : `<small>جمع کل قرارداد</small><b>—</b><span>مبلغ را بنویس</span>`;
   };
   function csRender(soft) {
     if (soft) csRead();
@@ -822,7 +833,7 @@
   .sv-row{background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:14px;margin-bottom:10px}
   .sv-h{display:flex;gap:8px;align-items:flex-start}.sv-h b{flex:1;font-size:15px;line-height:1.6}.sv-h small{color:var(--muted);font-size:12.5px;white-space:nowrap}
   .sv-bar{height:12px;border-radius:7px;background:var(--soft);margin:10px 0 8px;position:relative;overflow:hidden}
-  .sv-bar i{position:absolute;top:0;bottom:0;right:0;border-radius:7px}.sv-bar i.pv{background:var(--concrete-2)}.sv-bar i.nw{background:var(--gold)}
+  .sv-bar i{position:absolute;top:0;bottom:0;inset-inline-start:0;border-radius:7px}.sv-bar i.pv{background:var(--concrete-2)}.sv-bar i.nw{background:var(--gold)}
   .sv-ctl{display:flex;align-items:center;gap:10px}
   .sv-ctl button{width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-size:24px;font-family:inherit;color:var(--ink);flex:none}
   .sv-ctl button:disabled{opacity:.35}
@@ -831,7 +842,7 @@
   .sv-pay{background:var(--night);color:#fff;border-radius:20px;padding:16px;text-align:center}
   .sv-pay small{display:block;color:var(--concrete);font-size:13px}.sv-pay b{display:block;font-size:26px;margin:4px 0}
   .sv-pay span{display:block;color:var(--gold-2);font-size:13px;line-height:1.7}
-  .sv-pay details{margin-top:10px;text-align:right;font-size:13px;color:var(--concrete)}
+  .sv-pay details{margin-top:10px;text-align:start;font-size:13px;color:var(--concrete)}
   .sv-pay details summary{cursor:pointer;text-align:center}
   .sv-pay .est-leg{color:var(--concrete)}.sv-pay .est-leg b{font-size:13px;display:inline;margin:0;color:#fff}
   .sv-pct{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
@@ -897,7 +908,7 @@
     const doneP = pct ? r.done : Math.round((r.done / r.q) * 100), prevP = pct ? r.prev : Math.round((r.prev / r.q) * 100);
     const now = Math.round((r.done - r.prev) * r.p);
     return `<div class="sv-row"><div class="sv-h"><b>${esc(r.n)}</b><small class="num">${pct ? moneyFa(rowAmt(r)) + ' تومان' : `${fa(r.q)} ${esc(r.u)} × ${moneyFa(r.p)}`}</small></div>
-      <div class="sv-bar" aria-hidden="true"><i class="pv" style="width:${prevP}%"></i><i class="nw" style="right:${prevP}%;width:${Math.max(0, doneP - prevP)}%"></i></div>
+      <div class="sv-bar" aria-hidden="true"><i class="pv" style="width:${prevP}%"></i><i class="nw" style="inset-inline-start:${prevP}%;width:${Math.max(0, doneP - prevP)}%"></i></div>
       <div class="sv-ctl">${edit ? `<button onclick="sovQ('${key}',${k},-1)" aria-label="کمتر" ${r.done <= r.prev ? 'disabled' : ''}>−</button>` : ''}
         <div class="pc"><b class="num">${pct ? fa(r.done) + '٪' : fa(r.done) + ' ' + esc(r.u)}</b><small>${pct ? 'انجام شده' : 'از ' + fa(r.q) + ' ' + esc(r.u)}${r.prev ? ' · قبلاً ' + (pct ? fa(r.prev) + '٪' : fa(r.prev)) : ''}</small></div>
         ${edit ? `<button onclick="sovQ('${key}',${k},1)" aria-label="بیشتر" ${r.done >= r.q ? 'disabled' : ''}>+</button>` : ''}</div>
@@ -908,6 +919,8 @@
     const host = $('s-sov'), key = sovKey(), v = sovV(key), p = (S.projs[S.role] || [])[S.pi];
     if (!host || !v || !p) return r;
     const provider = isProvider(p), edit = provider && v.st === 'draft';
+    // صورت‌وضعیت خالی: درصد پیشرفت «NaN٪» نشود
+    host.querySelectorAll('.sov-ring b, .sov-hero h2').forEach((b) => { if (/NaN/.test(b.textContent)) b.textContent = b.textContent.replace(/NaN/g, '۰'); });
     const secs = [...host.querySelectorAll(':scope > .section')];
     const rowsSec = secs.find((s) => s.querySelector('.sov-row') || /ردیف‌های کار/.test(s.textContent));
     const sumCard = secs.map((s) => s.querySelector('.card')).find((c) => c && /خلاصهٔ مالی/.test(c.textContent));
@@ -925,7 +938,7 @@
       const net = legs.find((l) => l.classList.contains('sov-net'));
       const netB = net ? net.querySelector('b').textContent : '';
       const n = +digits(netB);
-      sumCard.outerHTML = `<div class="sv-pay"><small>قابل پرداخت این صورت‌وضعیت</small><b class="num">${esc(netB)}</b><span>${n > 0 ? numWords(n) + ' تومان' : 'هنوز کاری برای این دوره ثبت نشده'}</span>
+      sumCard.outerHTML = `<div class="sv-pay"><small>قابل پرداخت این صورت‌وضعیت</small><b class="num">${esc(netB)}</b><span>${n > 0 ? numWordsT(n) : 'هنوز کاری برای این دوره ثبت نشده'}</span>
         <details><summary>جزئیات و کسورات</summary>${legs.filter((l) => l !== net).map((l) => l.outerHTML).join('')}<p style="margin:6px 0 0;line-height:1.8">«حسن انجام کار» بخشی است که کارفرما تا پایان کار نگه می‌دارد؛ «بیمه» سهم بیمهٔ کارگاه است.</p></details></div>`;
     }
     host.querySelectorAll('.sr-leg').forEach((x) => x.remove());
@@ -965,7 +978,7 @@
   .ph-kpi div{background:rgba(255,255,255,.07);border-radius:12px;padding:8px 6px;text-align:center}
   .ph-kpi b{display:block;font-size:15px;color:#fff}.ph-kpi small{display:block;font-size:11.5px}
   .ph-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden;position:relative}
-  .ph-bar i{position:absolute;top:0;bottom:0;right:0;border-radius:5px;background:var(--gold);width:0;transition:width 1.2s cubic-bezier(.3,1,.4,1)}
+  .ph-bar i{position:absolute;top:0;bottom:0;inset-inline-start:0;border-radius:5px;background:var(--gold);width:0;transition:width 1.2s cubic-bezier(.3,1,.4,1)}
   .ph-row{display:flex;align-items:center;gap:8px;margin-top:12px;position:relative}
   .ph-row .go{margin-inline-start:auto;border:0;border-radius:12px;background:var(--gold);color:#1a1205;font:800 14px inherit;font-family:inherit;min-height:42px;padding:0 14px}
   .ph-nav{display:flex;gap:6px;align-items:center}
@@ -1044,7 +1057,7 @@
       <div class="ph-bar" aria-label="پیشرفت ${fa(prog)} درصد"><i data-w="${prog}"></i></div>
       ${inf.steps.length ? stepsHTML(i, inf, 8) : ''}
       <div class="ph-kpi"><div><b class="num">${fa(prog)}٪</b><small>پیشرفت</small></div><div><b class="num">${inf.total ? moneyM(inf.paid) : '—'}</b><small>دریافت${inf.total ? ' از ' + moneyM(inf.total) : ''}</small></div><div><b class="num" style="${inf.left != null && inf.left < 0 ? 'color:#FF8A80' : ''}">${left}</b><small>${!inf.started ? 'مدت قرارداد' : inf.left != null && inf.left < 0 ? 'تأخیر' : 'مانده'}</small></div></div>
-      <div class="ph-row">${L.length > 1 ? `<div class="ph-nav"><button onclick="heroNav(-1,event)" aria-label="پروژهٔ قبلی">›</button><button onclick="heroNav(1,event)" aria-label="پروژهٔ بعدی">‹</button></div>` : ''}<button class="go" onclick="event.stopPropagation();openProjPage(${i})">ادامهٔ کار ‹</button></div></div>`;
+      <div class="ph-row">${L.length > 1 ? `<div class="ph-nav"><button onclick="heroNav(-1,event)" aria-label="پروژهٔ قبلی">${S.prefs && S.prefs.lang === 'en' ? '←' : '→'}</button><button onclick="heroNav(1,event)" aria-label="پروژهٔ بعدی">${S.prefs && S.prefs.lang === 'en' ? '→' : '←'}</button></div>` : ''}<button class="go" onclick="event.stopPropagation();openProjPage(${i})">ادامهٔ کار ‹</button></div></div>`;
   }
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);

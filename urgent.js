@@ -18,7 +18,7 @@
 
   const css = document.createElement('style');
   css.textContent = `
-  .ug-btn{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:14px 16px;font-family:inherit;text-align:right;cursor:pointer;color:#1a1205;background:linear-gradient(135deg,#FFC93C,#F97316);box-shadow:0 8px 24px rgba(249,115,22,.35)}
+  .ug-btn{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:20px;padding:14px 16px;font-family:inherit;text-align:start;cursor:pointer;color:#1a1205;background:linear-gradient(135deg,#FFC93C,#F97316);box-shadow:0 8px 24px rgba(249,115,22,.35)}
   .ug-btn .bolt{flex:none;width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.35);display:grid;place-items:center;font-size:26px;animation:ugBolt 2.4s infinite}
   .ug-btn .t{flex:1}.ug-btn b{display:block;font-size:17px}.ug-btn small{display:block;font-size:12.5px;opacity:.85;line-height:1.6}
   @keyframes ugBolt{0%,80%,100%{transform:none}85%{transform:scale(1.15) rotate(-8deg)}90%{transform:scale(1.15) rotate(8deg)}}
@@ -44,7 +44,7 @@
   .ug-acts button{min-height:56px;border-radius:16px;border:0;font:800 16px inherit;font-family:inherit}
   .ug-acts .yes{background:var(--ok);color:#fff}.ug-acts .no{background:rgba(255,255,255,.12);color:#fff}
   .ug-time{font-size:12.5px;color:var(--concrete);margin-top:8px;text-align:center}
-  .ug-mini{display:flex;align-items:center;gap:10px;width:100%;border:1px solid color-mix(in srgb,#F97316 45%,transparent);border-radius:16px;padding:12px 14px;margin-bottom:8px;font-family:inherit;text-align:right;background:color-mix(in srgb,#F97316 13%,var(--surface));color:var(--ink);cursor:pointer;box-shadow:var(--shadow)}
+  .ug-mini{display:flex;align-items:center;gap:10px;width:100%;border:1px solid color-mix(in srgb,#F97316 45%,transparent);border-radius:16px;padding:12px 14px;margin-bottom:8px;font-family:inherit;text-align:start;background:color-mix(in srgb,#F97316 13%,var(--surface));color:var(--ink);cursor:pointer;box-shadow:var(--shadow)}
   .ug-mini .t{flex:1;min-width:0}.ug-mini b{display:block;font-size:15px}.ug-mini small{display:block;font-size:12.5px;color:var(--muted)}
   .ug-mini em{font-style:normal;background:#FFC93C;color:#1a1205;border-radius:10px;padding:4px 10px;font-weight:800;font-size:13px}`;
   document.head.appendChild(css);
@@ -97,7 +97,7 @@
   window.urgTot = function () {
     const f = S.ugf; if ($('ugW')) f.wage = +digits($('ugW').value) || 0;
     const t = f.wage * f.days * f.need, box = $('ugTot');
-    if (box) box.innerHTML = t > 0 ? `<small>جمع کل (${fa(f.need)} نفر × ${fa(f.days)} روز)</small><b class="num">${moneyFa(t)} تومان</b><span>${numWords(t)} تومان</span>` : '<small>جمع کل</small><b>—</b><span>دستمزد روزانه را بنویس</span>';
+    if (box) box.innerHTML = t > 0 ? `<small>جمع کل (${fa(f.need)} نفر × ${fa(f.days)} روز)</small><b class="num">${moneyFa(t)} تومان</b><span>${numWordsT(t)}</span>` : '<small>جمع کل</small><b>—</b><span>دستمزد روزانه را بنویس</span>';
   };
   let cntT = 0;
   function urgCount() {
@@ -184,7 +184,7 @@
     S.ug.seen[id] = 1;
     sb.innerHTML = `<div class="grab"></div><div class="ug-offer"><span class="tag">⚡ کار فوری</span>
       <h2 id="sheetTitle">${esc(o.title)}</h2><div class="sub">${esc(o.client.name)}${o.client.verified ? ' ✓' : ''}${o.client.trust != null ? '، اعتبار ' + fa(o.client.trust) : ''}، ${esc(o.city)}، ${esc(o.startWhen)}</div>
-      <div class="ug-sum"><small>${moneyFa(o.dailyWage)} تومان روزانه × ${fa(o.days)} روز</small><b class="num">${moneyFa(o.total)} تومان</b><span>${numWords(o.total)} تومان</span></div>
+      <div class="ug-sum"><small>${moneyFa(o.dailyWage)} تومان روزانه × ${fa(o.days)} روز</small><b class="num">${moneyFa(o.total)} تومان</b><span>${numWordsT(o.total)}</span></div>
       ${o.note ? `<p style="margin:10px 0 0;font-size:13.5px;color:var(--concrete)">${esc(o.note)}</p>` : ''}
       <div class="ug-acts"><button class="yes" id="ugYes">قبول می‌کنم</button><button class="no" id="ugNo">نه</button></div>
       <div class="ug-time">${o.needCount > 1 ? fa(o.needCount) + ' نفر لازم است، ' : ''}اولین کسی که قبول کند برنده است، ${left(o.expiresAt)} وقت</div></div>`;

@@ -179,7 +179,7 @@
     const ctrLink = root.querySelector('.ctr-link');
     if (ctrLink && !root.querySelector('[onclick^="openSov"]') && (!p.meClient || (p._sts && p._sts.items.length))) {
       const v = S.sov[k];
-      ctrLink.insertAdjacentHTML('afterend', `<button class="card ctr-link" style="margin-top:8px" onclick="openSov(${i})"><span class="nt-ic">${I.cash}</span><div style="flex:1;text-align:right"><b style="display:block">صورت‌وضعیت</b><span style="font-size:13px;color:var(--muted)">متره × فی${v && v.no ? ' · شمارهٔ ' + fa(v.no) : ''}</span></div><span class="tag ${v && v.st === 'ok' ? 'ok' : 'wait'}">${v ? { draft: 'پیش‌نویس', sent: 'ارسال شد', ok: 'تأیید شد' }[v.st] : 'هنوز نیست'}</span></button>`);
+      ctrLink.insertAdjacentHTML('afterend', `<button class="card ctr-link" style="margin-top:8px" onclick="openSov(${i})"><span class="nt-ic">${I.cash}</span><div style="flex:1;text-align:start"><b style="display:block">صورت‌وضعیت</b><span style="font-size:13px;color:var(--muted)">متره × فی${v && v.no ? ' · شمارهٔ ' + fa(v.no) : ''}</span></div><span class="tag ${v && v.st === 'ok' ? 'ok' : 'wait'}">${v ? { draft: 'پیش‌نویس', sent: 'ارسال شد', ok: 'تأیید شد' }[v.st] : 'هنوز نیست'}</span></button>`);
     }
     // عکس‌های گزارش روزانه
     root.querySelectorAll('.dl .dr').forEach((el, n) => {
