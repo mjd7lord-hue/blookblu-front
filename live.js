@@ -632,7 +632,7 @@
     if (!L.on) return;
     const t = modeType();
     if (!L.loaded['ads:' + t] || Date.now() - L.loaded['ads:' + t] > 15000) {
-      loadAds(t).then(() => { if (S.cur === 'explore') prev(); }).catch((e) => { L.loaded['ads:' + t] = 0; err(e); });
+      loadAds(t).then(() => { if (S.cur === 'explore') renderExplore(); }).catch((e) => { L.loaded['ads:' + t] = 0; err(e); });
     }
   });
   wrap('openAd', function (prev, id) {

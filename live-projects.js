@@ -62,7 +62,7 @@
     if (!on()) return prev();
     if (!S.projs[S.role]) S.projs[S.role] = [];
     prev();
-    if (!fresh('projs:' + S.role)) loadProjects().then(() => { if (S.cur === 'proj') prev(); }).catch(err);
+    if (!fresh('projs:' + S.role)) loadProjects().then(() => { if (S.cur === 'proj') renderProj(); }).catch(err);
   });
   wrap('go', function (prev, name, noPush) {
     // صفحه‌هایی که به فهرست پروژه‌ها تکیه دارند
@@ -524,7 +524,7 @@
   wrap('renderDisp', function (prev) {
     if (!on()) return prev();
     prev();
-    if (!fresh('disp', 20000)) loadDisputes().then(() => { if (S.cur === 'disp') prev(); }).catch(err);
+    if (!fresh('disp', 20000)) loadDisputes().then(() => { if (S.cur === 'disp') renderDisp(); }).catch(err);
     // شبیه‌سازی بازدید در نسخهٔ واقعی نیست
     document.querySelectorAll('#s-disp button').forEach((b) => { if ((b.getAttribute('onclick') || '').startsWith('arbVisit')) b.remove(); });
   });

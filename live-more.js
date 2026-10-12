@@ -183,7 +183,7 @@
   wrap('renderHome', function (prev) {
     if (on() && !S.req[S.role]) S.req[S.role] = [];
     prev();
-    if (on() && !fresh('req', 60000)) L.loadRequests().then(() => { if (S.cur === 'home') prev(); }).catch(() => {});
+    if (on() && !fresh('req', 60000)) L.loadRequests().then(() => { if (S.cur === 'home') renderHome(); }).catch(() => {});
   });
 
   /* ================= تقویم (ماه جاری شمسی) ================= */
@@ -364,7 +364,7 @@
       if (c && c[5] && v > (learnSynced[i] || 0)) { learnSynced[i] = v; api('PUT', '/app/courses/' + c[5] + '/progress', { done: v }).catch(err); }
     });
     prev();
-    if (!fresh('learn', 60000)) loadCourses().then(() => { if (S.cur === 'learn') prev(); }).catch(() => {});
+    if (!fresh('learn', 60000)) loadCourses().then(() => { if (S.cur === 'learn') renderLearn(); }).catch(() => {});
   });
 
   /* ---------- تیم و حضور و غیاب ---------- */
@@ -389,7 +389,7 @@
       const lab = document.querySelectorAll('#s-team .tmgrid small');
       t.past.forEach((day, i) => { if (lab[i]) lab[i].textContent = faDM(day, { day: 'numeric' }); });
     }
-    if (!fresh('team', 30000)) loadTeam().then(() => { if (S.cur === 'team') prev(true); }).catch(err);
+    if (!fresh('team', 30000)) loadTeam().then(() => { if (S.cur === 'team') renderTeam(true); }).catch(err);
   });
   wrap('tmToggle', function (prev, k) {
     if (!on() || !S.team[k] || !S.team[k]._id) return prev(k);
@@ -478,7 +478,7 @@
   // میز کار مهندس: بازدیدهای امروز و ثبت گزارش
   wrap('renderHome', function (prev) {
     prev();
-    if (on() && S.role === 'engineer' && !fresh('visits', 60000)) loadVisits().then(() => { if (S.cur === 'home') prev(); }).catch(() => {});
+    if (on() && S.role === 'engineer' && !fresh('visits', 60000)) loadVisits().then(() => { if (S.cur === 'home') renderHome(); }).catch(() => {});
   });
   if (typeof window.homeEngineer === 'function') {
     const he0 = window.homeEngineer;
@@ -801,7 +801,9 @@
         body.blk-chat #s-chat .ctxbar{position:relative;top:0;flex:none;margin-bottom:6px}
         body.blk-chat #s-chat .msgs{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:12px}
         body.blk-chat #s-chat .composer{position:relative;flex:none;bottom:auto;left:auto;right:auto;background:var(--bg);padding:6px 12px calc(8px + env(safe-area-inset-bottom,0px))}
-        body.blk-chat.blk-kb #s-chat .composer{padding-bottom:6px}
+        body.blk-chat.blk-kb #s-chat .composer{padding-bottom:4px;background:var(--bg)}
+        body.blk-chat.blk-kb #s-chat .ctr-hint{display:none}
+        body.blk-chat #s-chat .msgs{padding-bottom:8px}
         body.blk-chat.blk-kb #s-chat .qr{display:none}
       }`;
     document.head.appendChild(st);
@@ -813,8 +815,13 @@
     const h = vv ? vv.height : innerHeight, t = vv ? vv.offsetTop : 0;
     document.documentElement.style.setProperty('--vvh', h + 'px');
     document.documentElement.style.setProperty('--vvt', t + 'px');
-    document.body.classList.toggle('blk-kb', !!vv && h < innerHeight * 0.8);
+    // اندروید (interactive-widget=resizes-content) کل صفحه را کوچک می‌کند و ارتفاع‌ها برابر می‌شوند؛
+    // پس «کادر نوشتن چت در فوکوس» هم یعنی کیبورد باز است (فاصلهٔ نوار پایین/جزیره زیر کادر حذف شود)
+    const typing = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('#s-chat .composer'));
+    document.body.classList.toggle('blk-kb', (!!vv && h < innerHeight * 0.8) || (typing && isChat()));
   }
+  document.addEventListener('focusin', (e) => { if (e.target.closest && e.target.closest('#s-chat .composer')) vvSync(); });
+  document.addEventListener('focusout', (e) => { if (e.target.closest && e.target.closest('#s-chat .composer')) setTimeout(vvSync, 60); });
   function syncChatMode() {
     document.body.classList.toggle('blk-chat', isChat());
     vvSync();
@@ -1418,7 +1425,7 @@
   wrap('renderReq', function (prev) {
     if (!on()) return prev();
     prev();
-    if (!fresh('req')) loadRequests2().then(() => { if (S.cur === 'req') prev(); }).catch(err);
+    if (!fresh('req')) loadRequests2().then(() => { if (S.cur === 'req') renderReq(); }).catch(err);
   });
   wrap('rqAns', function (prev, i, st) {
     const Lx = S.rtab === 'in' ? S.req[S.role] : S.out, r = Lx && Lx[i];
@@ -1624,6 +1631,6 @@
     }
     ['job', 'consult'].forEach((t) => { if (L.loadAds && !fresh('ads:' + t, 60000)) jobs.push(L.loadAds(t)); });
     if (!S.docs[S.role] && L.loadDocs) jobs.push(L.loadDocs());
-    if (jobs.length) Promise.all(jobs.map((j) => j.catch(() => {}))).then(() => { if (S.cur === 'home' && ['specialist', 'engineer'].includes(S.role)) { prev(); } });
+    if (jobs.length) Promise.all(jobs.map((j) => j.catch(() => {}))).then(() => { if (S.cur === 'home' && ['specialist', 'engineer'].includes(S.role) && !(L._hsp && Date.now() - L._hsp < 15000)) { L._hsp = Date.now(); renderHome(); } });
   });
 })();

@@ -169,6 +169,19 @@
   });
   document.querySelectorAll('.screen').forEach((s) => keep.observe(s, { childList: true }));
 
+  /* ================= باز شدن کشو (details) = صفحه هم همراهش حرکت کند ================= */
+  // مثلاً «حساب و تنظیمات» در صفحهٔ «من»: محتوای باز شده اگر زیر صفحه یا پشت نوار پایین بود، نرم بالا می‌آید
+  document.addEventListener('toggle', (e) => {
+    const d = e.target;
+    if (!d || d.tagName !== 'DETAILS' || !d.open || !d.closest('.screen')) return;
+    setTimeout(() => {
+      const r = d.getBoundingClientRect(), vh = innerHeight, navH = 96, topGap = 72;
+      if (r.bottom <= vh - navH) return;
+      const need = r.bottom - (vh - navH) + 12, room = r.top - topGap;
+      if (room > 0) scrollBy({ top: Math.min(need, room), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }, 80);
+  }, true);
+
   /* ================= دکمهٔ تازه‌سازی در پیام‌ها و کاوش ================= */
   const RF_ICO = '<svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>';
   const rfCss = document.createElement('style');
@@ -1076,52 +1089,80 @@
     if (act === 'chat') { if (p.cid && window.LIVE && LIVE.openConv && p._live) LIVE.openConv(p.cid); else if (p.who && typeof openChatWith === 'function') openChatWith(p.who); return; }
     if (act === 'ctr' && typeof openContract === 'function') { openContract(i); return; }
   };
+  // دکمه‌های سریع (گرد و کوچک): مجری (شروع، تیک کار بعدی، گزارش، صورت‌وضعیت) · کارفرما (پرداخت، صورت‌وضعیت، پایان) · چت
   function heroActs(p, i, inf) {
-    const prov = isProvider(p), b = (act, ic, t, main) => `<button class="pa ${main ? 'm' : ''}" onclick="heroAct('${act}',${i},event)"><span aria-hidden="true">${ic}</span>${t}</button>`;
+    const prov = isProvider(p), b = (act, ic, t, main) => `<button class="pa ${main ? 'm' : ''}" onclick="heroAct('${act}',${i},event)" aria-label="${t}"><span aria-hidden="true">${ic}</span><small>${t}</small></button>`;
     const L = [];
     if (prov) {
-      if (p.stage < 2) L.push(b('stage', '▶', 'شروع کار', 1));
-      if (inf.steps.length && inf.steps.some((s) => !s.done)) L.push(b('tick', '✓', 'تیک کار بعدی', p.stage >= 2));
-      if (!inf.steps.length) L.push(b('list', '☰', 'فهرست کار'));
-      if (p.stage >= 2) L.push(b('daily', '📝', 'گزارش امروز'));
-      L.push(b('sov', '📋', 'صورت‌وضعیت'));
+      if (p.stage < 2) L.push(b('stage', '▶', 'شروع', 1));
+      if (inf.steps.length && inf.steps.some((s) => !s.done)) L.push(b('tick', '✓', 'تیک', p.stage >= 2));
+      if (!inf.steps.length) L.push(b('list', '☰', 'فهرست'));
+      if (p.stage >= 2) L.push(b('daily', '✎', 'گزارش'));
+      L.push(b('sov', '▤', 'صورت‌وضعیت'));
     } else {
-      if (p.stage < 2) L.push(b('stage', '▶', 'شروع کار', 1));
-      L.push(b('pay', '💳', 'ثبت پرداخت', p.stage >= 2));
-      L.push(b('sov', '📋', 'صورت‌وضعیت'));
-      if (p.stage === 2) L.push(b('stage', '🏁', 'پایان کار'));
+      if (p.stage < 2) L.push(b('stage', '▶', 'شروع', 1));
+      L.push(b('pay', '₮', 'پرداخت', p.stage >= 2));
+      L.push(b('sov', '▤', 'صورت‌وضعیت'));
+      if (p.stage === 2) L.push(b('stage', '⚑', 'پایان'));
     }
-    L.push(b('chat', '💬', 'چت'));
+    L.push(b('chat', '…', 'چت'));
     return `<div class="ph-acts">${L.join('')}</div>`;
   }
+  /* ---- یک کارت اسلایدی: هر پروژه یک برگ؛ کارت دیگر نقش (تقاضا، رشته…) برگ آخر همان کارت ---- */
   const phCss2 = document.createElement('style');
   phCss2.textContent = `
-  .ph-tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px;scrollbar-width:none;position:relative}
-  .ph-tabs::-webkit-scrollbar{display:none}
-  .ph-tabs button{flex:none;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#E5E7EB;border-radius:12px;min-height:34px;padding:0 10px;font:600 12.5px inherit;font-family:inherit}
-  .ph-tabs button[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#1a1205}
-  .ph-tabs button i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-inline-end:5px;background:#8FE3B8}
-  .ph-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:6px;margin-top:12px;position:relative}
-  .ph-acts .pa{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#fff;border-radius:14px;min-height:58px;font:700 12px inherit;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px}
-  .ph-acts .pa span{font-size:17px;line-height:1}
-  .ph-acts .pa.m{background:var(--gold);border-color:var(--gold);color:#1a1205}`;
+  .ph-wrap{position:relative;margin:12px 16px 0}
+  .ph-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .ph-track::-webkit-scrollbar{display:none}
+  .ph-track>.ph-slide{flex:0 0 100%;scroll-snap-align:center;margin:0!important;min-height:300px;transition:transform .45s cubic-bezier(.3,1,.4,1),opacity .45s;transform:scale(.94);opacity:.55}
+  .ph-track>.ph-slide.on{transform:none;opacity:1}
+  .ph-slide.ph-ext{padding:0;overflow:hidden;border-radius:22px}
+  .ph-slide.ph-ext>.hcard{margin:0;height:100%;box-shadow:none}
+  .ph-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+  .ph-dots button{width:7px;height:7px;border-radius:5px;border:0;padding:0;background:var(--line);transition:width .35s cubic-bezier(.3,1.4,.5,1),background .3s}
+  .ph-dots button[aria-current=true]{width:22px;background:var(--gold)}
+  .ph-hero .ph-art{width:150px;height:126px}
+  .ph-hero h2{font-size:18px}
+  .ph-acts{display:flex;justify-content:space-between;gap:4px;margin-top:14px;position:relative}
+  .ph-acts .pa{flex:1;border:0;background:none;color:#E5E7EB;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;font-family:inherit;min-height:0}
+  .ph-acts .pa span{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);transition:transform .2s}
+  .ph-acts .pa:active span{transform:scale(.88)}
+  .ph-acts .pa small{font-size:11px;color:var(--concrete);white-space:nowrap}
+  .ph-acts .pa.m span{background:var(--gold);border-color:var(--gold);color:#1a1205;box-shadow:0 0 0 0 rgba(242,181,58,.5);animation:paPulse 2.4s infinite}
+  @keyframes paPulse{70%{box-shadow:0 0 0 10px rgba(242,181,58,0)}100%{box-shadow:0 0 0 0 rgba(242,181,58,0)}}
+  .ph-slide.on .ph-art .rise{animation:phRise .6s both}
+  @media (prefers-reduced-motion:reduce){.ph-track>.ph-slide{transition:none;transform:none;opacity:1}.ph-acts .pa.m span{animation:none}}`;
   document.head.appendChild(phCss2);
-  window.heroGo = (k, ev) => { if (ev) ev.stopPropagation(); S.hpi = k; renderHome(); };
-  function heroHTML(L) {
-    const at = ((S.hpi % L.length) + L.length) % L.length, [p, i] = L[at], w = p.who && person(p.who), inf = projInfo(p);
+  function slideHTML(p, i) {
+    const w = p.who && person(p.who), inf = projInfo(p);
     const prog = inf.pct != null ? inf.pct : p.stage >= 2 ? 50 : 0;
     const left = !inf.started ? `${fa(inf.durD)} روز` : inf.left == null ? '—' : `${fa(Math.abs(inf.left))} روز`;
-    const next = p.stage < 2 ? 'شروع کار را بزنید' : inf.steps.length ? (inf.steps.find((s) => !s.done) ? 'بعدی: ' + inf.steps.find((s) => !s.done).t : 'همهٔ کارها تیک خورد') : 'در حال اجرا';
-    // چند کار همزمان: زبانه برای هر پروژه
-    const tabs = L.length > 1 ? `<div class="ph-tabs" role="tablist">${L.map(([q], k) => `<button role="tab" aria-pressed="${k === at}" onclick="heroGo(${k},event)">${q.stage >= 2 ? '<i></i>' : ''}${esc(q.t)}</button>`).join('')}</div>` : '';
-    return `<div class="hcard ph-hero" id="phHero" role="button" tabindex="0" onclick="openProjPage(${i})"><div class="stars"></div>
-      ${tabs}
-      <div class="ph-top"><div class="ph-t"><small>${L.length > 1 ? `پروژهٔ ${fa(at + 1)} از ${fa(L.length)} در جریان` : 'پروژهٔ در جریان'}</small><h2>${esc(p.t)}</h2><div class="ph-who">${w ? esc(w.name) + ' · ' : ''}${esc(next)}</div></div>${projArt(p)}</div>
+    const next = p.stage < 2 ? 'منتظر شروع' : inf.steps.length ? (inf.steps.find((s) => !s.done) ? 'بعدی: ' + inf.steps.find((s) => !s.done).t : 'همهٔ کارها تیک خورد') : 'در حال اجرا';
+    return `<div class="hcard ph-hero ph-slide" data-i="${i}" role="button" tabindex="0" onclick="openProjPage(${i})"><div class="stars"></div>
+      <div class="ph-top"><div class="ph-t"><small>${w ? esc(w.name) : ''}</small><h2>${esc(p.t)}</h2><div class="ph-who">${esc(next)}</div></div>${projArt(p)}</div>
       <div class="ph-bar" aria-label="پیشرفت ${fa(prog)} درصد"><i data-w="${prog}"></i></div>
-      ${inf.steps.length ? stepsHTML(i, inf, 8) : ''}
+      ${inf.steps.length ? stepsHTML(i, inf, 6) : ''}
       <div class="ph-kpi"><div><b class="num">${fa(prog)}٪</b><small>پیشرفت</small></div><div><b class="num">${inf.total ? moneyM(inf.paid) : '—'}</b><small>دریافت${inf.total ? ' از ' + moneyM(inf.total) : ''}</small></div><div><b class="num" style="${inf.left != null && inf.left < 0 ? 'color:#FF8A80' : ''}">${left}</b><small>${!inf.started ? 'مدت قرارداد' : inf.left != null && inf.left < 0 ? 'تأخیر' : 'مانده'}</small></div></div>
-      ${heroActs(p, i, inf)}
-      <div class="ph-row"><span></span><button class="go" onclick="event.stopPropagation();openProjPage(${i})">همهٔ جزئیات ‹</button></div></div>`;
+      ${heroActs(p, i, inf)}</div>`;
+  }
+  function bindSlider(wrap) {
+    const tr = wrap.querySelector('.ph-track'), slides = [...tr.children], dots = [...wrap.querySelectorAll('.ph-dots button')];
+    const mark = (k) => {
+      slides.forEach((s, j) => s.classList.toggle('on', j === k));
+      dots.forEach((d, j) => d.setAttribute('aria-current', j === k));
+      if (S.hpi !== k) { S.hpi = k; const b = slides[k] && slides[k].querySelector('.ph-bar i'); if (b) { b.style.width = '0'; requestAnimationFrame(() => (b.style.width = b.dataset.w + '%')); } }
+    };
+    // فقط کارت افقی جابه‌جا شود، نه کل صفحه (scrollIntoView صفحه را هم تکان می‌داد)
+    const goTo = (k, smooth) => { const d = slides[k].getBoundingClientRect().left - tr.getBoundingClientRect().left; tr.scrollBy({ left: d, behavior: smooth ? 'smooth' : 'auto' }); };
+    const cur = () => { const w = tr.clientWidth || 1; return Math.max(0, Math.min(slides.length - 1, Math.round(Math.abs(tr.scrollLeft) / (w + 10)))); };
+    let t = 0;
+    tr.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => mark(cur()), 60); }, { passive: true });
+    dots.forEach((d, j) => d.addEventListener('click', (e) => { e.stopPropagation(); goTo(j, true); mark(j); }));
+    const k = Math.min(slides.length - 1, Math.max(0, S.hpi || 0));
+    // بدون انیمیشن به برگ قبلی برگرد (بازرسم صفحه نباید برگ را عوض کند)
+    tr.style.scrollBehavior = 'auto';
+    if (k) { try { goTo(k, false); } catch (e) {} }
+    requestAnimationFrame(() => { tr.style.scrollBehavior = ''; mark(k); slides.forEach((s) => { const b = s.querySelector('.ph-bar i'); if (b) b.style.width = b.dataset.w + '%'; }); });
   }
   wrapW('renderHome', function (prev, ...a) {
     const r = prev(...a);
@@ -1130,16 +1171,24 @@
     const L = (S.projs[S.role] || []).map((p, i) => [p, i]).filter(([p]) => p.stage >= 1 && p.stage < 3 && (!p.status || p.status === 'active'));
     const old = $('phHero'); if (old) old.remove();
     noHomeAds(host);
-    if (!L.length) return r;
-    const hero = host.querySelector(':scope > .hcard');
-    const html = heroHTML(L);
-    // کارت اصلی‌ای که خودش «پروژه/کارگاه/شیفت» نمونه بود جایش را به پروژهٔ واقعی می‌دهد؛ بقیه (آمار تقاضا، رشته) پایین‌تر می‌مانند
-    if (hero && (hero.id === 'csite' || /^\s*(شیفت امروز|پروژهٔ من)/.test(hero.textContent))) hero.outerHTML = html;
-    else if (hero) hero.insertAdjacentHTML('beforebegin', html);
-    else { const anchor = $('rdSec') || host.querySelector(':scope > header'); if (anchor) anchor.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html); }
-    // چند پروژه = زبانه‌های کارت اصلی؛ فهرست جدا لازم نیست
     const list = $('hmProj'); if (list) list.remove();
-    requestAnimationFrame(() => requestAnimationFrame(() => { const b = document.querySelector('#phHero .ph-bar i'); if (b) b.style.width = b.dataset.w + '%'; }));
+    if (!L.length) return r;
+    // کارت اصلی دیگرِ نقش: نمونه‌های «کارگاه/شیفت/پروژهٔ من» حذف؛ کارت‌های واقعی (تقاضا، رشته) برگ آخر همین کارت
+    const hero = host.querySelector(':scope > .hcard');
+    let ext = null;
+    if (hero && (hero.id === 'csite' || /^\s*(شیفت امروز|پروژهٔ من)/.test(hero.textContent))) hero.remove();
+    else if (hero) ext = hero;
+    const n = L.length + (ext ? 1 : 0);
+    if (S.hpi >= n) S.hpi = 0;
+    const html = `<div class="ph-wrap" id="phHero"><div class="ph-track">${L.map(([p, i]) => slideHTML(p, i)).join('')}${ext ? '<div class="ph-slide ph-ext"></div>' : ''}</div>
+      ${n > 1 ? `<div class="ph-dots" role="tablist">${Array.from({ length: n }, (_, k) => `<button role="tab" aria-label="برگ ${fa(k + 1)} از ${fa(n)}"></button>`).join('')}</div>` : ''}</div>`;
+    const anchor = $('ugIn') || $('ugBtnSec') || $('rdSec') || host.querySelector(':scope > header');
+    if (ext) ext.insertAdjacentHTML('beforebegin', html);
+    else if (anchor) anchor.insertAdjacentHTML('afterend', html);
+    else host.insertAdjacentHTML('afterbegin', html);
+    const wrap = $('phHero');
+    if (ext) wrap.querySelector('.ph-ext').appendChild(ext);
+    bindSlider(wrap);
     return r;
   });
 
