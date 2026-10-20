@@ -138,8 +138,8 @@
   const RULES = [
     ['۱', 'ثبت بدقولی', 'اگر طرف مقابل سر کار نیامد یا به قرارداد عمل نکرد، در صفحهٔ پروژه «بدقولی طرف مقابل» را بزن.'],
     ['۲', '۲۴ ساعت فرصت جواب', 'او می‌تواند قبول کند یا اعتراض بنویسد؛ اعتراض را مدیر بلوک بررسی می‌کند. بی‌جواب بماند، اخطار ثبت می‌شود.'],
-    ['۳', 'اخطار: ۱۰ امتیاز کم تا ۶ ماه', 'روی شناسنامهٔ کاری دیده می‌شود. قیم‌های او هم هر کدام ۵ امتیاز از دست می‌دهند.'],
-    ['۴', '۲ اخطار در ۳ ماه', '«آماده به کار» و نیروی فوری ۷ روز بسته می‌شود. ۳ اخطار فعال = تعلیق حساب تا بررسی مدیر.'],
+    ['۳', 'اخطار: ۱۰ امتیاز کم تا ۱ ماه', 'روی شناسنامهٔ کاری دیده می‌شود. قیم‌های او هم هر کدام ۵ امتیاز از دست می‌دهند.'],
+    ['۴', '۳ اخطار در ۲ ماه', '«آماده به کار» و نیروی فوری ۷ روز بسته می‌شود. ۵ اخطار فعال = تعلیق حساب تا بررسی مدیر.'],
     ['۵', 'لغو قرارداد امضاشده', 'لغو با توافق هر دو طرف اخطار ندارد. لغو یک‌طرفه برای لغوکننده اخطار دارد. خسارت مالی از راه حل اختلاف.'],
   ];
   const rulesHTML = () => `<div class="card" style="padding:4px 14px">${RULES.map((r) => `<div class="tr-row"><span class="n num">${r[0]}</span><div><b>${r[1]}</b><span>${r[2]}</span></div></div>`).join('')}</div>`;
@@ -160,7 +160,7 @@
     const el = $('s-strikes'); if (!el) return;
     const a = S.stk.against, b = S.stk.byMe, act = a.filter((s) => s.status === 'confirmed').length;
     el.innerHTML = `${pageBar('خوش‌قولی و اخطارها', hq('strike'))}
-      <div class="section" style="margin-top:10px"><div class="hcard"><small>قانون بلوک</small><h2>${act ? `${fa(act)} اخطار فعال داری` : 'قول، قول است'}</h2><p style="margin:6px 0 0;font-size:13.5px;line-height:1.8;opacity:.85">${act ? 'هر اخطار ۶ ماه بعد خودکار از امتیازت برمی‌گردد.' : 'تا حالا اخطار بدقولی نداری. همین‌طور بمان؛ خوش‌قولی اعتبارت را بالا نگه می‌دارد.'}</p></div></div>
+      <div class="section" style="margin-top:10px"><div class="hcard"><small>قانون بلوک</small><h2>${act ? `${fa(act)} اخطار فعال داری` : 'قول، قول است'}</h2><p style="margin:6px 0 0;font-size:13.5px;line-height:1.8;opacity:.85">${act ? 'هر اخطار ۱ ماه بعد خودکار از امتیازت برمی‌گردد.' : 'تا حالا اخطار بدقولی نداری. همین‌طور بمان؛ خوش‌قولی اعتبارت را بالا نگه می‌دارد.'}</p></div></div>
       ${a.length ? `<div class="section"><div class="sec-head"><h3>ثبت‌شده برای من</h3></div>${a.map((s) => stkCard(s, true)).join('')}</div>` : ''}
       ${b.length ? `<div class="section"><div class="sec-head"><h3>ثبت‌شده توسط من</h3></div>${b.map((s) => stkCard(s, false)).join('')}</div>` : ''}
       <div class="section"><div class="sec-head"><h3>اگر کسی بدقولی کند چه می‌شود؟</h3></div>${rulesHTML()}</div><div style="height:20px"></div>`;
@@ -219,7 +219,7 @@
   window.pjCancel = function () {
     const p = curProj(); if (!p) return;
     sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">لغو قرارداد</h3>
-      <p class="sub">اگر قرارداد را هر دو امضا کرده‌اید: لغو با توافق اخطار ندارد؛ لغو یک‌طرفه برای تو اخطار بدقولی دارد (۱۰ امتیاز تا ۶ ماه). قبل از امضا، لغو آزاد است.</p>
+      <p class="sub">اگر قرارداد را هر دو امضا کرده‌اید: لغو با توافق اخطار ندارد؛ لغو یک‌طرفه برای تو اخطار بدقولی دارد (۱۰ امتیاز تا ۱ ماه). قبل از امضا، لغو آزاد است.</p>
       <span class="label">دلیل لغو</span><textarea class="field" id="pjC" maxlength="500" placeholder="مثلاً کارفرما نقشه را عوض کرد"></textarea>
       <button class="cta" onclick="pjCancelGo(false)">درخواست لغو با توافق</button>
       <button class="ghost" style="width:100%;margin-top:8px;color:var(--bad)" onclick="pjCancelGo(true)">لغو یک‌طرفه (اخطار برای من)</button>`;
@@ -266,15 +266,23 @@
       const p = person(S.tid), el = $('s-trust'); if (!p || !el) return r;
       const adj = p.adj || 0, n = p.strikes || 0;
       const brk = el.querySelector('.card.brk');
+      // دور ۴۱: امتیاز شروع — ثبت‌نام +۱۰، مدرک تأییدشده +۵ (با تأیید هویت دست‌کم ۲۵)
+      const tt = trustOf(p);
+      if (brk && !brk.querySelector('.st41')) {
+        brk.insertAdjacentHTML('afterbegin', `<div class="st41"><div class="h"><span>ثبت‌نام کامل</span><b>${fa(tt.st)} از ${fa(10)}</b></div><div class="bars"><i data-w="100" style="background:var(--ok)"></i></div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">برای همه از روز اول</div></div>
+          <div class="st41"><div class="h"><span>مدرک تأییدشده</span><b>${fa(tt.dc)} از ${fa(5)}</b></div><div class="bars"><i data-w="${tt.dc ? 100 : 0}" style="background:#5EEAD4"></i></div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">${tt.dc ? 'نشان «مدرک‌دار» گرفته' : 'یک مدرک (کارت مهارت، پروانه…) بفرست'}</div></div>`);
+        requestAnimationFrame(() => brk.querySelectorAll('.st41 .bars i').forEach((i) => (i.style.width = i.dataset.w + '%')));
+      }
       if (brk && (adj || n || (p.guar && p.guar.length))) {
         brk.insertAdjacentHTML('beforeend', `<div><div class="h"><span>قیم، پاسخ مفید و خوش‌قولی</span><b class="num" style="color:${adj < 0 ? 'var(--bad)' : 'var(--ok)'}">${adj > 0 ? '+' : adj < 0 ? '−' : ''}${fa(Math.abs(adj))}</b></div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">${n ? `${fa(n)} اخطار بدقولی فعال (هر کدام −۱۰) · ` : ''}قیم معتبر +۵ · هر پاسخ تخصصی با لایک +۱ (تا ۵)</div></div>`);
       }
       if (n) {
         const sec = el.querySelector('.flip-hint');
-        if (sec) sec.insertAdjacentHTML('afterend', `<div class="section"><button class="note" style="width:100%;border:0;text-align:start;font:inherit;color:#991B1B;background:#FEE2E2" onclick="${p === ME() || S.tid === 'me' ? "go('strikes')" : ''}">${I.warn}<span>${fa(n)} اخطار بدقولی در ۶ ماه اخیر</span></button></div>`);
+        if (sec) sec.insertAdjacentHTML('afterend', `<div class="section"><button class="note" style="width:100%;border:0;text-align:start;font:inherit;color:#991B1B;background:#FEE2E2" onclick="${p === ME() || S.tid === 'me' ? "go('strikes')" : ''}">${I.warn}<span>${fa(n)} اخطار بدقولی در ماه اخیر</span></button></div>`);
       }
       const g = el.querySelector('details.guide');
-      if (g && !g.querySelector('.g36')) g.insertAdjacentHTML('beforeend', '<p class="g36"><b>۵. قیم، پاسخ مفید و خوش‌قولی:</b> قیم معتبر ۵ امتیاز اضافه می‌کند. هر پاسخ تو به پرسش تخصصی که اولین «مفید بود» را بگیرد ۱ امتیاز (تا ۵). هر اخطار بدقولی ۱۰ امتیاز تا ۶ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.</p>');
+      if (g && !g.querySelector('.g41')) g.insertAdjacentHTML('beforeend', '<p class="g41"><b>شروع:</b> با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.</p>');
+      if (g && !g.querySelector('.g36')) g.insertAdjacentHTML('beforeend', '<p class="g36"><b>۵. قیم، پاسخ مفید و خوش‌قولی:</b> قیم معتبر ۵ امتیاز اضافه می‌کند. هر پاسخ تو به پرسش تخصصی که اولین «مفید بود» را بگیرد ۱ امتیاز (تا ۵). هر اخطار بدقولی ۱۰ امتیاز تا ۱ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.</p>');
       i18n(el);
     } catch (e) {}
     return r;
@@ -285,7 +293,7 @@
       const p = person(S.pid), el = $('s-profile');
       if (p && el && p.strikes && !el.querySelector('.stk36')) {
         const s = el.querySelectorAll(':scope > .section')[0];
-        if (s) s.insertAdjacentHTML('afterend', `<div class="section stk36"><div class="note" style="color:#991B1B;background:#FEE2E2">${I.warn}<span>${fa(p.strikes)} اخطار بدقولی در ۶ ماه اخیر</span></div></div>`);
+        if (s) s.insertAdjacentHTML('afterend', `<div class="section stk36"><div class="note" style="color:#991B1B;background:#FEE2E2">${I.warn}<span>${fa(p.strikes)} اخطار بدقولی در ماه اخیر</span></div></div>`);
         i18n(el.querySelector('.stk36'));
       }
     } catch (e) {}
@@ -670,7 +678,7 @@
       steps: [
         { t: 'طرف مقابل سر کار نیامد؟ در صفحهٔ پروژه «طرف مقابل بدقولی کرد؟» را بزن و بنویس چه شد.', s: `<div class="card" style="padding:4px 10px;border-radius:14px;font-size:11px"><div class="linkrow" style="min-height:38px;font-size:11px"><span class="ic" style="width:26px;height:26px">⚠</span><span>طرف مقابل بدقولی کرد؟</span></div><div class="linkrow" style="min-height:38px;font-size:11px"><span class="ic" style="width:26px;height:26px">✕</span><span>لغو قرارداد</span></div></div>` + F(50, 18) },
         { t: 'او ۲۴ ساعت فرصت دارد قبول یا اعتراض کند. اعتراض را مدیر بلوک بررسی می‌کند.', s: `<div class="stk" style="font-size:10px"><div class="h"><b style="font-size:11px">سر کار نیامد</b><span class="tag pending" style="font-size:9px">منتظر جواب</span></div><p style="font-size:10px">مهلت جواب: ۲۳ ساعت</p><div class="acts"><button class="y" style="min-height:28px;font-size:10px">قبول دارم</button><button style="min-height:28px;font-size:10px">اعتراض دارم</button></div></div>` },
-        { t: 'اخطار ثبت شود: ۱۰ امتیاز کم تا ۶ ماه. ۲ اخطار در ۳ ماه: «آماده به کار» ۷ روز بسته. ۳ اخطار: تعلیق.', s: scoreMini(78, 68) },
+        { t: 'اخطار ثبت شود: ۱۰ امتیاز کم تا ۱ ماه. ۳ اخطار در ۲ ماه: «آماده به کار» ۷ روز بسته. ۵ اخطار: تعلیق.', s: scoreMini(78, 68) },
         { t: 'لغو با توافق هر دو طرف اخطار ندارد؛ لغو یک‌طرفه برای لغوکننده اخطار دارد.', s: `<div class="cq-ban" style="font-size:10px;padding:10px"><b style="font-size:11px">حسین صالحی درخواست لغو داده</b><p style="font-size:10px">قبول کنی، بدون اخطار لغو می‌شود.</p><div class="row"><button class="y" style="min-height:28px;font-size:10px">قبول لغو</button><button style="min-height:28px;font-size:10px">ادامه</button></div></div>` + F(30, 70) },
       ] },
     guar: { ic: '🤝', t: 'قیم چیست؟', d: 'چه کسی قیم می‌شود و چه اثری دارد', page: 'guar',
@@ -822,17 +830,17 @@
   /* ================= ترجمهٔ انگلیسی ================= */
   if (typeof I18N === 'object') {
     Object.assign(I18N.dict, {
-      'آموزش': 'Tutorial', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
+      'آموزش': 'Tutorial', 'ثبت‌نام کامل': 'Complete sign-up', 'برای همه از روز اول': 'For everyone from day one', 'مدرک تأییدشده': 'Approved document', 'نشان «مدرک‌دار» گرفته': 'Has the “Documented” badge', 'یک مدرک (کارت مهارت، پروانه…) بفرست': 'Send one document (skill card, licence…)', 'شروع:': 'Start:', 'با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.': 'Complete sign-up 10 points, identity check 10, first approved document 5; at least 25 from day one.', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
       'فهمیدم': 'Got it', 'بعدی': 'Next', 'قبلی': 'Back', 'تمام': 'Done', 'شروع': 'Start', 'رد شدن': 'Skip', 'دیدن دوبارهٔ آشنایی با بلوک': 'Replay the Blook intro',
       'خوش‌قولی': 'Reliability', 'خوش‌قولی و اخطارها': 'Reliability & warnings', 'قانون بلوک': 'Blook rule', 'قول، قول است': 'A promise is a promise',
-      '{#} اخطار فعال داری': 'You have {#} active warnings', 'هر اخطار ۶ ماه بعد خودکار از امتیازت برمی‌گردد.': 'Each warning is automatically lifted from your score after 6 months.',
+      '{#} اخطار فعال داری': 'You have {#} active warnings', 'هر اخطار ۱ ماه بعد خودکار از امتیازت برمی‌گردد.': 'Each warning is automatically lifted from your score after 1 month.',
       'تا حالا اخطار بدقولی نداری. همین‌طور بمان؛ خوش‌قولی اعتبارت را بالا نگه می‌دارد.': 'No bad-faith warnings so far. Keep it that way; reliability keeps your score high.',
       'ثبت‌شده برای من': 'Recorded against me', 'ثبت‌شده توسط من': 'Recorded by me', 'اگر کسی بدقولی کند چه می‌شود؟': 'What happens if someone breaks their word?',
-      'ثبت بدقولی': 'Report bad faith', '۲۴ ساعت فرصت جواب': '24 hours to respond', 'اخطار: ۱۰ امتیاز کم تا ۶ ماه': 'Warning: −10 points for 6 months', '۲ اخطار در ۳ ماه': '2 warnings in 3 months', 'لغو قرارداد امضاشده': 'Cancelling a signed contract',
+      'ثبت بدقولی': 'Report bad faith', '۲۴ ساعت فرصت جواب': '24 hours to respond', 'اخطار: ۱۰ امتیاز کم تا ۱ ماه': 'Warning: −10 points for 1 month', '۳ اخطار در ۲ ماه': '3 warnings in 2 months', 'لغو قرارداد امضاشده': 'Cancelling a signed contract',
       'اگر طرف مقابل سر کار نیامد یا به قرارداد عمل نکرد، در صفحهٔ پروژه «بدقولی طرف مقابل» را بزن.': 'If the other side did not show up or broke the contract, tap “Report bad faith” on the project page.',
       'او می‌تواند قبول کند یا اعتراض بنویسد؛ اعتراض را مدیر بلوک بررسی می‌کند. بی‌جواب بماند، اخطار ثبت می‌شود.': 'They can accept or object; a Blook admin reviews objections. No answer means the warning is recorded.',
       'روی شناسنامهٔ کاری دیده می‌شود. قیم‌های او هم هر کدام ۵ امتیاز از دست می‌دهند.': 'It shows on the work ID. Each of their guarantors also loses 5 points.',
-      '«آماده به کار» و نیروی فوری ۷ روز بسته می‌شود. ۳ اخطار فعال = تعلیق حساب تا بررسی مدیر.': '“Ready to work” and urgent hire are blocked for 7 days. 3 active warnings = account suspended until admin review.',
+      '«آماده به کار» و نیروی فوری ۷ روز بسته می‌شود. ۵ اخطار فعال = تعلیق حساب تا بررسی مدیر.': '“Ready to work” and urgent hire are blocked for 7 days. 5 active warnings = account suspended until admin review.',
       'لغو با توافق هر دو طرف اخطار ندارد. لغو یک‌طرفه برای لغوکننده اخطار دارد. خسارت مالی از راه حل اختلاف.': 'Mutual cancellation has no warning. One-sided cancellation gives the canceller a warning. Damages go through dispute resolution.',
       'سر کار نیامد': 'Did not show up', 'لغو یک‌طرفهٔ قرارداد': 'One-sided cancellation', 'عمل نکردن به قرارداد': 'Breach of contract', 'به قرارداد عمل نکرد': 'Broke the contract',
       'منتظر جواب': 'Awaiting reply', 'اعتراض؛ در بررسی مدیر': 'Objected; under admin review', 'اخطار ثبت شد': 'Warning recorded', 'رد شد': 'Dismissed',
@@ -844,12 +852,12 @@
       'چه شد؟': 'What happened?', 'توضیح کوتاه': 'Short note', 'ثبت ناروا را مدیر بلوک رد می‌کند. اول در چت با هم صحبت کنید.': 'False reports are dismissed by the admin. Talk in the chat first.',
       'ثبت شد؛ طرف مقابل ۲۴ ساعت فرصت جواب دارد': 'Recorded; the other side has 24 hours to reply', 'بنویس چه شد': 'Describe what happened',
       'لغو قرارداد': 'Cancel contract', 'دلیل لغو': 'Reason for cancelling', 'درخواست لغو با توافق': 'Request mutual cancellation', 'لغو یک‌طرفه (اخطار برای من)': 'Cancel one-sidedly (warning for me)',
-      'اگر قرارداد را هر دو امضا کرده‌اید: لغو با توافق اخطار ندارد؛ لغو یک‌طرفه برای تو اخطار بدقولی دارد (۱۰ امتیاز تا ۶ ماه). قبل از امضا، لغو آزاد است.': 'If you both signed: mutual cancellation has no warning; one-sided cancellation gives you a bad-faith warning (10 points for 6 months). Before signing, cancelling is free.',
+      'اگر قرارداد را هر دو امضا کرده‌اید: لغو با توافق اخطار ندارد؛ لغو یک‌طرفه برای تو اخطار بدقولی دارد (۱۰ امتیاز تا ۱ ماه). قبل از امضا، لغو آزاد است.': 'If you both signed: mutual cancellation has no warning; one-sided cancellation gives you a bad-faith warning (10 points for 1 month). Before signing, cancelling is free.',
       'درخواست لغو فرستاده شد؛ اگر قبول کند، بدون اخطار لغو می‌شود': 'Cancellation request sent; if accepted, it is cancelled with no warning', 'لغو شد؛ اخطار بدقولی برایت ثبت شد': 'Cancelled; a bad-faith warning was recorded for you', 'پروژه لغو شد': 'Project cancelled',
       'با توافق لغو شد؛ بدون اخطار': 'Cancelled by agreement; no warning', 'قرارداد ادامه دارد': 'The contract continues', 'انجام شد': 'Done',
       'درخواست لغو فرستادی': 'You requested cancellation', 'پس گرفتن درخواست': 'Withdraw request', '{@} درخواست لغو داده': '{@} asked to cancel', 'قبول لغو': 'Accept cancellation', 'ادامهٔ قرارداد': 'Continue the contract',
       'طرف مقابل بدقولی کرد؟': 'Other side broke their word?', 'قانون خوش‌قولی بلوک': 'Blook reliability rule', 'قیم و خوش‌قولی': 'Guarantor & reliability', 'قیم معتبر +۵': 'Valid guarantor +5', 'قیم، پاسخ مفید و خوش‌قولی': 'Guarantor, helpful answers & reliability', 'قیم معتبر +۵ · هر پاسخ تخصصی با لایک +۱ (تا ۵)': 'Valid guarantor +5 · each liked expert answer +1 (up to 5)', '۵. قیم، پاسخ مفید و خوش‌قولی:': '5. Guarantor, helpful answers & reliability:', 'هر پاسخ تو به پرسش تخصصی که اولین «مفید بود» را بگیرد ۱ امتیاز (تا ۵).': 'Each of your expert answers that gets its first “helpful” earns 1 point (up to 5).',
-      '{#} اخطار بدقولی فعال (هر کدام −۱۰)': '{#} active bad-faith warnings (−10 each)', '{#} اخطار بدقولی در ۶ ماه اخیر': '{#} bad-faith warnings in the last 6 months',
+      '{#} اخطار بدقولی فعال (هر کدام −۱۰)': '{#} active bad-faith warnings (−10 each)', '{#} اخطار بدقولی در ماه اخیر': '{#} bad-faith warnings in the last month',
       'ضامن خوش‌قولی تو در بلوک': 'Your reliability guarantor in Blook',
       'قیم کسی است که خودش در بلوک خوش‌سابقه است و با کد پیامکی تضمین می‌کند تو را می‌شناسد و خوش‌قولی. قیم معتبر ۵ امتیاز به اعتبارت اضافه می‌کند؛ اگر بدقولی کنی، او هم ۵ امتیاز از دست می‌دهد.': 'A guarantor is someone with a good record in Blook who confirms by SMS code that they know you and you keep your word. A valid guarantor adds 5 points; if you break your word, they lose 5 points too.',
       'تو می‌توانی قیم دیگران باشی ✓': 'You can be a guarantor ✓', 'هنوز نمی‌توانی قیم باشی': 'You cannot be a guarantor yet', 'چه کسی می‌تواند قیم باشد؟': 'Who can be a guarantor?',
@@ -884,7 +892,7 @@
       'همهٔ قراردادها در «من ← قراردادهای من» بایگانی می‌شوند؛ با نسخهٔ چاپی و وضعیت امضای هر دو طرف.': 'All contracts are archived in “Me → My contracts”, with a printable copy and both signatures.',
       'طرف مقابل سر کار نیامد؟ در صفحهٔ پروژه «طرف مقابل بدقولی کرد؟» را بزن و بنویس چه شد.': 'Other side did not show up? On the project page tap “Other side broke their word?” and describe it.',
       'او ۲۴ ساعت فرصت دارد قبول یا اعتراض کند. اعتراض را مدیر بلوک بررسی می‌کند.': 'They have 24 hours to accept or object. A Blook admin reviews objections.',
-      'اخطار ثبت شود: ۱۰ امتیاز کم تا ۶ ماه. ۲ اخطار در ۳ ماه: «آماده به کار» ۷ روز بسته. ۳ اخطار: تعلیق.': 'A recorded warning: −10 points for 6 months. 2 warnings in 3 months: “Ready to work” blocked 7 days. 3 warnings: suspension.',
+      'اخطار ثبت شود: ۱۰ امتیاز کم تا ۱ ماه. ۳ اخطار در ۲ ماه: «آماده به کار» ۷ روز بسته. ۵ اخطار: تعلیق.': 'A recorded warning: −10 points for 1 month. 3 warnings in 2 months: “Ready to work” blocked 7 days. 5 warnings: suspension.',
       'لغو با توافق هر دو طرف اخطار ندارد؛ لغو یک‌طرفه برای لغوکننده اخطار دارد.': 'Mutual cancellation has no warning; one-sided cancellation gives the canceller a warning.',
       'قیم کسی است که خودش در بلوک خوش‌سابقه است و خوش‌قولی تو را تضمین می‌کند.': 'A guarantor has a good record in Blook and vouches that you keep your word.',
       'شرط قیم شدن: هویت تأییدشده، ۳ پروژهٔ تمام‌شده، اعتبار ۷۰ یا بیشتر، ۳۰ روز سابقه، بدون اخطار.': 'To be a guarantor: verified identity, 3 completed projects, trust 70+, 30 days in Blook, no warnings.',
@@ -907,7 +915,7 @@
       'هر جا این علامت را دیدی': 'Wherever you see this sign', 'روی آن بزن تا آموزش کوتاه همان بخش را با مثال واقعی ببینی.': 'Tap it for a short tutorial of that section with a real example.',
       'آموزش کوتاه هر بخش با مثال واقعی؛ هر جا علامت': 'A short tutorial for each section with a real example; wherever you see', 'را دیدی، آموزش همان بخش است.': ', it is that section’s tutorial.',
       '۵. قیم و خوش‌قولی:': '5. Guarantor & reliability:',
-      'قیم معتبر ۵ امتیاز اضافه می‌کند. هر اخطار بدقولی ۱۰ امتیاز تا ۶ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.': 'A valid guarantor adds 5 points. Each bad-faith warning removes 10 points for 6 months; if someone you guarantee breaks their word, you lose 5 points.',
+      'قیم معتبر ۵ امتیاز اضافه می‌کند. هر اخطار بدقولی ۱۰ امتیاز تا ۱ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.': 'A valid guarantor adds 5 points. Each bad-faith warning removes 10 points for 1 month; if someone you guarantee breaks their word, you lose 5 points.',
       'این بخش الان در صفحه نیست؛ اول پروژه یا آگهی بساز': 'This part is not on the page yet; create a project or ad first', 'نیروی فوری در حال': 'Urgent hire',
     });
     I18N.re = null;

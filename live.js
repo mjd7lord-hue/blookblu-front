@@ -170,9 +170,9 @@
   }
 
   /* ---------- افراد و آگهی‌ها ---------- */
-  function trustIdentity(o, trust) {
+  function trustIdentity(o, trust, doc) {
     const c = Math.round((o.rating || 0) / 5 * 55), pr = Math.min(25, o.done || 0), r = Math.min(10, Math.round((o.revN || 0) / 2));
-    return trust - (c + pr + r) >= 10;
+    return trust - (c + pr + r + 10 + (doc ? 5 : 0)) >= 10;
   }
   /** نویسندهٔ آگهی / طرف گفت‌وگو ← P[code]؛ خودم ← 'me' */
   function upsertPerson(a, city) {
@@ -187,8 +187,10 @@
     if (a.reviewsCount != null) o.revN = a.reviewsCount;
     if (a.week) o.week = a.week;
     if (city && !o.place) o.place = city;
-    if (a.trust != null) o.verified = trustIdentity(o, a.trust);
-    else if (a.verified != null && o._full !== true && o.verified == null) o.verified = a.verified;
+    // هویت تأییدشده را سرور صریح می‌فرستد (دور ۴۱)؛ verified = نشان «مدرک‌دار»
+    if (a.identityVerified != null) o.verified = !!a.identityVerified;
+    else if (a.trust != null && o.verified == null) o.verified = trustIdentity(o, a.trust, a.verified);
+    if (a.verified != null) o.docVerified = !!a.verified;
     if (a.avatarUrl) o.avatar = abs(a.avatarUrl);
     return a.code;
   }
