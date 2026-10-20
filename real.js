@@ -10,6 +10,25 @@
   const wrapW = (name, fn) => { const prev = window[name]; if (typeof prev !== 'function') return; window[name] = function (...a) { return fn.call(this, prev, ...a); }; };
   const isDemoP = (id) => id && id !== 'me' && P[id] && !P[id]._live;
 
+  /* ---- حضور و بازدید (دور ۳۹): برای «آنلاین همین حالا» و آمار بازدید پنل؛ مهمان‌ها هم شمرده می‌شوند ---- */
+  const vid = (() => {
+    let v = null; try { v = localStorage.getItem('blk-vid'); } catch (e) {}
+    if (!v || !/^[A-Za-z0-9_-]{8,40}$/.test(v)) { v = 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); try { localStorage.setItem('blk-vid', v); } catch (e) {} }
+    return v;
+  })();
+  let lastView = 0;
+  function ping(view) {
+    if (!window.LIVE || !LIVE.base || document.hidden) return;
+    const h = { 'Content-Type': 'application/json' };
+    if (LIVE.tok && LIVE.tok.a) h.Authorization = 'Bearer ' + LIVE.tok.a;
+    if (view) lastView = Date.now();
+    fetch(LIVE.base + '/api/app/ping', { method: 'POST', headers: h, body: JSON.stringify({ v: vid, view: !!view }) }).catch(() => {});
+  }
+  // باز شدن اپ = یک بازدید؛ برگشتن بعد از ۳۰ دقیقه = بازدید تازه؛ هر ۶۰ ثانیه «هنوز اینجام»
+  setTimeout(() => ping(true), 2500);
+  setInterval(() => ping(false), 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) ping(Date.now() - lastView > 30 * 60000); });
+
   /* ---- انبارهای نمایشی: با اتصال خالی می‌شوند ---- */
   function purge() {
     if (!on()) return;

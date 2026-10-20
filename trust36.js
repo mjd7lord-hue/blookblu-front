@@ -267,14 +267,14 @@
       const adj = p.adj || 0, n = p.strikes || 0;
       const brk = el.querySelector('.card.brk');
       if (brk && (adj || n || (p.guar && p.guar.length))) {
-        brk.insertAdjacentHTML('beforeend', `<div><div class="h"><span>قیم و خوش‌قولی</span><b class="num" style="color:${adj < 0 ? 'var(--bad)' : 'var(--ok)'}">${adj > 0 ? '+' : adj < 0 ? '−' : ''}${fa(Math.abs(adj))}</b></div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">${n ? `${fa(n)} اخطار بدقولی فعال (هر کدام −۱۰) · ` : ''}قیم معتبر +۵</div></div>`);
+        brk.insertAdjacentHTML('beforeend', `<div><div class="h"><span>قیم، پاسخ مفید و خوش‌قولی</span><b class="num" style="color:${adj < 0 ? 'var(--bad)' : 'var(--ok)'}">${adj > 0 ? '+' : adj < 0 ? '−' : ''}${fa(Math.abs(adj))}</b></div><div style="font-size:12.5px;color:var(--muted);margin-top:4px">${n ? `${fa(n)} اخطار بدقولی فعال (هر کدام −۱۰) · ` : ''}قیم معتبر +۵ · هر پاسخ تخصصی با لایک +۱ (تا ۵)</div></div>`);
       }
       if (n) {
         const sec = el.querySelector('.flip-hint');
         if (sec) sec.insertAdjacentHTML('afterend', `<div class="section"><button class="note" style="width:100%;border:0;text-align:start;font:inherit;color:#991B1B;background:#FEE2E2" onclick="${p === ME() || S.tid === 'me' ? "go('strikes')" : ''}">${I.warn}<span>${fa(n)} اخطار بدقولی در ۶ ماه اخیر</span></button></div>`);
       }
       const g = el.querySelector('details.guide');
-      if (g && !g.querySelector('.g36')) g.insertAdjacentHTML('beforeend', '<p class="g36"><b>۵. قیم و خوش‌قولی:</b> قیم معتبر ۵ امتیاز اضافه می‌کند. هر اخطار بدقولی ۱۰ امتیاز تا ۶ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.</p>');
+      if (g && !g.querySelector('.g36')) g.insertAdjacentHTML('beforeend', '<p class="g36"><b>۵. قیم، پاسخ مفید و خوش‌قولی:</b> قیم معتبر ۵ امتیاز اضافه می‌کند. هر پاسخ تو به پرسش تخصصی که اولین «مفید بود» را بگیرد ۱ امتیاز (تا ۵). هر اخطار بدقولی ۱۰ امتیاز تا ۶ ماه کم می‌کند؛ اگر کسی که قیمش هستی بدقولی کند، تو ۵ امتیاز از دست می‌دهی.</p>');
       i18n(el);
     } catch (e) {}
     return r;
@@ -848,7 +848,7 @@
       'درخواست لغو فرستاده شد؛ اگر قبول کند، بدون اخطار لغو می‌شود': 'Cancellation request sent; if accepted, it is cancelled with no warning', 'لغو شد؛ اخطار بدقولی برایت ثبت شد': 'Cancelled; a bad-faith warning was recorded for you', 'پروژه لغو شد': 'Project cancelled',
       'با توافق لغو شد؛ بدون اخطار': 'Cancelled by agreement; no warning', 'قرارداد ادامه دارد': 'The contract continues', 'انجام شد': 'Done',
       'درخواست لغو فرستادی': 'You requested cancellation', 'پس گرفتن درخواست': 'Withdraw request', '{@} درخواست لغو داده': '{@} asked to cancel', 'قبول لغو': 'Accept cancellation', 'ادامهٔ قرارداد': 'Continue the contract',
-      'طرف مقابل بدقولی کرد؟': 'Other side broke their word?', 'قانون خوش‌قولی بلوک': 'Blook reliability rule', 'قیم و خوش‌قولی': 'Guarantor & reliability', 'قیم معتبر +۵': 'Valid guarantor +5',
+      'طرف مقابل بدقولی کرد؟': 'Other side broke their word?', 'قانون خوش‌قولی بلوک': 'Blook reliability rule', 'قیم و خوش‌قولی': 'Guarantor & reliability', 'قیم معتبر +۵': 'Valid guarantor +5', 'قیم، پاسخ مفید و خوش‌قولی': 'Guarantor, helpful answers & reliability', 'قیم معتبر +۵ · هر پاسخ تخصصی با لایک +۱ (تا ۵)': 'Valid guarantor +5 · each liked expert answer +1 (up to 5)', '۵. قیم، پاسخ مفید و خوش‌قولی:': '5. Guarantor, helpful answers & reliability:', 'هر پاسخ تو به پرسش تخصصی که اولین «مفید بود» را بگیرد ۱ امتیاز (تا ۵).': 'Each of your expert answers that gets its first “helpful” earns 1 point (up to 5).',
       '{#} اخطار بدقولی فعال (هر کدام −۱۰)': '{#} active bad-faith warnings (−10 each)', '{#} اخطار بدقولی در ۶ ماه اخیر': '{#} bad-faith warnings in the last 6 months',
       'ضامن خوش‌قولی تو در بلوک': 'Your reliability guarantor in Blook',
       'قیم کسی است که خودش در بلوک خوش‌سابقه است و با کد پیامکی تضمین می‌کند تو را می‌شناسد و خوش‌قولی. قیم معتبر ۵ امتیاز به اعتبارت اضافه می‌کند؛ اگر بدقولی کنی، او هم ۵ امتیاز از دست می‌دهد.': 'A guarantor is someone with a good record in Blook who confirms by SMS code that they know you and you keep your word. A valid guarantor adds 5 points; if you break your word, they lose 5 points too.',
