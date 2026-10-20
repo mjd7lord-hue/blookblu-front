@@ -225,6 +225,7 @@
     if (id === 'me') return 'me';
     Object.assign(P[id], {
       _full: true, _pid: pp.id, bio: pp.bio || '', place: pp.city, born: pp.city, since: monthYear(pp.since), phone: faPhone(pp.phone),
+      adj: (pp.trust && pp.trust.adj) || 0, strikes: pp.strikes || 0,
       verified: !!pp.identityVerified, docVerified: !!pp.verified, stars: pp.stars, exp: (pp.data && pp.data.exp) || '—', age: (L.ageOf && pp.data && L.ageOf(pp.data.by)) || '—',
       skills: pp.skills.map(skillRow), revs: pp.reviews.map(revRow), guar: pp.guarantors.map((g) => [g.name, g.relation, 'general']),
       pf: (pp.portfolio || []).map((x) => [x.title, x.place || '', abs(x.url)]),
@@ -450,6 +451,8 @@
     if (link.screen === 'home') return "go('home')";
     if (link.screen === 'roles') return "go('roles')";
     if (link.screen === 'myads') return "go('myads')";
+    if (link.screen === 'strikes') return "go('strikes')";
+    if (link.screen === 'guar') return "go('guar')";
     return "go('notif')";
   }
   const mapNotif = (n) => ({ id: n.id, g: group(n.createdAt), ty: NTY[n.type] || 'req', t: n.title, s: n.body || '', time: rel(n.createdAt), go: goFor(n.link), read: !!n.readAt });
@@ -612,6 +615,7 @@
     Object.assign(m, {
       code: p.code, name: p.name, ini: ini(p.name), title: p.title || m.title, place: p.city, born: p.city,
       rating: p.rating, done: p.doneCount, revN: p.reviewsCount, verified: !!p.identityVerified, docVerified: !!p.verified,
+      adj: (p.trust && p.trust.adj) || 0, strikes: p.strikes || 0,
       phone: p.phone ? faPhone(p.phone) : null, since: monthYear(p.since), resp: '', bio: p.bio || '', age: '—', exp: (p.data && p.data.exp) || '—',
       week: p.week, stars: p.stars, revs: p.reviews.map(revRow), guar: p.guarantors.map((g) => [g.name, g.relation, 'general']),
       pf: (p.portfolio || []).map((x) => [x.title, x.place || '', abs(x.url)]), avatar: abs(p.avatarUrl),

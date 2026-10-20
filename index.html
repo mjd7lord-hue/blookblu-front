@@ -2302,7 +2302,7 @@ const RANGE={'شهر':{n:'داخل شهر',reach:38},'۳۰':{n:'تا ۳۰ کیل
 /* ---------- state ---------- */
 const S={role:'contractor',mode:'workers',roleF:'all',q:'',f:{skills:[],verified:false,rating:0,sort:'best'},saved:new Set(['karimi']),hist:[],cur:'explore',
   me:{guarReq:[{n:'استاد جواد رحیمی',rel:'همکار ۵ ساله',st:null},{n:'مهندس سلیمانی',rel:'ناظر پروژهٔ طولا',st:null}],guar:[['مهندس عباسی','ناظر · ۶ سال همکاری','ok'],['کریمی، بتن قشم','۱۲ سفارش مشترک','wait']],pub:true,phone:false,pf:false}};
-const trustOf=p=>{const c=Math.round(p.rating/5*55),pr=Math.min(25,p.done),r=Math.min(10,Math.round(p.revN/2)),id=p.verified?10:0;return{c,pr,r,id,t:c+pr+r+id}};
+const trustOf=p=>{const c=Math.round(p.rating/5*55),pr=Math.min(25,p.done),r=Math.min(10,Math.round(p.revN/2)),id=p.verified?10:0,adj=p.adj||0;return{c,pr,r,id,adj,t:Math.max(0,Math.min(100,c+pr+r+id+adj))}};
 function avBg(p){return p&&p.avatar?`;background-image:url('${String(p.avatar).replace(/['"()]/g,'')}');background-size:cover;background-position:center;color:transparent`:''}
 const hexA=(p,cls='')=>`<div class="hex ${cls}" style="background:${ROLES[p.role].c}${avBg(p)}" aria-hidden="true">${p.ini}</div>`;
 function ringSm(v,color,size=26,sw=4){const r=(size-sw)/2,C=2*Math.PI*r;return `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="var(--line)" stroke-width="${sw}" fill="none"/><circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${sw}" fill="none" stroke-linecap="round" stroke-dasharray="${C*v/100} ${C}"/></svg>`}
@@ -8302,6 +8302,7 @@ go('home',true);</script>
 <script src="urgent.js"></script>
 <script src="explore.js"></script>
 <script src="i18n-extra.js"></script>
+<script src="trust36.js"></script>
 <script src="desktop.js"></script>
 
 </body></html>
