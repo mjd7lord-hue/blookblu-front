@@ -3626,7 +3626,7 @@ function renderAuth(){
     <div class="auth-hero"><div class="auth-logo">${logoSVG('anim')}</div>
       <h1>ورود به ${wordmark('anim md')}</h1><p>با شمارهٔ موبایل وارد شو یا حساب تازه بساز.</p></div>
     <div class="section"><label class="label" for="ph">شمارهٔ موبایل</label>
-      <div class="phone-in"><span>۰۹</span><input id="ph" dir="ltr" inputmode="numeric" maxlength="14" placeholder="xx xxx xxxx" value="${esc(r.phone)}" oninput="phIn(this)"></div>
+      <div class="phone-in"><input id="ph" dir="ltr" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="09xx xxx xxxx" aria-label="شمارهٔ موبایل" value="${esc(r.phone?'09'+r.phone:'')}" oninput="phIn(this)"></div>
       <label class="agree"><input type="checkbox" id="agr" onchange="chkPhone()" ${r.ok?'checked':''}><span><a href="#" onclick="event.preventDefault();openLegal('terms')">قوانین استفاده</a> و <a href="#" onclick="event.preventDefault();openLegal('privacy')">حریم خصوصی</a> بلوک را می‌پذیرم.</span></label>
       <button class="cta" id="phBtn" disabled onclick="sendOtp()">دریافت کد تأیید</button>
       <button class="ghost" onclick="S.pending=null;go('explore')">فعلاً فقط آگهی‌ها را می‌بینم</button></div>`;
@@ -3659,8 +3659,8 @@ const ROLE_INFO={
 };
 /* شماره: با ۰۹، ۹۸+ یا بدون آن قبول؛ S.reg.phone همیشه ۹ رقم بعد از ۰۹ */
 function phNorm(v){let d=String(v||'').replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g,'');if(d.startsWith('0098'))d=d.slice(4);else if(d.startsWith('98')&&d.length>=12)d=d.slice(2);if(d.startsWith('09'))d=d.slice(2);else if(d.startsWith('9')&&d.length===10)d=d.slice(1);return d.slice(0,9)}
-function phIn(el){el.value=el.value.replace(/[^0-9۰-۹+]/g,'');S.reg.phone=phNorm(el.value);const sp=el.previousElementSibling;if(sp)sp.style.display=/^[+0۰]|^(98|۹۸)/.test(el.value)&&el.value.length>1?'none':'';chkPhone()}
-function chkPhone(){const r=S.reg,v=(r.phone||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)),ag=$('agr');r.ok=ag&&ag.checked;const b=$('phBtn');if(b)b.disabled=!(v.length===9&&r.ok)}
+function phIn(el){el.value=el.value.replace(/[^0-9۰-۹+]/g,'');S.reg.phone=phNorm(el.value);const d=el.value.replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g,'');S.reg.phOk=/^(09|9|989|00989)\d{9}$/.test(d);chkPhone()}
+function chkPhone(){const r=S.reg,v=(r.phone||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)),ag=$('agr');r.ok=ag&&ag.checked;const b=$('phBtn');if(b)b.disabled=!((r.phOk===undefined?v.length===9:r.phOk&&v.length===9)&&r.ok)}
 function sendOtp(){S.reg.step='otp';S.reg.t=Date.now();renderAuth();toast('کد تأیید فرستاده شد')}
 function otpTimer(){clearInterval(S.otpI);const upd=()=>{const el=$('otpT');if(!el){clearInterval(S.otpI);return}const s=Math.max(0,120-Math.floor((Date.now()-S.reg.t)/1000));
   el.innerHTML=s?`ارسال دوباره تا <b class="num">${fa(Math.floor(s/60)+':'+String(s%60).padStart(2,'0'))}</b>`:`<button class="lnk2" onclick="S.reg.t=Date.now();otpTimer();toast('کد دوباره فرستاده شد')">ارسال دوبارهٔ کد</button>`};upd();S.otpI=setInterval(upd,1000)}
@@ -4006,7 +4006,7 @@ function renderSec(){
     <div class="card">${S.sess.map((s,i)=>`<div class="need"><span class="nt-ic">${s.cur?MI.phone.replace('class="ico"','class="ico" style="width:20px;height:20px"'):'<svg class="ico" viewBox="0 0 24 24" style="width:20px;height:20px"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>'}</span><div style="flex:1"><b style="display:block">${s.d}${s.cur?' <span class="tag ok">فعلی</span>':''}</b><span style="font-size:13px;color:var(--muted)">${s.m} · ${s.w}</span></div>${s.cur?'':`<button class="chip" onclick="S.sess.splice(${i},1);renderSec();toast('از این دستگاه خارج شدی')">خروج</button>`}</div>`).join('')}</div></div>
   <div class="section"><div class="card" style="padding:2px 16px"><button class="linkrow" onclick="chPhone()"><span class="ic">${MI.phone.replace('class="ico"','class="ico" style="width:20px;height:20px"')}</span><span>تغییر شمارهٔ موبایل</span><small dir="ltr">۰۹۱۷ ••• ۴۵۱۲</small></button></div></div>`;
 }
-function chPhone(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">تغییر شمارهٔ موبایل</h3><p class="sub">به هر دو شماره کد تأیید فرستاده می‌شود.</p><span class="label">شمارهٔ تازه</span><div class="phone-in"><span>۰۹</span><input dir="ltr" inputmode="numeric" maxlength="9" placeholder="xx xxx xxxx"></div><button class="cta" onclick="closeSheet();toast('کد تأیید به هر دو شماره فرستاده شد')">ارسال کد</button>`;show()}
+function chPhone(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">تغییر شمارهٔ موبایل</h3><p class="sub">به هر دو شماره کد تأیید فرستاده می‌شود.</p><span class="label">شمارهٔ تازه</span><div class="phone-in"><input dir="ltr" type="tel" inputmode="numeric" maxlength="14" placeholder="09xx xxx xxxx"></div><button class="cta" onclick="closeSheet();toast('کد تأیید به هر دو شماره فرستاده شد')">ارسال کد</button>`;show()}
 
 /* ---------- درباره و وضعیت سرویس ---------- */
 function renderAbout(){

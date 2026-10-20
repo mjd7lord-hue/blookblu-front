@@ -33,6 +33,12 @@
   .hq svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
   .hq::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--gold);opacity:0;animation:hqPing 3.2s 1.2s 2}
   @keyframes hqPing{0%{opacity:.7;transform:scale(.8)}70%,100%{opacity:0;transform:scale(1.35)}}
+  #qa42 .qa42{grid-template-columns:repeat(4,1fr)}#qa42 .qa42 button{padding:10px 2px;font-size:12px;position:relative}
+  #qa42 .qa42 em{position:absolute;top:4px;inset-inline-end:8px;background:#EF4444;color:#fff;border-radius:9px;min-width:18px;height:18px;padding:0 5px;font:700 11px/18px inherit;font-style:normal}
+  .est42{display:flex;align-items:center;gap:12px;width:100%;text-align:start;font:inherit;color:inherit;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:12px 14px;cursor:pointer}
+  .est42 .ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--gold)}
+  .est42 .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+  .est42 .t{flex:1;min-width:0}.est42 b{display:block;font-size:15px}.est42 small{display:block;font-size:12.5px;color:var(--muted)}.est42 .go{color:var(--muted);font-size:18px}
   .hq.on-dark{background:rgba(255,255,255,.12);color:#FFD27A}
   .bar .hq{margin-inline-start:4px}
   #phHero .hq.ph-hq{position:absolute;top:10px;inset-inline-end:10px;z-index:3;width:30px;height:30px}
@@ -775,8 +781,42 @@
         const t = head(s);
         if (/^درخواست‌های تازه|^پیشنهادها برای/.test(t) || s.querySelector('.est-promo') || /ساختمانت چقدر خرج دارد|حل‌کنندهٔ حضوری بلوک شو/.test(s.textContent) && !s.querySelector('.hcard, #phHero')) s.remove();
       });
-      host.querySelectorAll(':scope > .section .qa > button').forEach((b) => { if (/exploreMode\(|go\('explore'\)/.test(b.getAttribute('onclick') || '')) b.remove(); });
-      host.querySelectorAll(':scope > .section .qa').forEach((q) => { if (!q.children.length) q.closest('.section').remove(); });
+      // دور ۴۲: یک «دسترسی سریع» یکسان برای همهٔ نقش‌ها (به‌جای کاشی‌های پراکندهٔ هر نقش)
+      if (S.auth) {
+        host.querySelectorAll(':scope > .section .qa').forEach((q) => { const s = q.closest('.section'); if (s && s.id !== 'qa42') s.remove(); });
+        if (!$('qa42')) {
+          const L = (S.req && S.req[S.role]) || [];
+          const pend = L.filter((x) => x && !x.st).length, un = (S.notifs || []).filter((n) => !n.read).length;
+          const msgN = (S.convs || []).reduce((n, c) => n + (c.unread || 0), 0);
+          const IC = {
+            req: '<svg class="ico" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h4"/></svg>',
+            proj: '<svg class="ico" viewBox="0 0 24 24"><path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>',
+            ctr: '<svg class="ico" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 15c1.5-2 2.5 1 4-1s2 1 3 0"/></svg>',
+            msg: '<svg class="ico" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+            ads: '<svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg>',
+            post: '<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+            id: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.5"/><path d="M14 10h4M14 14h3"/></svg>',
+            bell: '<svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+          };
+          const t = (fn, c, ic, label, n) => `<button onclick="${fn}"><span class="ic" style="--c:${c}">${ic}</span>${label}${n ? `<em class="num">${fa(n)}</em>` : ''}</button>`;
+          const html = `<div class="section" id="qa42"><div class="sec-head"><h3>دسترسی سریع</h3></div><div class="qa qa42">${[
+            t("go('req')", 'var(--gold)', IC.req, 'درخواست‌ها', pend),
+            t("go('proj')", 'var(--accent)', IC.proj, 'پروژه‌ها'),
+            t("go('ctrs')", 'var(--r-engineer)', IC.ctr, 'قراردادها'),
+            t("go('msg')", 'var(--r-specialist)', IC.msg, 'پیام‌ها', msgN),
+            t("go('myads')", 'var(--r-contractor)', IC.ads, 'آگهی‌های من'),
+            t("gate('post',()=>openWizard())", 'var(--ok)', IC.post, 'ثبت آگهی'),
+            t("openTrust('me')", 'var(--r-worker)', IC.id, 'شناسنامهٔ کاری'),
+            t("go('notif')", 'var(--r-company)', IC.bell, 'اعلان‌ها', un),
+          ].join('')}</div></div>`;
+          const after = $('phHero') || $('ugIn') || $('ugBtnSec') || host.querySelector(':scope > header');
+          if (after) after.insertAdjacentHTML('afterend', html); else host.insertAdjacentHTML('afterbegin', html);
+        }
+      }
+      // ابزار برآورد هزینه برای همه (کاربر و مهمان)، پایین خانه
+      if (!$('est42')) {
+        host.insertAdjacentHTML('beforeend', `<div class="section" id="est42"><button class="card est42" onclick="go('est')"><span class="ic">${'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h4"/></svg>'}</span><span class="t"><b>برآورد هزینه</b><small>هزینهٔ ساخت، بازسازی و دستمزد؛ قیمت به‌روز، در ۳۰ ثانیه</small></span><span class="go">‹</span></button></div>`);
+      }
       // کارت «آماده به کار» پایین خانه
       const rdS = $('rdSec');
       if (rdS && rdS.parentElement === host) { const tail = [...host.children].reverse().find((c) => c.classList.contains('section') || c.id === 'phHero'); if (tail && tail !== rdS) tail.after(rdS); }
@@ -830,7 +870,7 @@
   /* ================= ترجمهٔ انگلیسی ================= */
   if (typeof I18N === 'object') {
     Object.assign(I18N.dict, {
-      'آموزش': 'Tutorial', 'ثبت‌نام کامل': 'Complete sign-up', 'برای همه از روز اول': 'For everyone from day one', 'مدرک تأییدشده': 'Approved document', 'نشان «مدرک‌دار» گرفته': 'Has the “Documented” badge', 'یک مدرک (کارت مهارت، پروانه…) بفرست': 'Send one document (skill card, licence…)', 'شروع:': 'Start:', 'با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.': 'Complete sign-up 10 points, identity check 10, first approved document 5; at least 25 from day one.', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
+      'آموزش': 'Tutorial', 'دسترسی سریع': 'Quick access', 'برآورد هزینه': 'Cost estimate', 'هزینهٔ ساخت، بازسازی و دستمزد؛ قیمت به‌روز، در ۳۰ ثانیه': 'Build, renovation and labour costs; current prices, in 30 seconds', 'قراردادها': 'Contracts', 'پیام‌ها': 'Messages', 'ثبت آگهی': 'Post an ad', 'پروژه‌ها': 'Projects', 'ثبت‌نام کامل': 'Complete sign-up', 'برای همه از روز اول': 'For everyone from day one', 'مدرک تأییدشده': 'Approved document', 'نشان «مدرک‌دار» گرفته': 'Has the “Documented” badge', 'یک مدرک (کارت مهارت، پروانه…) بفرست': 'Send one document (skill card, licence…)', 'شروع:': 'Start:', 'با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.': 'Complete sign-up 10 points, identity check 10, first approved document 5; at least 25 from day one.', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
       'فهمیدم': 'Got it', 'بعدی': 'Next', 'قبلی': 'Back', 'تمام': 'Done', 'شروع': 'Start', 'رد شدن': 'Skip', 'دیدن دوبارهٔ آشنایی با بلوک': 'Replay the Blook intro',
       'خوش‌قولی': 'Reliability', 'خوش‌قولی و اخطارها': 'Reliability & warnings', 'قانون بلوک': 'Blook rule', 'قول، قول است': 'A promise is a promise',
       '{#} اخطار فعال داری': 'You have {#} active warnings', 'هر اخطار ۱ ماه بعد خودکار از امتیازت برمی‌گردد.': 'Each warning is automatically lifted from your score after 1 month.',
