@@ -39,6 +39,30 @@
   .est42 .ic{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,var(--surface));color:var(--gold)}
   .est42 .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
   .est42 .t{flex:1;min-width:0}.est42 b{display:block;font-size:15px}.est42 small{display:block;font-size:12.5px;color:var(--muted)}.est42 .go{color:var(--muted);font-size:18px}
+  .inst-steps{list-style-type:persian;margin:0 0 12px;padding:0 20px;text-align:start;line-height:2;font-size:14.5px}.inst-steps li{margin-bottom:4px}
+  html[data-en] .inst-steps{list-style-type:decimal}
+  .inst-warn{font-size:13px;background:#FEF3C7;color:#92400E;border-radius:10px;padding:8px 10px;margin:0 0 10px;text-align:start}
+  .onb .onb-steps{max-width:420px;margin:0 auto 12px;color:#E5E7EB}.onb .onb-steps .inst-steps{color:#E5E7EB}
+  .onb-inst .ph{width:150px;height:230px;border-radius:26px;border:6px solid #374151;background:linear-gradient(160deg,#1F2937,#111827);padding:18px 12px}
+  .onb-inst .g{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.onb-inst .g i{aspect-ratio:1;border-radius:8px;background:#374151}
+  .onb-inst img{width:100%;border-radius:8px;animation:hsPop 1.6s .4s both infinite alternate}
+  @keyframes hsPop{0%{transform:scale(.2);opacity:0}40%{transform:scale(1.15);opacity:1}55%,100%{transform:none;opacity:1}}
+  .tut-ph .sf-page{position:absolute;inset:0;display:flex;flex-direction:column;background:#fff;color:#111}
+  .tut-ph .sf-url{margin:8px;background:#F3F4F6;border-radius:8px;text-align:center;font-size:10px;padding:4px;direction:ltr}
+  .tut-ph .ch-top{display:flex;align-items:center;gap:6px;padding:8px;direction:ltr}
+  .tut-ph .sf-body{flex:1;display:grid;place-items:center;align-content:center;gap:2px}.tut-ph .sf-body b{font-size:16px}.tut-ph .sf-body small{color:#6B7280;font-size:10px}
+  .tut-ph .sf-bar{display:flex;justify-content:space-around;padding:8px 4px 10px;border-top:1px solid #E5E7EB;font-size:13px;color:#2563EB}
+  .tut-ph .hl{color:#F97316!important;animation:hqPing 1.4s infinite;border-radius:8px;outline:2px solid #F97316;outline-offset:2px}
+  .tut-ph .ios-sheet{position:absolute;inset:auto 6px 6px;background:#F2F2F7;border-radius:12px;padding:4px;box-shadow:0 -6px 18px rgba(0,0,0,.18);direction:ltr;animation:tutIn .4s both}
+  .tut-ph .ios-sheet.and{inset:30px 8px auto auto;width:62%;background:#fff;direction:rtl}
+  .tut-ph .ios-sheet div{background:#fff;border-radius:8px;margin:3px;padding:7px 9px;font-size:10.5px;color:#111}.tut-ph .ios-sheet div.hl{outline-offset:-2px}
+  .tut-ph .add-dlg{position:absolute;inset:0;background:#F2F2F7;color:#111;direction:ltr}
+  .tut-ph .add-dlg .h{display:flex;justify-content:space-between;align-items:center;padding:10px 8px;font-size:10px;color:#2563EB}.tut-ph .add-dlg .h b{color:#111}
+  .tut-ph .add-dlg .r{display:flex;gap:8px;align-items:center;margin:8px;background:#fff;border-radius:10px;padding:8px}.tut-ph .add-dlg img{width:38px;height:38px;border-radius:9px}
+  .tut-ph .add-dlg .r b{display:block;font-size:12px}.tut-ph .add-dlg .r small{font-size:9.5px;color:#6B7280}
+  .tut-ph .hs-grid{position:absolute;inset:0;background:linear-gradient(160deg,#1E3A8A,#0F766E);padding:22px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-content:start}
+  .tut-ph .hs-ic{display:grid;justify-items:center;gap:3px}.tut-ph .hs-ic i,.tut-ph .hs-ic img{width:100%;aspect-ratio:1;border-radius:22%;display:block}
+  .tut-ph .hs-ic small{font-size:8.5px;color:#fff}.tut-ph .hs-ic.pop img{animation:hsPop 1.4s .5s both}
   .hq.on-dark{background:rgba(255,255,255,.12);color:#FFD27A}
   .bar .hq{margin-inline-start:4px}
   #phHero .hq.ph-hq{position:absolute;top:10px;inset-inline-end:10px;z-index:3;width:30px;height:30px}
@@ -646,6 +670,30 @@
     return r;
   });
 
+  /* ================= دور ۴۳: بلوک روی صفحهٔ گوشی (آیفون و اندروید) ================= */
+  const UA = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(UA);
+  const inApp = /Instagram|FBAN|FBAV|Telegram|WhatsApp|Line\/|; wv\)/i.test(UA);
+  const standalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+  let bip = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; document.querySelectorAll('.inst-native').forEach((b) => (b.hidden = false)); });
+  window.addEventListener('appinstalled', () => { bip = null; toast('بلوک روی صفحهٔ گوشی‌ات نصب شد'); });
+  window.instNative = async () => {
+    if (!bip) { tutOpen('install'); return; }
+    try { bip.prompt(); await bip.userChoice; } catch (e) {}
+    bip = null;
+  };
+  window.blkStandalone = standalone;
+  const SHARE_SVG = '<svg viewBox="0 0 24 24" style="width:1.2em;height:1.2em;vertical-align:-.25em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>';
+  const INST_TXT = {
+    ios: [`در Safari دکمهٔ اشتراک‌گذاری ${SHARE_SVG} را بزن (پایین صفحه)`, 'پایین بیا و «Add to Home Screen» (افزودن به صفحهٔ اصلی) را بزن', 'بالای صفحه «Add» (افزودن) را بزن؛ آیکون بلوک روی صفحهٔ گوشی‌ات می‌آید'],
+    android: ['در Chrome دکمهٔ ⋮ (بالای صفحه) را بزن', '«نصب برنامه» یا «Add to Home screen» (افزودن به صفحهٔ اصلی) را بزن', '«نصب» را تأیید کن؛ آیکون بلوک روی صفحهٔ گوشی‌ات می‌آید'],
+  };
+  const myOS = () => (isIOS ? 'ios' : 'android');
+  const inAppNote = () => (inApp ? `<p class="inst-warn">از داخل ${isIOS ? 'تلگرام/اینستاگرام' : 'یک برنامهٔ دیگر'} آمده‌ای؛ اول لینک را در ${isIOS ? 'Safari' : 'Chrome'} باز کن.</p>` : '');
+  const instSteps = (os) => `<ol class="inst-steps">${INST_TXT[os].map((t) => `<li>${t}</li>`).join('')}</ol>`;
+
   /* ================= ۶) آموزش‌ها: صحنه‌های متحرک با اجزای واقعی اپ ================= */
   const F = (x, y, cls) => `<i class="tut-f ${cls || ''}" style="left:${x}%;top:${y}%"></i>`;
   const heroMini = (pct, extra) => `<div class="hcard ph-hero" style="margin:0;padding:12px;border-radius:16px;font-size:10px"><div class="stars"></div>
@@ -713,7 +761,28 @@
         { t: 'اولین نفری که قبول کند، کار مال اوست؛ گفت‌وگو، توافق و پروژه خودکار ساخته می‌شود.', s: chatMini(btnMini('✓ قبول کرد؛ پروژه ساخته شد', 'ghost')) },
       ] },
   };
-  const ORDER = ['home', 'hero', 'contract', 'strike', 'guar', 'pay', 'ready', 'urgent'];
+  const blkIcon = (pop) => `<div class="hs-ic ${pop ? 'pop' : ''}"><img src="assets/brand/icon-dark-180.png" alt=""><small>بلوک</small></div>`;
+  const homeGrid = `<div class="hs-grid">${['#5EA8FF', '#F97316', '#22C55E', '#A78BFA', '#EF4444', '#F2B53A', '#14B8A6'].map((c) => `<div class="hs-ic"><i style="background:${c}"></i><small>&nbsp;</small></div>`).join('')}${blkIcon(true)}</div>`;
+  const safariBar = (hl) => `<div class="sf-page"><div class="sf-url">blooko.ir</div><div class="sf-body"><b>بلوک</b><small>بازار کار ساختمان</small></div><div class="sf-bar"><span>‹</span><span>›</span><span class="${hl ? 'hl' : ''}">${SHARE_SVG}</span><span>▢</span><span>⧉</span></div></div>`;
+  const chromeBar = (hl) => `<div class="sf-page"><div class="ch-top"><span class="sf-url" style="flex:1;margin:0">blooko.ir</span><span class="${hl ? 'hl' : ''}" style="font-size:16px;font-weight:900">⋮</span></div><div class="sf-body"><b>بلوک</b><small>بازار کار ساختمان</small></div></div>`;
+  const sheetList = (rows, hl) => `<div class="ios-sheet">${rows.map((r, i) => `<div class="${i === hl ? 'hl' : ''}">${r}</div>`).join('')}</div>`;
+  const addDlg = (btn) => `<div class="add-dlg"><div class="h"><span>انصراف</span><b>${btn === 'Add' ? 'Add to Home Screen' : 'نصب برنامه'}</b><span class="hl">${btn}</span></div><div class="r"><img src="assets/brand/icon-dark-180.png" alt=""><div><b>بلوک</b><small>blooko.ir</small></div></div></div>`;
+  TOP.inst_ios = { ic: '📲', t: 'بلوک روی صفحهٔ آیفون', d: 'Safari ← اشتراک‌گذاری ← Add to Home Screen', alt: 'inst_and',
+    steps: [
+      { t: INST_TXT.ios[0], s: safariBar(true) + F(50, 94) },
+      { t: INST_TXT.ios[1], s: safariBar(false) + sheetList(['Copy  ⧉', 'Add to Bookmarks  ☆', 'Add to Home Screen  ⊞', 'Find on Page'], 2) + F(50, 74) },
+      { t: INST_TXT.ios[2], s: addDlg('Add') + F(86, 9) },
+      { t: 'تمام! از این به بعد بلوک را مثل یک برنامه از صفحهٔ گوشی باز کن؛ بدون نوار مرورگر و سریع‌تر.', s: homeGrid },
+    ] };
+  TOP.inst_and = { ic: '📲', t: 'بلوک روی صفحهٔ اندروید', d: 'Chrome ← ⋮ ← نصب برنامه', alt: 'inst_ios',
+    steps: [
+      { t: INST_TXT.android[0], s: chromeBar(true) + F(88, 6) },
+      { t: INST_TXT.android[1], s: chromeBar(false) + sheetList(['زبانهٔ تازه', 'نشانک‌ها', 'نصب برنامه  ⊕', 'افزودن به صفحهٔ اصلی'], 2).replace('ios-sheet', 'ios-sheet and') + F(60, 34) },
+      { t: INST_TXT.android[2], s: addDlg('نصب') + F(86, 9) },
+      { t: 'تمام! از این به بعد بلوک را مثل یک برنامه از صفحهٔ گوشی باز کن؛ بدون نوار مرورگر و سریع‌تر.', s: homeGrid },
+    ] };
+  TOP.install = { ic: '📲', t: 'بلوک روی صفحهٔ گوشی', d: 'آیفون و اندروید؛ همیشه یک لمس فاصله', steps: [] };
+  const ORDER = ['install', 'home', 'hero', 'contract', 'strike', 'guar', 'pay', 'ready', 'urgent'];
   const T = { k: null, i: 0, timer: 0 };
   function countAnim(root) {
     root.querySelectorAll('.tut-cnt').forEach((el) => {
@@ -730,12 +799,16 @@
       <div class="tut-dots">${tp.steps.map((_, j) => `<i class="${j === T.i ? 'on' : ''}"></i>`).join('')}</div>
       <div class="tut-nav">${T.i ? '<button class="ghost" onclick="tutGo(-1)">قبلی</button>' : ''}<button class="cta" style="margin:0" onclick="${last ? 'closeSheet()' : 'tutGo(1)'}">${last ? 'فهمیدم' : 'بعدی'}</button></div>
       ${tp.page && tp.steps.some((s) => s.sel) && S.auth ? '<button class="ghost" style="width:100%;margin-top:8px" onclick="tutShow()">نشانم بده در خود اپ</button>' : ''}
+      ${tp.alt ? `<button class="cta inst-native" ${bip && !isIOS ? '' : 'hidden'} style="margin-top:8px" onclick="instNative()">نصب بلوک با یک لمس</button><button class="ghost" style="width:100%;margin-top:8px" onclick="T36.k='${tp.alt}';T36.i=0;tutStepX()">${tp.alt === 'inst_and' ? 'آموزش برای اندروید' : 'آموزش برای آیفون'}</button>${inAppNote()}` : ''}
       <button class="ghost" style="width:100%;margin-top:4px;font-size:13px" onclick="tutOpen(\'all\')">همهٔ آموزش‌ها</button>`;
     show(); i18n(sb); countAnim(sb);
     const bar = sb.querySelector('.ph-bar i'); if (bar) { const w = bar.style.width; bar.style.width = '0'; requestAnimationFrame(() => requestAnimationFrame(() => (bar.style.width = w))); }
   }
+  window.tutStepX = () => tutStep();
+  window.T36 = T;
   window.tutGo = (d) => { T.i = Math.max(0, Math.min(TOP[T.k].steps.length - 1, T.i + d)); tutStep(); };
   window.tutOpen = function (topics) {
+    if (topics === 'install') topics = isIOS ? 'inst_ios' : 'inst_and';
     const list = String(topics || 'all') === 'all' ? ORDER : String(topics).split(',').filter((k) => TOP[k]);
     if (list.length === 1) { T.k = list[0]; T.i = 0; tutStep(); return; }
     sb.innerHTML = `<div class="grab"></div><h3 id="sheetTitle">راهنمای بلوک</h3><p class="sub">آموزش کوتاه هر بخش با مثال واقعی؛ هر جا علامت ${HQ_SVG.replace('<svg', '<svg style="width:18px;height:18px;vertical-align:-4px;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round"')} را دیدی، آموزش همان بخش است.</p>
@@ -827,12 +900,11 @@
   ['renderChat'].forEach((n) => wrapW(n, function (prev, ...a) { const r = prev(...a); try { addHq('#s-chat .bar', 'contract'); } catch (e) {} return r; }));
 
   /* ================= آشنایی اول کار ================= */
+  // دور ۴۳: آشنایی کوتاه — خوش آمدی، بلوک روی صفحهٔ گوشی، علامت «؟» (بقیه را آموزش هر بخش می‌گوید)
   const ONB = [
-    { h: 'به بلوک خوش آمدی', p: 'کارگر، متخصص، مهندس، پیمانکار و کارفرما؛ همه در یک جا، در سراسر ایران.', art: 'hex' },
-    { h: 'پیدا کن یا پیدا شو', p: 'در کاوش آگهی‌ها و نیروهای آماده به کار را ببین؛ یا خودت «آماده به کار» شو تا پیدایت کنند.', art: 'find' },
-    { h: 'قرارداد واقعی با امضای پیامکی', p: 'توافق در چت، قرارداد با کد پیامکی، و پرداخت و پیشرفت کار همه ثبت می‌شود.', art: 'sign' },
-    { h: 'خوش‌قولی = اعتبار', p: 'هر کار تمام‌شده و هر ستاره اعتبارت را بالا می‌برد؛ بدقولی ۱۰ امتیاز کمش می‌کند.', art: 'score' },
-    { h: 'هر جا این علامت را دیدی', p: 'روی آن بزن تا آموزش کوتاه همان بخش را با مثال واقعی ببینی.', art: 'hq' },
+    { h: 'به بلوک خوش آمدی', p: 'کار و نیروی ساختمانی در سراسر ایران؛ با قرارداد واقعی و امضای پیامکی.', art: 'hex' },
+    { h: 'بلوک را روی صفحهٔ گوشی‌ات بگذار', p: '', art: 'inst', inst: true },
+    { h: 'هر جا این علامت را دیدی', p: 'روی آن بزن تا آموزش کوتاه همان بخش را ببینی.', art: 'hq' },
   ];
   const ART = {
     hex: `<svg viewBox="0 0 200 160"><g fill="none" stroke-width="3">${[[100, 80, '#F2B53A'], [60, 56, '#0F766E'], [140, 56, '#5EA8FF'], [60, 104, '#F97316'], [140, 104, '#A78BFA']].map(([x, y, c], k) => `<polygon points="${x},${y - 22} ${x + 19},${y - 11} ${x + 19},${y + 11} ${x},${y + 22} ${x - 19},${y + 11} ${x - 19},${y - 11}" stroke="${c}" fill="${k ? 'none' : c}" style="animation:tutIn .5s ${k * 0.15}s both"/>`).join('')}</g></svg>`,
@@ -840,37 +912,47 @@
     sign: `<svg viewBox="0 0 200 160"><rect x="55" y="20" width="90" height="120" rx="10" fill="#1F2937" stroke="#374151"/><path d="M70 50h60M70 66h60M70 82h40" stroke="#6B7280" stroke-width="4" stroke-linecap="round"/><path d="M70 115c10-14 18 8 28-4s14 6 26-6" fill="none" stroke="#F2B53A" stroke-width="4" stroke-linecap="round" stroke-dasharray="120" stroke-dashoffset="120"><animate attributeName="stroke-dashoffset" from="120" to="0" dur="1.4s" fill="freeze" repeatCount="indefinite"/></path></svg>`,
     score: `<svg viewBox="0 0 200 160"><circle cx="100" cy="80" r="52" fill="none" stroke="#1F2937" stroke-width="12"/><circle cx="100" cy="80" r="52" fill="none" stroke="#22C55E" stroke-width="12" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" transform="rotate(-90 100 80)"><animate attributeName="stroke-dashoffset" from="327" to="70" dur="1.4s" fill="freeze"/></circle><text x="100" y="90" text-anchor="middle" font-size="30" font-weight="900" fill="#fff">۷۸</text></svg>`,
     hq: `<div class="hqbig">${HQ_SVG}</div>`,
+    inst: `<div class="onb-inst"><div class="ph"><div class="g">${[0, 1, 2, 3, 4, 5, 6].map(() => '<i></i>').join('')}<img src="assets/brand/icon-dark-180.png" alt=""></div></div></div>`,
   };
   const O = { i: 0 };
   function onbRender() {
     const ov = $('onb36'); if (!ov) return;
-    const s = ONB[O.i], last = O.i === ONB.length - 1;
+    const LST = onbList(), s = LST[O.i], last = O.i === LST.length - 1;
     ov.innerHTML = `<button class="skip" onclick="onbClose()">${last ? '' : 'رد شدن'}</button>
       <div class="art stage" key="${O.i}">${ART[s.art]}</div>
-      <div class="stage"><h2>${s.h}</h2><p>${s.p}</p></div>
-      <div class="dots">${ONB.map((_, j) => `<i class="${j === O.i ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="stage"><h2>${s.h}</h2>${s.inst ? `<div class="onb-steps">${instSteps(myOS())}${inAppNote()}<button class="go inst-native" ${bip && !isIOS ? '' : 'hidden'} style="margin-bottom:8px" onclick="instNative()">نصب بلوک با یک لمس</button><button class="alt" style="margin:0" onclick="onbClose();tutOpen('install')">آموزش تصویری قدم‌به‌قدم</button></div>` : `<p>${s.p}</p>`}</div>
+      <div class="dots">${LST.map((_, j) => `<i class="${j === O.i ? 'on' : ''}"></i>`).join('')}</div>
       <button class="go" onclick="${last ? 'onbClose()' : 'onbNext()'}">${last ? 'شروع' : 'بعدی'}</button>
       ${last ? `<button class="alt" onclick="onbClose();tutOpen('all')">دیدن همهٔ آموزش‌ها</button>` : ''}`;
     i18n(ov);
   }
+  const onbList = () => ONB.filter((x) => !(x.inst && standalone()));
   window.onbOpen = function () {
     if ($('onb36')) return;
     O.i = 0;
+    // کاربر تازه «تازه‌های بلوک» (تغییرات نسخه) را لازم ندارد
+    let tries = 0;
+    const wn = setInterval(() => { const w = window.LIVE && LIVE.cfg && LIVE.cfg.whatsNew; if (w && w.v) { ls.set('blk-wn:' + w.v, '9'); clearInterval(wn); } else if (++tries > 30) clearInterval(wn); }, 1000);
     const ov = document.createElement('div'); ov.className = 'onb'; ov.id = 'onb36'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'آشنایی با بلوک');
     document.body.appendChild(ov);
     let x0 = null;
     ov.addEventListener('pointerdown', (e) => (x0 = e.clientX));
-    ov.addEventListener('pointerup', (e) => { if (x0 == null) return; const d = e.clientX - x0; x0 = null; if (Math.abs(d) > 50) { const fwd = en() ? d < 0 : d > 0; O.i = Math.max(0, Math.min(ONB.length - 1, O.i + (fwd ? 1 : -1))); onbRender(); } });
+    ov.addEventListener('pointerup', (e) => { if (x0 == null) return; const d = e.clientX - x0; x0 = null; if (Math.abs(d) > 50) { const fwd = en() ? d < 0 : d > 0; O.i = Math.max(0, Math.min(onbList().length - 1, O.i + (fwd ? 1 : -1))); onbRender(); } });
     onbRender();
   };
-  window.onbNext = () => { O.i = Math.min(ONB.length - 1, O.i + 1); onbRender(); };
+  window.onbNext = () => { O.i = Math.min(onbList().length - 1, O.i + 1); onbRender(); };
   window.onbClose = () => { ls.set('blk-onb1', '1'); const o = $('onb36'); if (o) o.remove(); };
   if (!jsdom && !ls.get('blk-onb1')) setTimeout(() => { if (!ls.get('blk-onb1')) onbOpen(); }, 700);
 
   /* ================= ترجمهٔ انگلیسی ================= */
   if (typeof I18N === 'object') {
     Object.assign(I18N.dict, {
-      'آموزش': 'Tutorial', 'دسترسی سریع': 'Quick access', 'برآورد هزینه': 'Cost estimate', 'هزینهٔ ساخت، بازسازی و دستمزد؛ قیمت به‌روز، در ۳۰ ثانیه': 'Build, renovation and labour costs; current prices, in 30 seconds', 'قراردادها': 'Contracts', 'پیام‌ها': 'Messages', 'ثبت آگهی': 'Post an ad', 'پروژه‌ها': 'Projects', 'ثبت‌نام کامل': 'Complete sign-up', 'برای همه از روز اول': 'For everyone from day one', 'مدرک تأییدشده': 'Approved document', 'نشان «مدرک‌دار» گرفته': 'Has the “Documented” badge', 'یک مدرک (کارت مهارت، پروانه…) بفرست': 'Send one document (skill card, licence…)', 'شروع:': 'Start:', 'با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.': 'Complete sign-up 10 points, identity check 10, first approved document 5; at least 25 from day one.', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
+      'آموزش': 'Tutorial', 'بلوک روی صفحهٔ گوشی': 'Blook on your home screen', 'آیفون و اندروید؛ همیشه یک لمس فاصله': 'iPhone and Android; always one tap away', 'بلوک روی صفحهٔ آیفون': 'Blook on your iPhone home screen', 'بلوک روی صفحهٔ اندروید': 'Blook on your Android home screen',
+      'بلوک را روی صفحهٔ گوشی‌ات بگذار': 'Put Blook on your home screen', 'نصب بلوک با یک لمس': 'Install Blook in one tap', 'آموزش تصویری قدم‌به‌قدم': 'Step-by-step visual guide', 'آموزش برای اندروید': 'Guide for Android', 'آموزش برای آیفون': 'Guide for iPhone',
+      'بلوک روی صفحهٔ گوشی‌ات نصب شد': 'Blook is now on your home screen', 'کار و نیروی ساختمانی در سراسر ایران؛ با قرارداد واقعی و امضای پیامکی.': 'Construction work and crews across Iran; with real contracts and SMS signatures.', 'روی آن بزن تا آموزش کوتاه همان بخش را ببینی.': 'Tap it for a short guide to that section.',
+      'پایین بیا و «Add to Home Screen» (افزودن به صفحهٔ اصلی) را بزن': 'Scroll down and tap “Add to Home Screen”', 'بالای صفحه «Add» (افزودن) را بزن؛ آیکون بلوک روی صفحهٔ گوشی‌ات می‌آید': 'Tap “Add” at the top; the Blook icon appears on your home screen',
+      'در Chrome دکمهٔ ⋮ (بالای صفحه) را بزن': 'In Chrome tap ⋮ (top of the screen)', '«نصب برنامه» یا «Add to Home screen» (افزودن به صفحهٔ اصلی) را بزن': 'Tap “Install app” or “Add to Home screen”', '«نصب» را تأیید کن؛ آیکون بلوک روی صفحهٔ گوشی‌ات می‌آید': 'Confirm “Install”; the Blook icon appears on your home screen',
+      'تمام! از این به بعد بلوک را مثل یک برنامه از صفحهٔ گوشی باز کن؛ بدون نوار مرورگر و سریع‌تر.': 'Done! From now on open Blook like an app from your home screen; faster and without the browser bar.', 'دسترسی سریع': 'Quick access', 'برآورد هزینه': 'Cost estimate', 'هزینهٔ ساخت، بازسازی و دستمزد؛ قیمت به‌روز، در ۳۰ ثانیه': 'Build, renovation and labour costs; current prices, in 30 seconds', 'قراردادها': 'Contracts', 'پیام‌ها': 'Messages', 'ثبت آگهی': 'Post an ad', 'پروژه‌ها': 'Projects', 'ثبت‌نام کامل': 'Complete sign-up', 'برای همه از روز اول': 'For everyone from day one', 'مدرک تأییدشده': 'Approved document', 'نشان «مدرک‌دار» گرفته': 'Has the “Documented” badge', 'یک مدرک (کارت مهارت، پروانه…) بفرست': 'Send one document (skill card, licence…)', 'شروع:': 'Start:', 'با ثبت‌نام کامل ۱۰ امتیاز، با تأیید هویت ۱۰ و با اولین مدرک تأییدشده ۵ امتیاز؛ یعنی از روز اول دست‌کم ۲۵.': 'Complete sign-up 10 points, identity check 10, first approved document 5; at least 25 from day one.', 'راهنمای بلوک': 'Blook guide', 'همهٔ آموزش‌ها': 'All tutorials', 'دیدن همهٔ آموزش‌ها': 'See all tutorials', 'نشانم بده در خود اپ': 'Show me in the app',
       'فهمیدم': 'Got it', 'بعدی': 'Next', 'قبلی': 'Back', 'تمام': 'Done', 'شروع': 'Start', 'رد شدن': 'Skip', 'دیدن دوبارهٔ آشنایی با بلوک': 'Replay the Blook intro',
       'خوش‌قولی': 'Reliability', 'خوش‌قولی و اخطارها': 'Reliability & warnings', 'قانون بلوک': 'Blook rule', 'قول، قول است': 'A promise is a promise',
       '{#} اخطار فعال داری': 'You have {#} active warnings', 'هر اخطار ۱ ماه بعد خودکار از امتیازت برمی‌گردد.': 'Each warning is automatically lifted from your score after 1 month.',
