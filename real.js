@@ -66,6 +66,25 @@
     return r;
   });
 
+  /* ---- مدارک من: «کارت ملی» = همان «تأیید هویت» (کارت + سلفی)، نه یک مدرک جدا (دور ۴۰) ---- */
+  wrapW('renderDocs', function (prev, ...a) {
+    const r = prev(...a);
+    if (!on() || !S.auth) return r;
+    try {
+      const k = (LIVE.me && LIVE.me.user && LIVE.me.user.kycStatus) || 'none';
+      document.querySelectorAll('#s-docs .doc-row').forEach((row) => {
+        const b = row.querySelector('b');
+        if (!b || b.textContent.trim() !== 'کارت ملی') return;
+        row.querySelectorAll('label.mini, .tag').forEach((x) => x.remove());
+        const sub = row.querySelector('span[style*="font-size:13px"]');
+        if (sub) sub.textContent = k === 'verified' ? 'هویت تأیید شده' : k === 'pending' ? 'تأیید هویت در حال بررسی' : 'با «تأیید هویت»: کارت ملی + سلفی';
+        row.insertAdjacentHTML('beforeend', k === 'verified' ? '<span class="tag ok">تأیید شده</span>' : k === 'pending' ? '<span class="tag wait">در بررسی</span>' : '<button class="mini yes" onclick="openKYC()">تأیید هویت</button>');
+      });
+      i18n($('s-docs'));
+    } catch (e) {}
+    return r;
+  });
+
   /* ---- بازدید مهندس: فقط مهندس واقعی ---- */
   wrapW('renderVisit', function (prev, ...a) {
     const v = S.visit;
@@ -165,6 +184,7 @@
       'اول یک مهندس انتخاب کن': 'Pick an engineer first',
       'در کاوش، پروفایل مهندس را باز کن و «رزرو بازدید» را بزن؛ زمان‌های آزاد واقعی او اینجا می‌آید.': 'In Explore, open an engineer’s profile and tap “Book a visit”; their real free times appear here.',
       'پیدا کردن مهندس': 'Find an engineer',
+      'هویت تأیید شده': 'Identity verified', 'تأیید هویت در حال بررسی': 'Identity check in review', 'با «تأیید هویت»: کارت ملی + سلفی': 'Via “Verify identity”: national card + selfie', 'تأیید هویت': 'Verify identity',
     });
     I18N.re = null;
   }
