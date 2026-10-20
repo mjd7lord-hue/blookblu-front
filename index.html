@@ -2359,7 +2359,7 @@ function islandSVG(o={}){
     Object.entries(CITY).forEach(([n,[x,y,pr]])=>{if(x<vb[0]||x>vb[0]+vb[2]||y<vb[1]||y>vb[1]+vb[3])return;
       const imp=(o.pins||[]).some(p=>p.place===n)||o.center===n||(o.cities||[]).includes(n);if(!imp)return;
       labels+=`<text class="place-lbl" x="${x}" y="${y+12*k}" text-anchor="middle" style="font-size:${9*k}px">${n}</text>`});
-    labels+=`<text class="prov-lbl" x="${vb[0]+vb[2]-8*k}" y="${vb[1]+16*k}" text-anchor="start" style="font-size:${10*k}px">${zoom==='qeshm'?'جزیرهٔ قشم':'استان '+zoom}</text>`;
+    labels+=`<text class="prov-lbl" x="${vb[0]+vb[2]-8*k}" y="${vb[1]+16*k}" text-anchor="start" style="font-size:${10*k}px">${zoom==='qeshm'?'نزدیک تو':'استان '+zoom}</text>`;
   }
   if(o.range&&o.center&&CITY[o.center]&&!o.explore){const [cx,cy]=CITY[o.center];rings+=[0,1,2].map(i=>`<circle class="bcast" style="animation-delay:${i*.8}s" cx="${cx}" cy="${cy}" r="${6*k}"/>`).join('')}
   const me=o.me&&CITY[o.me]?(()=>{const [x,y]=CITY[o.me];return `<circle class="sonar" cx="${x}" cy="${y}" r="${4*k}"/><circle class="sonar s2" cx="${x}" cy="${y}" r="${4*k}"/><circle class="me-dot" cx="${x}" cy="${y}" r="${2.4*k}"/>`})():'';
@@ -2378,14 +2378,14 @@ function listFor(ignoreRole){
   if(S.f.skills.length) l=l.filter(({a})=>a.skills.some(s=>S.f.skills.some(f=>s.includes(f)||f.includes(s))));
   if(S.f.verified) l=l.filter(({p})=>p.verified);
   if(S.f.rating) l=l.filter(({p})=>p.rating>=S.f.rating);
-  const k={best:x=>-trustOf(x.p).t,rating:x=>-x.p.rating,exp:x=>-(x.p.done),near:x=>{const c=CITY[x.a.place]||[0,0],q=CITY['قشم'];return Math.hypot(c[0]-q[0],c[1]-q[1])}}[S.f.sort];
+  const k={best:x=>-trustOf(x.p).t,rating:x=>-x.p.rating,exp:x=>-(x.p.done),near:x=>{const c=CITY[x.a.place]||[0,0],q=CITY[S.auth&&ME().place]||CITY['تهران']||CITY['قشم'];return Math.hypot(c[0]-q[0],c[1]-q[1])}}[S.f.sort];
   return l.sort((x,y)=>k(x)-k(y));
 }
 function filterCount(){return S.f.skills.length+(S.f.verified?1:0)+(S.f.rating?1:0)+(S.f.sort!=='best'?1:0)}
 function renderExplore(){
   const mi=MODES.findIndex(m=>m[0]===S.mode), list=listFor(), all=listFor(true), t=modeType();
   const headN={work:'نیروی آماده',job:'فرصت کاری',consult:'پرسش منتظر پاسخ'}[t];
-  const headS=(S.provF?'استان '+S.provF:S.mapAll?'سراسر ایران':'جزیرهٔ قشم و بندرعباس')+' · '+{work:'این هفته',job:'متناسب با مهارت‌های تو',consult:'اگر بلدی، جواب بده'}[t];
+  const headS=(S.provF?'استان '+S.provF:S.mapAll?'سراسر ایران':'نزدیک تو')+' · '+{work:'این هفته',job:'متناسب با مهارت‌های تو',consult:'اگر بلدی، جواب بده'}[t];
   const ph={work:'مثلاً آرماتوربند، طولا یا کد B-4X92',job:'مثلاً بلوک‌چینی یا درگهان',consult:'مثلاً ترک دیوار، نم، نشست'}[t];
   const counts={};all.forEach(x=>counts[x.p.role]=(counts[x.p.role]||0)+1);
   const roleChips=[['all','همه',all.length]].concat(Object.keys(ROLES).filter(r=>counts[r]).map(r=>[r,ROLES[r].n,counts[r]]));
@@ -2405,7 +2405,7 @@ function renderExplore(){
     </div>
     <div class="hero-head">
       <div><small>${headS}</small><b class="num"><span id="heroN">${fa(list.length)}</span><span>${headN}</span></b></div>
-      <div class="hh-r">${S.exView!=='map'?'':S.provF?`<button class="legend-mini provx" onclick="S.provF=null;S.mapAll=false;renderExplore()">قشم ×</button>`:S.mapAll?`<button class="legend-mini provx" onclick="S.mapAll=false;renderExplore()">قشم</button>`:`<button class="legend-mini provx" onclick="S.mapAll=true;renderExplore()">همهٔ ایران</button>`}<div class="vtog" role="group" aria-label="نمایش نتیجه‌ها"><button aria-pressed="${S.exView!=='map'}" onclick="S.exView='list';renderExplore()">فهرست</button><button aria-pressed="${S.exView==='map'}" onclick="S.exView='map';renderExplore()">نقشه</button></div></div>
+      <div class="hh-r">${S.exView!=='map'?'':S.provF?`<button class="legend-mini provx" onclick="S.provF=null;S.mapAll=true;renderExplore()">استان ${esc(S.provF)} ×</button>`:S.mapAll?`<button class="legend-mini provx" onclick="S.mapAll=false;renderExplore()">نزدیک من</button>`:`<button class="legend-mini provx" onclick="S.mapAll=true;renderExplore()">همهٔ ایران</button>`}<div class="vtog" role="group" aria-label="نمایش نتیجه‌ها"><button aria-pressed="${S.exView!=='map'}" onclick="S.exView='list';renderExplore()">فهرست</button><button aria-pressed="${S.exView==='map'}" onclick="S.exView='map';renderExplore()">نقشه</button></div></div>
     </div>
     ${S.exView==='map'?`<div class="island" id="heroMap">${exploreMap(list)}</div>`:''}
   </div>
@@ -2418,7 +2418,7 @@ function renderExplore(){
   if($('heroMap'))bindPins($('heroMap'));
   renderResults(true);
 }
-function exploreMap(list){return islandSVG({explore:true,prov:S.provF,zoom:!S.provF&&!S.mapAll?'qeshm':undefined,pins:list.map(x=>({id:x.a.id,place:x.a.place,color:ROLES[x.p.role].c})),me:'قشم'})}
+function exploreMap(list){return islandSVG({explore:true,prov:S.provF,zoom:!S.provF&&!S.mapAll?'qeshm':undefined,pins:list.map(x=>({id:x.a.id,place:x.a.place,color:ROLES[x.p.role].c})),me:S.auth?ME().place:''})}
 function bindPins(root){
   root.querySelectorAll('.pbub').forEach(b=>{const f=()=>{S.provF=b.dataset.prov;renderExplore()};b.addEventListener('click',f);b.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();f()}})});
   root.querySelectorAll('.pin').forEach(p=>{const f=()=>{const el=document.querySelector(`.acard[data-id="${p.dataset.id}"]`);root.querySelectorAll('.pin').forEach(x=>x.classList.toggle('sel',x===p));
@@ -2973,7 +2973,7 @@ function storyList(){
 }
 function storiesRail(){return `<div class="stories" role="list">${storyList().map((s,i)=>`<button class="story ${S.seen.has(s.k)?'seen':''}" role="listitem" onclick="openStory(${i})"><span class="rim"><span class="in">${s.ic}</span></span><span>${s.n}</span></button>`).join('')}</div>`}
 function storyArt(a){
-  if(a==='map') return `<div style="background:var(--night);border-radius:24px;padding:8px">${islandSVG({explore:true,pins:ADS.map(x=>({id:x.id,place:x.place,color:ROLES[(P[x.who]||ME()).role].c})),me:'قشم'})}</div>`;
+  if(a==='map') return `<div style="background:var(--night);border-radius:24px;padding:8px">${islandSVG({explore:true,pins:ADS.map(x=>({id:x.id,place:x.place,color:ROLES[(P[x.who]||ME()).role].c})),me:S.auth?ME().place:''})}</div>`;
   if(a==='ring') return `<svg viewBox="0 0 180 180"><circle cx="90" cy="90" r="70" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="14"/><circle cx="90" cy="90" r="70" fill="none" stroke="#F97316" stroke-width="14" stroke-linecap="round" stroke-dasharray="${440*.97} 440" transform="rotate(-90 90 90)" style="stroke-dashoffset:440;animation:draw 1.4s .2s ease forwards"/><text x="90" y="104" text-anchor="middle" fill="#fff" font-size="44" font-weight="900" font-family="Vazirmatn,Tahoma">${fa(97)}</text></svg>`;
   if(a==='sun') return `<svg viewBox="0 0 180 180"><circle cx="90" cy="80" r="34" fill="#F97316"/><g stroke="#FDBA74" stroke-width="5" stroke-linecap="round" style="transform-origin:90px 80px;animation:spin2 12s linear infinite">${Array.from({length:8},(_,i)=>`<path d="M90 26v-12" transform="rotate(${i*45} 90 80)"/>`).join('')}</g><path d="M40 150a50 26 0 0 1 100 0z" fill="#E9E2CF"/><path d="M36 151h108v6H36z" fill="#E9E2CF"/></svg>`;
   return `<svg viewBox="0 0 180 180"><path d="M90 90L40 50M90 90L140 50M90 90L90 150" stroke="#F97316" stroke-width="3" stroke-dasharray="120" stroke-dashoffset="120" style="animation:draw 1s .2s forwards"/><circle cx="40" cy="50" r="16" fill="#0F766E"/><circle cx="140" cy="50" r="16" fill="#6845A5"/><circle cx="90" cy="150" r="16" fill="#255E97"/><polygon points="90,64 112,77 112,103 90,116 68,103 68,77" fill="#F97316"/></svg>`;
@@ -3851,7 +3851,7 @@ function renderSet(){
   <div class="section"><div class="sec-head"><h3>قوانین</h3></div><div class="card" style="padding:2px 16px">
     ${row(QI.doc,'قوانین استفاده','',"openLegal('terms')")}${row(I.shield,'حریم خصوصی','',"openLegal('privacy')")}${row(I.users,'قوانین جامعهٔ بلوک','',"openLegal('rules')")}${row(I.card,'نحوهٔ محاسبهٔ امتیاز','',"openTrust('me',true)")}</div></div>
   <div class="section"><div class="card" style="padding:2px 16px">${row('<svg class="ico" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>','خروج از حساب','','logout()',1)}${row('<svg class="ico" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></svg>','حذف حساب','','delAcc()',1)}</div>
-    <p class="hint center" style="margin-top:14px">بلوک · نسخهٔ ۲٫۰ نمایشی · ساخته‌شده در قشم</p></div>`;
+    <p class="hint center" style="margin-top:14px">بلوک · نسخهٔ ۲٫۰ نمایشی · ساخته‌شده در ایران</p></div>`;
 }
 function setTheme(k){const r=document.documentElement;if(k==='system')delete r.dataset.theme;else r.dataset.theme=k;renderSet()}
 function logout(){S.auth=false;S.hist=[];go('home');toast('از حساب خارج شدی؛ همچنان می‌توانی آگهی‌ها را ببینی')}
@@ -4012,10 +4012,10 @@ function chPhone(){sb.innerHTML=`<div class="grab"></div><h3 id="sheetTitle">ت�
 function renderAbout(){
   $('s-about').innerHTML=`${pageBar('دربارهٔ بلوک')}
   <div class="section center" style="margin-top:6px"><div class="auth-logo big">${logoSVG('anim')}</div><h1 style="margin:6px 0 0">${wordmark('anim xl')}</h1><p style="color:var(--muted);margin:2px 0 0">بازار کار ساختمان، بدون واسطه · نسخهٔ ۲٫۰ نمایشی</p></div>
-  <div class="section"><div class="card"><p style="font-size:15px;line-height:2">بلوک کارگر، استادکار، مهندس، پیمانکار و شرکت ساختمانی را مستقیم به کارفرما وصل می‌کند؛ با شناسنامهٔ کاری واقعی، قیم و معرف، و گفت‌وگوی امن داخل اپ. از جزیرهٔ قشم شروع کردیم و برای همهٔ ایران ساخته شده.</p></div></div>
+  <div class="section"><div class="card"><p style="font-size:15px;line-height:2">بلوک کارگر، استادکار، مهندس، پیمانکار و شرکت ساختمانی را مستقیم به کارفرما وصل می‌کند؛ با شناسنامهٔ کاری واقعی، قیم و معرف، و گفت‌وگوی امن داخل اپ. برای همهٔ ایران ساخته شده و در همهٔ استان‌ها فعال است.</p></div></div>
   <div class="section"><div class="sec-head"><h3>وضعیت سرویس</h3><span>به‌روز: همین حالا</span></div><div class="card">${[['آگهی‌ها و کاوش','ok'],['پیام و چت','ok'],['ارسال پیامک کد','ok'],['اعلان‌ها','slow']].map(([n,s])=>`<div class="svc"><span class="dot ${s}"></span><span style="flex:1">${n}</span><small>${s==='ok'?'عادی':'کمی کند'}</small></div>`).join('')}</div></div>
   <div class="section"><div class="card" style="padding:2px 16px"><button class="linkrow" onclick="openLegal('terms')"><span class="ic">${QI.doc}</span><span>قوانین استفاده</span><small>‹</small></button><button class="linkrow" onclick="openLegal('privacy')"><span class="ic">${I.shield}</span><span>حریم خصوصی</span><small>‹</small></button><button class="linkrow" onclick="setOffline(true)"><span class="ic">${I.warn}</span><span>آزمایش حالت بدون اینترنت</span><small>‹</small></button></div>
-    <p class="hint center" style="margin-top:12px">ساخته‌شده در قشم · ۱۴۰۵</p></div>`;
+    <p class="hint center" style="margin-top:12px">ساخته‌شده در ایران · ۱۴۰۵</p></div>`;
 }
 
 /* ---------- حالت بدون اینترنت ---------- */
@@ -7944,9 +7944,9 @@ window.ME=function(){const m=ME0();const p=S.profile;if(!p||!p.d)return m;const 
   return m};
 /* ورود نمایشی و ورود واقعی: پروفایل + محدودهٔ کاوش = استان کاربر */
 (function(){
-  const ql=quickLogin;window.quickLogin=function(r){S.profile={d:demoProfileD(r)};S.role=r;profileSync();S.provF=userProv();ql(r)};
+  const ql=quickLogin;window.quickLogin=function(r){S.profile={d:demoProfileD(r)};S.role=r;profileSync();S.provF=null;ql(r)};
   const fa0=finishAuth;window.finishAuth=function(){const r=S.reg,d=JSON.parse(JSON.stringify(r.d||{}));Object.keys(d).forEach(k=>{if(k.startsWith('_')&&!k.startsWith('_x_'))delete d[k]});
-    S.role=r.role;fa0.apply(this,arguments);S.profile=Object.assign(S.profile||{},{d});profileSync();S.provF=userProv();
+    S.role=r.role;fa0.apply(this,arguments);S.profile=Object.assign(S.profile||{},{d});profileSync();S.provF=null;
     if(d.pub===false)S.me.pub=false;if(d.showPhone)S.me.phone=true;if(S.cur==='home')renderHome()};
 })();
 
@@ -7972,7 +7972,7 @@ function renderEditAll(soft){const r=S.reg,d=r.d,y=window.scrollY,el=$('s-edit')
 function saveEditAll(){const d=S.reg.d;const need=[];REG[S.role].forEach(st=>st.f.forEach(f=>{if(f.req&&vis(f,d)&&['fn','ln','cname','prov','city','nat','natc','idType','idNo'].includes(f.k)&&!filled(f,d))need.push(f.label)}));
   if(need.length){toast('این مورد لازم است: '+need[0]);return}
   const old=S.profile.d||{};const clean=JSON.parse(JSON.stringify(d));Object.keys(clean).forEach(k=>{if(k.startsWith('_')&&!k.startsWith('_x_'))delete clean[k]});
-  S.profile.d=clean;profileSync();if(old.prov!==clean.prov){S.provF=userProv()}
+  S.profile.d=clean;profileSync();if(old.prov!==clean.prov){S.provF=null}
   if(S.role==='engineer'&&clean.field){const m={'عمران':['civil','struct'],'معماری':['arch'],'تأسیسات برقی':['elec'],'تأسیسات مکانیکی':['mech']};const ks=[...new Set([].concat(clean.field).flatMap(x=>m[x]||[]))];if(ks.length){S.efields=ks;if(!ks.includes(S.efield))S.efield=ks[0]}}
   S.reg=null;toast('پروفایل ذخیره شد');back()}
 (function(){const r0=render;window.render=function(){if(S.cur==='edit'&&S.auth){if(!S.reg||S.reg.step!=='edit'){profileSync();S.reg={step:'edit',role:S.role,i:0,d:JSON.parse(JSON.stringify(S.profile.d))}}renderEditAll();return}r0()};

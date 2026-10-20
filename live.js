@@ -287,7 +287,7 @@
     S.auth = true;
     S.mode = snap.mode || ({ worker: 'jobs', specialist: 'jobs', engineer: 'consult' })[S.role] || 'workers';
     S.roleF = 'all';
-    if (typeof userProv === 'function') S.provF = userProv();
+    S.provF = null; // کاوش سراسری (دور ۳۷)
     S.hist = [];
     L._fromSnap = true;
     render();
@@ -298,7 +298,7 @@
     S.auth = true;
     S.mode = ({ worker: 'jobs', specialist: 'jobs', engineer: 'consult' })[S.role] || 'workers';
     S.roleF = 'all';
-    if (typeof userProv === 'function') S.provF = userProv();
+    S.provF = null; // کاوش سراسری (دور ۳۷)
     S.hist = [];
     connectSSE();
     loadConvs().catch(() => {});

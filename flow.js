@@ -745,7 +745,7 @@
     const g = S.eg;
     // با سرور فقط کاربران واقعی (کد B-XXXX)؛ افراد نمایشی دعوت‌پذیر نیستند
     return Object.entries(P).filter(([id, p]) => id !== 'me' && p && !p.me && p.name && g.roles.includes(p.role) && (!live() || /^B-[A-Z0-9]{4}$/.test(id)))
-      .map(([id, p]) => ({ id, p, free: (p.week || []).filter((d) => d === 'a').length, near: provOf(p.place) === 'هرمزگان' ? 1 : 0 }))
+      .map(([id, p]) => ({ id, p, free: (p.week || []).filter((d) => d === 'a').length, near: provOf(p.place) === ((typeof userProv === 'function' && userProv()) || '') ? 1 : 0 }))
       .sort((a, b) => b.near - a.near || (b.free > 0) - (a.free > 0) || trustOf(b.p).t - trustOf(a.p).t).slice(0, 12);
   };
   function egSave() {
@@ -1044,16 +1044,19 @@
   document.head.appendChild(exCss);
   const TIP_K = 'blk-extip';
   window.exTipOff = () => { try { localStorage.setItem(TIP_K, '1'); } catch (e) {} const t = document.querySelector('.ex-tip'); if (t) t.remove(); };
-  window.exAll = () => { S.provF = null; S.mapAll = false; renderExplore(); };
+  window.exAll = () => { S.provF = null; S.mapAll = true; renderExplore(); };
+  // بلوک برای همهٔ ایران: کاوش از اول سراسری است؛ «نزدیک من» یک انتخاب است
+  if (S.mapAll === undefined) S.mapAll = true;
   function whereBar() {
     const all = listFor(true).length, list = listFor().length;
-    const inQ = (x) => provOf(x.a.place) === 'هرمزگان';
+    const myP = (typeof userProv === 'function' && userProv()) || '';
+    const inQ = (x) => provOf(x.a.place) === myP;
     if (S.provF) {
       const others = listFor(true).filter((x) => provOf(x.a.place) !== S.provF).length;
       return `<div class="ex-where on" role="status"><span class="pin">${I.pin}</span><span class="t"><b>فقط استان ${esc(S.provF)}</b><small>${fa(list)} آگهی اینجا${others ? ' · ' + fa(others) + ' آگهی در جاهای دیگر پنهان است' : ''}</small></span><button onclick="exAll()">همهٔ آگهی‌ها</button></div>`;
     }
     const out = listFor(true).filter((x) => !inQ(x)).length;
-    if (!S.mapAll && out) return `<div class="ex-where" role="status"><span class="pin">${I.pin}</span><span class="t"><b>همهٔ ${fa(all)} آگهی پایین آمده</b><small>نقشه قشم را نشان می‌دهد؛ ${fa(out)} آگهی بیرون از این نقشه است</small></span><button onclick="S.mapAll=true;renderExplore()">همهٔ ایران</button></div>`;
+    if (!S.mapAll && out) return `<div class="ex-where" role="status"><span class="pin">${I.pin}</span><span class="t"><b>همهٔ ${fa(all)} آگهی پایین آمده</b><small>نقشه نزدیک تو را نشان می‌دهد؛ ${fa(out)} آگهی بیرون از این نقشه است</small></span><button onclick="S.mapAll=true;renderExplore()">همهٔ ایران</button></div>`;
     return `<div class="ex-where" role="status"><span class="pin">${I.pin}</span><span class="t"><b>همهٔ ${fa(all)} آگهی پایین آمده</b><small>برای دیدن آگهی‌های یک استان، روی همان استان در نقشه بزن</small></span></div>`;
   }
   wrapW('renderExplore', function (prev) {

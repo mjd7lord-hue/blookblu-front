@@ -761,6 +761,17 @@
       const host = $('s-home'); if (!host) return r;
       const top = host.querySelector(':scope > header'); if (top && !top.querySelector('.hq')) top.insertAdjacentHTML('beforeend', hq('home,hero,ready,urgent'));
       const ph = $('phHero'); if (ph && !ph.querySelector('.ph-hq')) ph.insertAdjacentHTML('afterbegin', hq('hero', 'on-dark ph-hq'));
+      // دور ۳۷: خانه فقط کار خود کاربر؛ درخواست‌های تازه، کاوش و تبلیغ‌های نامرتبط نه
+      const head = (s) => { const h = s.querySelector(':scope > .sec-head h3'); return h ? h.textContent.trim() : ''; };
+      host.querySelectorAll(':scope > .section').forEach((s) => {
+        const t = head(s);
+        if (/^درخواست‌های تازه|^پیشنهادها برای/.test(t) || s.querySelector('.est-promo') || /ساختمانت چقدر خرج دارد|حل‌کنندهٔ حضوری بلوک شو/.test(s.textContent) && !s.querySelector('.hcard, #phHero')) s.remove();
+      });
+      host.querySelectorAll(':scope > .section .qa > button').forEach((b) => { if (/exploreMode\(|go\('explore'\)/.test(b.getAttribute('onclick') || '')) b.remove(); });
+      host.querySelectorAll(':scope > .section .qa').forEach((q) => { if (!q.children.length) q.closest('.section').remove(); });
+      // کارت «آماده به کار» پایین خانه
+      const rdS = $('rdSec');
+      if (rdS && rdS.parentElement === host) { const tail = [...host.children].reverse().find((c) => c.classList.contains('section') || c.id === 'phHero'); if (tail && tail !== rdS) tail.after(rdS); }
     } catch (e) {}
     return r;
   });
@@ -769,7 +780,7 @@
 
   /* ================= آشنایی اول کار ================= */
   const ONB = [
-    { h: 'به بلوک خوش آمدی', p: 'کارگر، متخصص، مهندس، پیمانکار و کارفرما؛ همه در یک جا، از قشم.', art: 'hex' },
+    { h: 'به بلوک خوش آمدی', p: 'کارگر، متخصص، مهندس، پیمانکار و کارفرما؛ همه در یک جا، در سراسر ایران.', art: 'hex' },
     { h: 'پیدا کن یا پیدا شو', p: 'در کاوش آگهی‌ها و نیروهای آماده به کار را ببین؛ یا خودت «آماده به کار» شو تا پیدایت کنند.', art: 'find' },
     { h: 'قرارداد واقعی با امضای پیامکی', p: 'توافق در چت، قرارداد با کد پیامکی، و پرداخت و پیشرفت کار همه ثبت می‌شود.', art: 'sign' },
     { h: 'خوش‌قولی = اعتبار', p: 'هر کار تمام‌شده و هر ستاره اعتبارت را بالا می‌برد؛ بدقولی ۱۰ امتیاز کمش می‌کند.', art: 'score' },
@@ -888,7 +899,8 @@
       'کارفرما: دکمهٔ ⚡ نیروی فوری را بزن؛ کار، دستمزد روزانه و زمان شروع را بنویس.': 'Employer: tap ⚡ Urgent hire; enter the job, daily wage and start time.',
       'درخواست همزمان به همهٔ نیروهای «آماده به کار» استان می‌رسد؛ هم‌شهری‌ها اول.': 'The request reaches every “Ready to work” worker in the province at once; same city first.',
       'اولین نفری که قبول کند، کار مال اوست؛ گفت‌وگو، توافق و پروژه خودکار ساخته می‌شود.': 'The first to accept gets the job; chat, agreement and project are created automatically.',
-      'به بلوک خوش آمدی': 'Welcome to Blook', 'کارگر، متخصص، مهندس، پیمانکار و کارفرما؛ همه در یک جا، از قشم.': 'Workers, specialists, engineers, contractors and employers, all in one place, starting in Qeshm.',
+      'به بلوک خوش آمدی': 'Welcome to Blook', 'کارگر، متخصص، مهندس، پیمانکار و کارفرما؛ همه در یک جا، در سراسر ایران.': 'Workers, specialists, engineers, contractors and employers, all in one place, across Iran.',
+      'نزدیک تو': 'Near you', 'نزدیک من': 'Near me', 'استان {@} ×': 'Province {@} ×', 'برای همهٔ ایران ساخته شده و در همهٔ استان‌ها فعال است.': 'Built for all of Iran and active in every province.', 'ساخته‌شده در ایران · ۱۴۰۵': 'Made in Iran · 1405', 'نقشه نزدیک تو را نشان می‌دهد؛ {#} آگهی بیرون از این نقشه است': 'The map shows your area; {#} ads are outside it',
       'پیدا کن یا پیدا شو': 'Find or be found', 'در کاوش آگهی‌ها و نیروهای آماده به کار را ببین؛ یا خودت «آماده به کار» شو تا پیدایت کنند.': 'Browse ads and ready workers in Explore, or turn on “Ready to work” so others find you.',
       'قرارداد واقعی با امضای پیامکی': 'Real contracts with SMS signatures', 'توافق در چت، قرارداد با کد پیامکی، و پرداخت و پیشرفت کار همه ثبت می‌شود.': 'Agree in chat, sign with an SMS code, and payments and progress are all recorded.',
       'خوش‌قولی = اعتبار': 'Reliability = trust', 'هر کار تمام‌شده و هر ستاره اعتبارت را بالا می‌برد؛ بدقولی ۱۰ امتیاز کمش می‌کند.': 'Every finished job and every star raises your trust; breaking your word costs 10 points.',

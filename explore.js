@@ -62,7 +62,7 @@
       if ((y1 - y0) * 1.6 + 12 > h) { h = (y1 - y0) * 1.6 + 12; w = h * 1.55; }
       vb = [(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h];
     }
-    const svg = islandSVG({ explore: true, prov: S.provF, zoom: S.provF || 'qeshm', vb, cities, me: S.auth ? myCity() : 'قشم' });
+    const svg = islandSVG({ explore: true, prov: S.provF, zoom: S.provF || 'qeshm', vb, cities, me: S.auth ? myCity() : '' });
     const k = typeof LASTK === 'number' ? LASTK : 1;
     const marks = cities.sort((a, b) => by[a].n - by[b].n).map((c, i) => {
       const [x, y] = CITY[c], b = by[c], role = Object.entries(b.roles).sort((p, q) => q[1] - p[1])[0][0], col = ROLES[role] ? ROLES[role].c : 'var(--accent)';
