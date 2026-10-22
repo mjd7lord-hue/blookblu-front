@@ -192,6 +192,7 @@
     else if (a.trust != null && o.verified == null) o.verified = trustIdentity(o, a.trust, a.verified);
     if (a.verified != null) o.docVerified = !!a.verified;
     if (a.avatarUrl) o.avatar = abs(a.avatarUrl);
+    if (a.sample != null) o.sample = !!a.sample;
     return a.code;
   }
   function myAuthor() {
@@ -202,7 +203,7 @@
     const who = upsertPerson(x.author, x.city);
     if (x.city && !CITY_PROV[x.city]) CITY_PROV[x.city] = x.province;
     return {
-      id: x.id, type: x.type, who, title: x.title, place: x.city, prov: x.province,
+      id: x.id, type: x.type, who, title: x.title, place: x.city, prov: x.province, _sample: !!(x.author && x.author.sample),
       wageType: x.wageType || '',
       wage: x.wageAmount ? money(x.wageAmount) : x.type === 'consult' ? '' : x.wageType === 'توافقی' ? 'پس از گفت‌وگو' : 'توافقی',
       start: x.startWhen || 'با هماهنگی', range: RANGE_B[x.range] || 'شهر', aud: x.audience || [], need: x.needCount || undefined,

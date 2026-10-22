@@ -29,6 +29,34 @@
   setInterval(() => ping(false), 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) ping(Date.now() - lastView > 30 * 60000); });
 
+  /* ---- دور ۴۴: برچسب «نمونه» روی آگهی و پروفایل حساب‌های نمونه (وقتی مدیر نمایششان را روشن کرده) ---- */
+  const smpCss = document.createElement('style');
+  smpCss.textContent = `.smp{display:inline-block;vertical-align:middle;margin-inline-start:6px;font-size:11px;font-weight:700;line-height:1;padding:4px 7px;border-radius:7px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
+  .smp-note{margin:10px 16px 0;padding:10px 12px;border-radius:12px;background:#FEF3C7;color:#92400E;font-size:13px;line-height:1.8}`;
+  document.head.appendChild(smpCss);
+  const isSampleAd = (id) => { const a = ADS.find((x) => String(x.id) === String(id)); return !!(a && (a._sample || (P[a.who] && P[a.who].sample))); };
+  let smpT = 0;
+  function markSamples() {
+    smpT = 0;
+    if (!on()) return;
+    document.querySelectorAll('.acard[data-id]:not([data-smp])').forEach((c) => {
+      c.dataset.smp = '1';
+      if (!isSampleAd(c.dataset.id)) return;
+      const t = c.querySelector('h3, b, .t'); (t || c).insertAdjacentHTML('beforeend', '<span class="smp" title="آگهی نمونه برای نمایش بلوک">نمونه</span>');
+    });
+    const ad = $('s-ad');
+    if (ad && S.cur === 'ad' && S.adId && isSampleAd(S.adId) && !ad.querySelector('.smp-note')) {
+      const bar = ad.querySelector('.bar'); const html = '<div class="smp-note">این آگهی «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.</div>';
+      if (bar) bar.insertAdjacentHTML('afterend', html); else ad.insertAdjacentHTML('afterbegin', html);
+    }
+    const pf = $('s-profile');
+    if (pf && S.cur === 'profile' && P[S.pid] && P[S.pid].sample && !pf.querySelector('.smp-note')) {
+      const bar = pf.querySelector('.bar'); const html = '<div class="smp-note">این پروفایل «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.</div>';
+      if (bar) bar.insertAdjacentHTML('afterend', html); else pf.insertAdjacentHTML('afterbegin', html);
+    }
+  }
+  try { new MutationObserver(() => { if (!smpT) smpT = setTimeout(markSamples, 60); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+
   /* ---- انبارهای نمایشی: با اتصال خالی می‌شوند ---- */
   function purge() {
     if (!on()) return;
@@ -183,7 +211,7 @@
     Object.assign(I18N.dict, {
       'اول یک مهندس انتخاب کن': 'Pick an engineer first',
       'در کاوش، پروفایل مهندس را باز کن و «رزرو بازدید» را بزن؛ زمان‌های آزاد واقعی او اینجا می‌آید.': 'In Explore, open an engineer’s profile and tap “Book a visit”; their real free times appear here.',
-      'پیدا کردن مهندس': 'Find an engineer',
+      'پیدا کردن مهندس': 'Find an engineer', 'نمونه': 'Sample', 'این آگهی «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.': 'This is a “sample” ad made to showcase Blook; there is no real person behind it.', 'این پروفایل «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.': 'This is a “sample” profile made to showcase Blook; there is no real person behind it.',
       'هویت تأیید شده': 'Identity verified', 'تأیید هویت در حال بررسی': 'Identity check in review', 'با «تأیید هویت»: کارت ملی + سلفی': 'Via “Verify identity”: national card + selfie', 'تأیید هویت': 'Verify identity',
     });
     I18N.re = null;
