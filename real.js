@@ -29,6 +29,62 @@
   setInterval(() => ping(false), 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) ping(Date.now() - lastView > 30 * 60000); });
 
+  /* ---- دور ۴۵: کد پیامکی خودکار ----
+   * آیفون: autocomplete="one-time-code" ← کد پیامک بالای کیبورد می‌آید و با یک لمس پر می‌شود.
+   * اندروید (Chrome): WebOTP ← اگر خط آخر پیامک «@blooko.ir #12345» باشد، کد بدون لمس خوانده و وارد می‌شود.
+   * کد کامل (چسباندن یا پرشدن خودکار) در هر خانه‌ای بیاید، بین ۵ خانه پخش می‌شود. */
+  const toEnD = (s) => String(s || '').replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  function fillOtpBoxes(code) {
+    const ins = [...document.querySelectorAll('#otp input')];
+    const d = toEnD(code).replace(/\D/g, '').slice(0, ins.length);
+    if (!ins.length || d.length < ins.length) return false;
+    ins.forEach((x, k) => (x.value = d[k]));
+    window.otpIn(ins[ins.length - 1], ins.length - 1);
+    return true;
+  }
+  wrapW('otpIn', function (prev, inp, i) {
+    const d = toEnD(inp && inp.value).replace(/\D/g, '');
+    if (d.length > 1 && fillOtpBoxes(d)) return;
+    return prev(inp, i);
+  });
+  let webOtp = null;
+  function listenSms(onCode) {
+    if (!('OTPCredential' in window) || !navigator.credentials) return;
+    if (webOtp) webOtp.abort();
+    const ac = (webOtp = new AbortController());
+    setTimeout(() => ac.abort(), 5 * 60000);
+    navigator.credentials.get({ otp: { transport: ['sms'] }, signal: ac.signal }).then((c) => { if (c && c.code) onCode(c.code); }).catch(() => {});
+  }
+  function armCodeInputs() {
+    const first = document.querySelector('#otp input:not([data-otp])');
+    if (first) {
+      document.querySelectorAll('#otp input').forEach((x) => { x.dataset.otp = '1'; x.setAttribute('autocomplete', 'off'); });
+      first.setAttribute('autocomplete', 'one-time-code');
+      first.setAttribute('name', 'otp');
+      first.removeAttribute('maxlength');
+      listenSms((code) => fillOtpBoxes(code));
+    }
+    // کد امضای قرارداد و تأیید قیم
+    document.querySelectorAll('#sigC:not([data-otp]), #gCode:not([data-otp])').forEach((x) => {
+      x.dataset.otp = '1';
+      x.setAttribute('autocomplete', 'one-time-code');
+      listenSms((code) => { if (document.body.contains(x)) { x.value = toEnD(code).replace(/\D/g, '').slice(0, 5); x.dispatchEvent(new Event('input', { bubbles: true })); } });
+    });
+    if (!document.querySelector('#otp input, #sigC, #gCode') && webOtp) { webOtp.abort(); webOtp = null; }
+  }
+
+  /* ---- دور ۴۵: بدون کپی متن (به‌جز داخل کادرهای نوشتن) ---- */
+  const ncCss = document.createElement('style');
+  ncCss.textContent = `body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,select,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+  img,svg{-webkit-user-drag:none}`;
+  document.head.appendChild(ncCss);
+  const editable = (t) => !!(t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]'));
+  ['copy', 'cut'].forEach((ev) => document.addEventListener(ev, (e) => { if (!editable(e.target)) e.preventDefault(); }, true));
+  document.addEventListener('contextmenu', (e) => { if (!editable(e.target)) e.preventDefault(); }, true);
+  document.addEventListener('selectstart', (e) => { if (!editable(e.target)) e.preventDefault(); }, true);
+  document.addEventListener('dragstart', (e) => { if (!editable(e.target)) e.preventDefault(); }, true);
+
   /* ---- دور ۴۴: برچسب «نمونه» روی آگهی و پروفایل حساب‌های نمونه (وقتی مدیر نمایششان را روشن کرده) ---- */
   const smpCss = document.createElement('style');
   smpCss.textContent = `.smp{display:inline-block;vertical-align:middle;margin-inline-start:6px;font-size:11px;font-weight:700;line-height:1;padding:4px 7px;border-radius:7px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
@@ -55,7 +111,8 @@
       if (bar) bar.insertAdjacentHTML('afterend', html); else pf.insertAdjacentHTML('afterbegin', html);
     }
   }
-  try { new MutationObserver(() => { if (!smpT) smpT = setTimeout(markSamples, 60); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+  let armT = 0;
+  try { new MutationObserver(() => { if (!smpT) smpT = setTimeout(markSamples, 60); if (!armT) armT = setTimeout(() => { armT = 0; armCodeInputs(); }, 40); }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
 
   /* ---- انبارهای نمایشی: با اتصال خالی می‌شوند ---- */
   function purge() {
