@@ -226,6 +226,7 @@
     if (typeof i18nNode === 'function' && en()) i18nNode(sb);
   }
   window.h46Manage = h46Manage;
+  window.H46 = { themeOf, scene, THEMES };
   window.m46Tog = (k) => { const E = S.e46; if (!E) return; const s = E.items[k]; s.done = !s.done; s.at = s.done ? new Date().toISOString() : null; E.dirty = true; h46Manage(E.i); };
   window.m46Del = (k) => { const E = S.e46; if (!E) return; E.items.splice(k, 1); E.dirty = true; h46Manage(E.i); };
   window.m46Add = () => { const E = S.e46, v = ($id('m46In') && $id('m46In').value.trim()) || ''; if (!E || !v) return; if (E.items.some((s) => s.t === v)) { toast('این کار در فهرست هست'); return; } E.items.push({ t: v.slice(0, 60), done: false, at: null }); E.dirty = true; h46Manage(E.i); setTimeout(() => $id('m46In') && $id('m46In').focus(), 50); };
