@@ -576,6 +576,7 @@
     } else p.prog = items;
     rerender();
   }
+  window.pgSave = (i, items) => saveSteps(i, items);
   function rerender() { if (S.cur === 'home' && typeof renderHome === 'function') renderHome(); else if (S.cur === 'pdet' && typeof renderPdet === 'function') renderPdet(); }
   window.pgTick = function (i, k, ev) {
     if (ev) ev.stopPropagation();
@@ -1134,6 +1135,7 @@
   @media (prefers-reduced-motion:reduce){.ph-track>.ph-slide{transition:none;transform:none;opacity:1}.ph-acts .pa.m span{animation:none}}`;
   document.head.appendChild(phCss2);
   function slideHTML(p, i) {
+    if (window.slideHTML46) return window.slideHTML46(p, i); // دور ۴۶: طرح تازه در hero46.js
     const w = p.who && person(p.who), inf = projInfo(p);
     const prog = inf.pct != null ? inf.pct : p.stage >= 2 ? 50 : 0;
     const left = !inf.started ? `${fa(inf.durD)} روز` : inf.left == null ? '—' : `${fa(Math.abs(inf.left))} روز`;
