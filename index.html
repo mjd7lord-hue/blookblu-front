@@ -3526,7 +3526,7 @@ function quickLogin(role){if(!DEMO)return;S.auth=true;S.role=role;S.mode=({worke
 const PROVS=IRP.map(p=>p.t).sort((a,b)=>a.localeCompare(b,'fa'));
 const EXP=['کمتر از ۱ سال','۱ تا ۳ سال','۳ تا ۵ سال','۵ تا ۱۰ سال','بیش از ۱۰ سال'];
 const BASE={title:'اطلاعات پایه',sub:'نام واقعی لازم است؛ بعداً با کارت ملی تطبیق داده می‌شود.',f:[
-  {k:'fn',t:'text',label:'نام',req:1,ph:'مثلاً حسین'},{k:'ln',t:'text',label:'نام خانوادگی',req:1,ph:'مثلاً صالحی'},
+  {k:'fn',t:'text',label:'نام',req:1,fa:1,ph:'مثلاً حسین'},{k:'ln',t:'text',label:'نام خانوادگی',req:1,fa:1,ph:'مثلاً صالحی'},
   {k:'prov',t:'prov',label:'استان محل کار',req:1},{k:'city',t:'text',label:'شهر',req:1,ph:'مثلاً قشم',list:1},
   {k:'range',t:'chips',label:'تا کجا برای کار می‌روی؟',opts:['فقط شهر خودم','تا ۵۰ کیلومتر','کل استان','هر جای ایران'],req:1}]};
 const PRIV={title:'حریم خصوصی',sub:'هر وقت بخواهی از تنظیمات عوض می‌شود.',f:[
@@ -3604,12 +3604,12 @@ const REG={
    {k:'staff',t:'chips',label:'تعداد پرسنل',opts:['کمتر از ۱۰','۱۰ تا ۵۰','۵۰ تا ۲۰۰','بیش از ۲۰۰'],req:1},
    {k:'mach',t:'toggle',label:'ماشین‌آلات اختصاصی داریم'},{k:'pf',t:'upload',label:'پروژه‌های شاخص'}]},
   {title:'نمایندهٔ شرکت',sub:'کسی که در بلوک به پیام‌ها جواب می‌دهد.',f:[
-   {k:'fn',t:'text',label:'نام و نام خانوادگی نماینده',req:1},{k:'pos',t:'text',label:'سمت',ph:'مثلاً مدیر پروژه',req:1},
+   {k:'fn',t:'text',label:'نام و نام خانوادگی نماینده',req:1,fa:1},{k:'pos',t:'text',label:'سمت',ph:'مثلاً مدیر پروژه',req:1},
    {k:'gazette',t:'upload',label:'روزنامهٔ رسمی آخرین تغییرات'}]},
   PRIV],
  general:[
   {title:'اطلاعات پایه',sub:'برای کارفرما فقط همین کافی است.',f:[
-   {k:'fn',t:'text',label:'نام',req:1},{k:'ln',t:'text',label:'نام خانوادگی',req:1},{k:'prov',t:'prov',label:'استان ملک',req:1},{k:'city',t:'text',label:'شهر',req:1,list:1}]},
+   {k:'fn',t:'text',label:'نام',req:1,fa:1},{k:'ln',t:'text',label:'نام خانوادگی',req:1,fa:1},{k:'prov',t:'prov',label:'استان ملک',req:1},{k:'city',t:'text',label:'شهر',req:1,list:1}]},
   {title:'چه کاری در پیش داری؟',sub:'بر اساس این، نیرو و مشاور مناسب پیشنهاد می‌شود.',f:[
    {k:'need',t:'chips',label:'نیاز',opts:['ساخت ویلا یا ساختمان','بازسازی و تعمیرات','کار جزئی و فوری','مشاوره و بازدید فنی','فعلاً فقط نگاه می‌کنم'],req:1},
    {k:'land',t:'chips',label:'وضعیت ملک',opts:['زمین دارم','پروانه گرفته‌ام','در حال ساخت','ساختمان موجود'],show:d=>d.need&&d.need!=='فعلاً فقط نگاه می‌کنم'},
@@ -3669,11 +3669,13 @@ function otpIn(inp,i){inp.value=inp.value.replace(/[^0-9۰-۹]/g,'').slice(-1);i
   if(v.length===5){const box=$('otp');if(v==='12345'){box.classList.add('good');clearInterval(S.otpI);setTimeout(()=>{S.reg.step='role';renderAuth()},650)}else{box.classList.remove('bad');void box.offsetWidth;box.classList.add('bad');toast('کد درست نیست');setTimeout(()=>{document.querySelectorAll('#otp input').forEach(x=>x.value='');document.querySelector('#otp input').focus()},450)}}}
 function pickRole(k){const r=S.reg;r.role=k;r.i=0;r.d={};REG[k].forEach(st=>st.f.forEach(f=>{if(f.def)r.d[f.k]=true}));r.step='form';renderAuth()}
 function vis(f,d){return !f.show||f.show(d)}
-function filled(f,d){const v=d[f.k];if(f.t==='multi'||f.t==='days')return v&&v.length>0;if(f.t==='text'||f.t==='area')return v&&String(v).trim().length>=2;return v!==undefined&&v!==''&&v!==null}
+function filled(f,d){const v=d[f.k];if(f.t==='multi'||f.t==='days')return v&&v.length>0;if(f.t==='text'||f.t==='area')return v&&String(v).trim().length>=2&&(!f.fa||!/[^ء-غف-ٰٕپچژکگۀی‌ ]/.test(v));return v!==undefined&&v!==''&&v!==null}
 function stepOK(){const r=S.reg,st=REG[r.role][r.i];return st.f.filter(f=>f.req&&vis(f,r.d)).every(f=>filled(f,r.d))}
+// نام فقط با حروف فارسی (هم‌تراز با FA_NAME در forms.ts بک‌اند)
+function faOnly(el){const v=el.value,c=v.replace(/[^ء-غف-ٰٕپچژکگۀی‌ ]/g,'');if(c!==v){el.value=c;toast('نام را فقط با حروف فارسی بنویس')}}
 function fieldHTML(f,d){
   const id='rf_'+f.k,lab=`<label class="label" for="${id}">${f.label}${f.req?'':' <span class="opt">اختیاری</span>'}</label>`;
-  if(f.t==='text')return lab+`<input class="field" id="${id}" ${f.dir?`dir="${f.dir}"`:''} ${f.list?'list="citylist"':''} placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="S.reg.d['${f.k}']=this.value;updRegBtn()">${f.hint?`<p class="hint">${f.hint}</p>`:''}`;
+  if(f.t==='text')return lab+`<input class="field" id="${id}" ${f.dir?`dir="${f.dir}"`:''} ${f.list?'list="citylist"':''} placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="${f.fa?'faOnly(this);':''}S.reg.d['${f.k}']=this.value;updRegBtn()">${f.hint?`<p class="hint">${f.hint}</p>`:f.fa?`<p class="hint">فقط حروف فارسی</p>`:''}`;
   if(f.t==='area')return lab+`<textarea class="field" id="${id}" placeholder="${f.ph||''}" oninput="S.reg.d['${f.k}']=this.value;updRegBtn()">${esc(d[f.k]||'')}</textarea>`;
   if(f.t==='num')return lab+`<div class="numf"><input class="field" id="${id}" inputmode="numeric" placeholder="${f.ph||''}" value="${esc(d[f.k]||'')}" oninput="this.value=this.value.replace(/[^0-9۰-۹٬,.]/g,'');S.reg.d['${f.k}']=this.value;updRegBtn()"><span>${f.unit||''}</span></div>`;
   if(f.t==='prov')return lab+`<select class="field" id="${id}" onchange="S.reg.d['${f.k}']=this.value;renderRegStep()"><option value="">انتخاب استان</option>${PROVS.map(p=>`<option ${d[f.k]===p?'selected':''}>${p}</option>`).join('')}</select>`;

@@ -45,6 +45,7 @@
     'گودبرداری و فونداسیون': 'Excavation & foundation', 'دیوارچینی': 'Masonry walls', 'تحویل': 'Handover',
     'تخریب': 'Demolition', 'تأسیسات': 'Installations', 'کاشی و کف': 'Tiles & flooring', 'رنگ و تحویل': 'Painting & handover',
     // ---- آماده به کار ----
+    'نام را فقط با حروف فارسی بنویس': 'Write the name in Persian letters only', 'فقط حروف فارسی': 'Persian letters only',
     'آماده به کار': 'Ready to work', 'روشن': 'On', 'خاموش': 'Off',
     'کارفرماها الان در کاوش تو را با نشان سبز می‌بینند.': 'Employers now see you in Explore with a green badge.',
     'خاموشی؛ در کاوش دیده نمی‌شوی. روشنش کن تا کار پیدا کنی.': 'You are off and hidden in Explore. Turn it on to find work.',
