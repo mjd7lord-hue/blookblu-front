@@ -964,8 +964,17 @@
   const tIn = (id, label, unit, ph) => `<label class="label" for="${id}">${label}</label><div class="numf"><input class="field" id="${id}" inputmode="decimal" placeholder="${ph || ''}" oninput="tlCalc()"><span>${unit}</span></div>`;
   const tRow = (k, v, big) => `<div class="tl-r${big ? ' big' : ''}"><span>${k}</span><b class="num">${v}</b></div>`;
   const chipsOf = (list, cur, key, tool) => `<div class="chips">${list.map((n, i) => `<button class="chip" aria-pressed="${cur === i}" onclick="TS49.${key}=${i};tlOpen('${tool}')">${n}</button>`).join('')}</div>`;
+  const TIC = {
+    conc: '<svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg>',
+    wall: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/></svg>',
+    tile: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M4 12h16"/></svg>',
+    wage: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/></svg>',
+    est: '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M8 18h.01M12 18h.01M16 14.5V18"/></svg>',
+    cal: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>',
+    box: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12h18M10 12v2h4v-2"/></svg>',
+  };
   const TOOLS = {
-    conc: { ic: '🏗️', t: 'بتن', d: 'سیمان، ماسه، شن و آب',
+    conc: { ic: TIC.conc, c: 'var(--accent)', t: 'بتن', d: 'سیمان، ماسه، شن و آب',
       form: () => `<p class="hint" style="margin-top:0">ابعاد را بده یا حجم را مستقیم بنویس</p>${tIn('tlL', 'طول', 'متر')}${tIn('tlW', 'عرض', 'متر')}${tIn('tlH', 'ضخامت', 'سانتی‌متر', 'مثلاً ۱۰')}${tIn('tlV', 'یا حجم', 'متر مکعب')}
         <span class="label">عیار سیمان</span><div class="chips">${[250, 300, 350, 400].map((c) => `<button class="chip" aria-pressed="${TS.conc === c}" onclick="TS49.conc=${c};tlOpen('conc')">${fa(c)} کیلو</button>`).join('')}</div>`,
       calc: () => {
@@ -973,14 +982,14 @@
         const k = TL.concrete, vv = v * (1 + k.waste), cem = vv * TS.conc;
         return tRow('حجم بتن (با ۵٪ دورریز)', f1(vv) + ' متر مکعب') + tRow('سیمان', fa(ceil(cem / k.bag)) + ' کیسهٔ ۵۰ کیلویی', 1) + tRow('وزن سیمان', faNum(cem) + ' کیلو') + tRow('ماسه', f1(vv * k.sand) + ' متر مکعب') + tRow('شن', f1(vv * k.gravel) + ' متر مکعب') + tRow('آب', faNum(cem * 0.5) + ' لیتر');
       } },
-    wall: { ic: '🧱', t: 'دیوار', d: 'تعداد آجر و بلوک',
+    wall: { ic: TIC.wall, c: 'var(--r-worker)', t: 'دیوار', d: 'تعداد آجر و بلوک',
       form: () => `${tIn('tlL', 'طول دیوار', 'متر')}${tIn('tlH', 'ارتفاع', 'متر')}${tIn('tlO', 'در و پنجره (کم شود)', 'متر مربع', 'اختیاری')}
         <span class="label">نوع دیوار</span>${chipsOf(TL.wall.map((w) => w[0]), TS.wall, 'wall', 'wall')}`,
       calc: () => {
         const a = Math.max(0, TLN('tlL') * TLN('tlH') - TLN('tlO')); if (!a) return '';
         return tRow('مساحت دیوار', f1(a) + ' متر مربع') + tRow('تعداد (با ۵٪ دورریز)', faNum(ceil(a * TL.wall[TS.wall][1] * (1 + TL.wallWaste))) + ' عدد', 1);
       } },
-    tile: { ic: '🔲', t: 'کاشی و سرامیک', d: 'متراژ و تعداد',
+    tile: { ic: TIC.tile, c: 'var(--r-engineer)', t: 'کاشی و سرامیک', d: 'متراژ و تعداد',
       form: () => `${tIn('tlL', 'طول', 'متر')}${tIn('tlW', 'عرض (یا ارتفاع دیوار)', 'متر')}
         <span class="label">اندازهٔ کاشی (سانتی‌متر)</span>${chipsOf(TL.tiles.map(([w, h]) => fa(w) + '×' + fa(h)), TS.tile, 'tile', 'tile')}`,
       calc: () => {
@@ -988,7 +997,7 @@
         const [w, h] = TL.tiles[TS.tile], aw = a * (1 + TL.tileWaste);
         return tRow('مساحت', f1(a) + ' متر مربع') + tRow('خرید (با ۸٪ دورریز)', f1(aw) + ' متر مربع', 1) + tRow('تعداد کاشی', faNum(ceil(aw / ((w / 100) * (h / 100)))) + ' عدد');
       } },
-    wage: { ic: '💰', t: 'دستمزد', d: 'روزانه یا متری',
+    wage: { ic: TIC.wage, c: 'var(--ok)', t: 'دستمزد', d: 'روزانه یا متری',
       form: () => `${chipsOf(['روزانه', 'متری'], TS.wt === 'day' ? 0 : 1, 'wt', 'wage').replace(/TS49\.wt=0/, "TS49.wt='day'").replace(/TS49\.wt=1/, "TS49.wt='m'")}
         ${TS.wt === 'day' ? tIn('tlA', 'تعداد روز', 'روز') + tIn('tlN', 'تعداد نفر', 'نفر', '۱') : tIn('tlA', 'متراژ', 'متر')}
         <label class="label" for="tlP">${TS.wt === 'day' ? 'دستمزد هر روز' : 'دستمزد هر متر'}</label><div class="numf"><input class="field" id="tlP" data-money="1" inputmode="numeric" oninput="tlCalc()"><span>تومان</span></div>`,
@@ -1009,7 +1018,7 @@
     // با عوض کردن گزینه‌ها (عیار، نوع دیوار…) عددهای نوشته‌شده می‌ماند
     const keep = {}; if (TS.k === k) sb.querySelectorAll('#tlForm input').forEach((i) => { keep[i.id] = i.value; });
     TS.k = k; const t = TOOLS[k];
-    sb.innerHTML = `<div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><button class="ghost" style="padding:6px 14px;width:auto;flex:0 0 auto;margin:0" aria-label="بازگشت" onclick="toolsSheet()">‹</button><h3 id="sheetTitle" style="margin:0;flex:1">${t.ic} ${t.t}</h3></div>
+    sb.innerHTML = `<div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><button class="ghost" style="padding:6px 14px;width:auto;flex:0 0 auto;margin:0" aria-label="بازگشت" onclick="toolsSheet()">‹</button><span class="tl-h"><span class="tl-ic" style="--c:${t.c}">${t.ic}</span></span><h3 id="sheetTitle" style="margin:0;flex:1">${t.t}</h3></div>
       <div id="tlForm">${t.form()}</div><div class="card tl-out" id="tlOut"></div>`;
     for (const id in keep) if ($(id)) $(id).value = keep[id];
     if ($('tlP') && window.moneyField) moneyField($('tlP'));
@@ -1017,17 +1026,17 @@
   };
   window.toolsSheet = () => {
     TS.k = null;
-    const L = [...Object.entries(TOOLS).map(([k, t]) => [`tlOpen('${k}')`, t.ic, t.t, t.d]), ["closeSheet();go('est')", '🧮', 'برآورد هزینه', 'ساخت، بازسازی و دستمزد'], ["closeSheet();go('cal')", '📅', 'تقویم کاری', 'روزهای آزاد و قرارها']];
+    const L = [...Object.entries(TOOLS).map(([k, t]) => [`tlOpen('${k}')`, t.ic, t.t, t.d, t.c]), ["closeSheet();go('est')", TIC.est, 'برآورد هزینه', 'ساخت، بازسازی و دستمزد', 'var(--gold)'], ["closeSheet();go('cal')", TIC.cal, 'تقویم کاری', 'روزهای آزاد و قرارها', 'var(--r-specialist)']];
     sb.innerHTML = `<div class="grab"></div><div style="display:flex;align-items:center;gap:8px"><h3 id="sheetTitle" style="margin:0;flex:1">ابزارک‌ها</h3>${hq('tools')}</div><p class="sub">محاسبهٔ سریع کارگاه؛ بدون اینترنت هم کار می‌کند.</p>
-      <div class="tl-grid">${L.map(([fn, ic, t, d]) => `<button class="card" onclick="${fn}"><span class="tl-ic">${ic}</span><b>${t}</b><small>${d}</small></button>`).join('')}</div>`;
+      <div class="tl-grid">${L.map(([fn, ic, t, d, c]) => `<button class="card" onclick="${fn}"><span class="tl-ic" style="--c:${c}">${ic}</span><b>${t}</b><small>${d}</small></button>`).join('')}</div>`;
     show(); i18n(sb);
   };
   css.textContent += `.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.tl-grid .card{display:block;padding:14px;text-align:start;font:inherit;color:inherit;cursor:pointer}.tl-grid .card>*{display:block}
-  .tl-grid .tl-ic{font-size:24px;line-height:1;margin-bottom:4px}.tl-grid small{color:var(--muted);font-size:12px}
+  .tl-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);margin-bottom:8px}.tl-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.tl-h .tl-ic{width:34px;height:34px;margin:0;border-radius:10px}.tl-h .tl-ic svg{width:19px;height:19px}.tl-grid small{color:var(--muted);font-size:12px}
   .tl-out{margin-top:14px;padding:12px 14px}.tl-r{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}.tl-r:last-of-type{border-bottom:0}.tl-r.big b{color:var(--accent);font-size:16px}`;
   TOP.tools = { ic: '🧰', t: 'ابزارک‌ها', d: 'بتن، دیوار، کاشی و دستمزد در چند ثانیه', page: 'home',
     steps: [
-      { t: 'در «دسترسی سریع» خانه، «ابزارک‌ها» را بزن.', s: `<div class="card" style="padding:10px;border-radius:14px;text-align:center;font-size:11px">🧰<br>ابزارک‌ها</div>` + F(50, 40), sel: '#qa42' },
+      { t: 'در «دسترسی سریع» خانه، «ابزارک‌ها» را بزن.', s: `<div class="card" style="padding:10px;border-radius:14px;text-align:center;font-size:11px"><span class="tl-ic" style="--c:var(--ok);margin:0 auto 4px">${TIC.box}</span>ابزارک‌ها</div>` + F(50, 40), sel: '#qa42' },
       { t: 'ابزار را انتخاب کن و ابعاد را بنویس؛ نتیجه همان لحظه پایین می‌آید.', s: `<div class="card" style="padding:10px;border-radius:14px;font-size:10.5px;line-height:2">طول ۵ · عرض ۴ · ضخامت ۱۰<br><b>سیمان: ۸ کیسه</b></div>` },
       { t: 'عددها تقریبی است (با دورریز)؛ برای خرید نهایی با استادکار هماهنگ کن.', s: btnMini('فهمیدم') },
     ] };

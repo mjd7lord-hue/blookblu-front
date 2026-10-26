@@ -3626,7 +3626,7 @@ function renderAuth(){
     <div class="auth-hero"><div class="auth-logo">${logoSVG('anim')}</div>
       <h1>ورود به ${wordmark('anim md')}</h1><p>با شمارهٔ موبایل وارد شو یا حساب تازه بساز.</p></div>
     <div class="section"><label class="label" for="ph">شمارهٔ موبایل</label>
-      <div class="phone-in"><input id="ph" dir="ltr" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="09xx xxx xxxx" aria-label="شمارهٔ موبایل" value="${esc(r.phone?'09'+r.phone:'')}" oninput="phIn(this)"></div>
+      <div class="phone-in"><input id="ph" dir="ltr" type="tel" inputmode="numeric" autocomplete="tel" maxlength="11" placeholder="09xxxxxxxxx" aria-label="شمارهٔ موبایل" value="${esc(r.phone?'09'+r.phone:'')}" oninput="phIn(this)"></div>
       <label class="agree"><input type="checkbox" id="agr" onchange="chkPhone()" ${r.ok?'checked':''}><span><a href="#" onclick="event.preventDefault();openLegal('terms')">قوانین استفاده</a> و <a href="#" onclick="event.preventDefault();openLegal('privacy')">حریم خصوصی</a> بلوک را می‌پذیرم.</span></label>
       <button class="cta" id="phBtn" disabled onclick="sendOtp()">دریافت کد تأیید</button>
       <button class="ghost" onclick="S.pending=null;go('explore')">فعلاً فقط آگهی‌ها را می‌بینم</button></div>`;
@@ -3659,7 +3659,11 @@ const ROLE_INFO={
 };
 /* شماره: با ۰۹، ۹۸+ یا بدون آن قبول؛ S.reg.phone همیشه ۹ رقم بعد از ۰۹ */
 function phNorm(v){let d=String(v||'').replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g,'');if(d.startsWith('0098'))d=d.slice(4);else if(d.startsWith('98')&&d.length>=12)d=d.slice(2);if(d.startsWith('09'))d=d.slice(2);else if(d.startsWith('9')&&d.length===10)d=d.slice(1);return d.slice(0,9)}
-function phIn(el){el.value=el.value.replace(/[^0-9۰-۹+]/g,'');S.reg.phone=phNorm(el.value);const d=el.value.replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/\D/g,'');S.reg.phOk=/^(09|9|989|00989)\d{9}$/.test(d);chkPhone()}
+// دور ۵۰: فقط ۱۱ رقم (۰۹xxxxxxxxx)؛ رقم اضافه تایپ نمی‌شود
+function phIn(el){let d=el.value.replace(/[۰-۹]/g,x=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(x)).replace(/[٠-٩]/g,x=>'٠١٢٣٤٥٦٧٨٩'.indexOf(x)).replace(/\D/g,'');
+  // چسباندن یا پر شدن خودکار با +98 / 0098 / بدون صفر ← ۰۹…
+  if(d.startsWith('0098'))d='0'+d.slice(4);else if(d.startsWith('98'))d='0'+d.slice(2);else if(d.startsWith('9'))d='0'+d;
+  el.value=d.slice(0,11);S.reg.phone=phNorm(el.value);S.reg.phOk=/^09\d{9}$/.test(el.value);chkPhone()}
 function chkPhone(){const r=S.reg,v=(r.phone||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)),ag=$('agr');r.ok=ag&&ag.checked;const b=$('phBtn');if(b)b.disabled=!((r.phOk===undefined?v.length===9:r.phOk&&v.length===9)&&r.ok)}
 function sendOtp(){S.reg.step='otp';S.reg.t=Date.now();renderAuth();toast('کد تأیید فرستاده شد')}
 function otpTimer(){clearInterval(S.otpI);const upd=()=>{const el=$('otpT');if(!el){clearInterval(S.otpI);return}const s=Math.max(0,120-Math.floor((Date.now()-S.reg.t)/1000));
@@ -7993,7 +7997,7 @@ function saveEditAll(){const d=S.reg.d;const need=[];REG[S.role].forEach(st=>st.
   const st=sendText;window.sendText=function(t){st(t);const i=$('cIn');if(i)i.focus({preventScroll:true})}})();
 
 /* ---------- ۸) اعلان‌ها: داخل اپ + اعلان گوشی ---------- */
-S.nprefs=S.nprefs||{};if(S.nprefs.push===undefined)S.nprefs.push=false;
+S.nprefs=S.nprefs||{};if(S.nprefs.push===undefined)S.nprefs.push=true;
 function notifUnread(){return (S.notifs||[]).filter(n=>!n.read).length}
 function bellUpd(){document.querySelectorAll('.bell-cnt').forEach(e=>{const n=notifUnread();e.textContent=n?fa(n>9?'9+':n):'';e.classList.toggle('on',!!n)})}
 function notify(o){const n={g:'امروز',ty:o.ty||'req',t:o.t,s:o.s||'',time:'همین حالا',go:o.go||"go('notif')",read:false};(S.notifs=S.notifs||[]).unshift(n);bellUpd();

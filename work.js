@@ -428,6 +428,20 @@
   /* ---- ماندگاری تنظیمات روی همین گوشی: تنظیمات پیام، اعلان و پوستهٔ روشن/تیره ---- */
   const KEEP = [['blk-mprefs', 'mprefs'], ['blk-nprefs', 'nprefs']];
   KEEP.forEach(([k, f]) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); if (v && typeof v === 'object') S[f] = Object.assign(S[f] || {}, v); } catch (e) {} });
+  // دور ۵۰: «اعلان روی گوشی» برای همه پیش‌فرض روشن (یک بار، حتی اگر قبلاً خاموش ذخیره شده)؛
+  // اجازهٔ مرورگر فقط با لمس کاربر گرفته می‌شود ← اولین لمس بعد از ورود، یک بار
+  try {
+    if (!localStorage.getItem('blk-push50')) { S.nprefs = S.nprefs || {}; S.nprefs.push = true; localStorage.setItem('blk-push50', '1'); }
+    if (!/jsdom/i.test(navigator.userAgent || '') && S.nprefs.push && 'Notification' in window && Notification.permission === 'default' && !localStorage.getItem('blk-pushask')) {
+      const ask = () => {
+        if (!S.auth) return;
+        document.removeEventListener('click', ask, true);
+        try { localStorage.setItem('blk-pushask', '1'); } catch (e) {}
+        Notification.requestPermission().then((p) => { if (p !== 'granted') S.nprefs.push = false; }).catch(() => {});
+      };
+      document.addEventListener('click', ask, true);
+    }
+  } catch (e) {}
   try { const th = localStorage.getItem('blk-theme'); if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th; } catch (e) {}
   const keepSnap = () => JSON.stringify([S.mprefs, S.nprefs, document.documentElement.dataset.theme || '']);
   let keepLast = keepSnap();
