@@ -208,6 +208,8 @@
       wage: x.wageAmount ? money(x.wageAmount) : x.type === 'consult' ? '' : x.wageType === 'توافقی' ? 'پس از گفت‌وگو' : 'توافقی',
       start: x.startWhen || 'با هماهنگی', range: RANGE_B[x.range] || 'شهر', aud: x.audience || [], need: x.needCount || undefined,
       resp: x.responsesCount || 0, posted: rel(x.createdAt), skills: x.skills || [], desc: x.description || '', status: x.status, _live: true,
+      // ارتقای پولی (دور ۵۳): ویژه / فوری تا زمان پرداخت‌شده
+      boost: x.featuredUntil && new Date(x.featuredUntil) > new Date() ? 'star' : x.urgentUntil && new Date(x.urgentUntil) > new Date() ? 'urgent' : null,
     };
   }
   async function loadAds(type, force) {
