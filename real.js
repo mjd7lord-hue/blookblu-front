@@ -17,12 +17,24 @@
     return v;
   })();
   let lastView = 0;
+  // دور ۵۱: منبع ورود (utm_source یا سایت قبلی) و «باز شده از آیکون روی گوشی» — برای آمار پنل؛ بدون دادهٔ شخصی
+  const entrySrc = (() => {
+    try {
+      const u = new URLSearchParams(location.search).get('utm_source') || new URLSearchParams(location.search).get('ref');
+      if (u) return u.slice(0, 40);
+      const r = document.referrer ? new URL(document.referrer).hostname : '';
+      return r && r !== location.hostname ? r : '';
+    } catch (e) { return ''; }
+  })();
+  const installed = () => { try { return !!(matchMedia('(display-mode: standalone)').matches || navigator.standalone); } catch (e) { return false; } };
   function ping(view) {
     if (!window.LIVE || !LIVE.base || document.hidden) return;
     const h = { 'Content-Type': 'application/json' };
     if (LIVE.tok && LIVE.tok.a) h.Authorization = 'Bearer ' + LIVE.tok.a;
     if (view) lastView = Date.now();
-    fetch(LIVE.base + '/api/app/ping', { method: 'POST', headers: h, body: JSON.stringify({ v: vid, view: !!view }) }).catch(() => {});
+    const body = { v: vid, view: !!view, sa: installed() };
+    if (entrySrc) body.src = entrySrc;
+    fetch(LIVE.base + '/api/app/ping', { method: 'POST', headers: h, body: JSON.stringify(body) }).catch(() => {});
   }
   // باز شدن اپ = یک بازدید؛ برگشتن بعد از ۳۰ دقیقه = بازدید تازه؛ هر ۶۰ ثانیه «هنوز اینجام»
   setTimeout(() => ping(true), 2500);
