@@ -20,3 +20,8 @@ services:
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
+    # دور ۵۴: لینک دعوت blooko.ir/i/کد ← اپ (index.html آن را به /?i=کد می‌برد)
+    routes:
+      - type: rewrite
+        source: /i/*
+        destination: /index.html

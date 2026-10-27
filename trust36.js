@@ -1041,6 +1041,16 @@
       { t: 'عددها تقریبی است (با دورریز)؛ برای خرید نهایی با استادکار هماهنگ کن.', s: btnMini('فهمیدم') },
     ] };
   ORDER.push('tools');
+  // دور ۵۴: کمپین «۱۰۰ عضو بنیان‌گذار» (founders.js)
+  const stepMini = (ok, t) => `<div style="display:flex;gap:8px;align-items:center;font-size:11px;padding:4px 0"><span style="width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;${ok ? 'background:var(--ok);color:#fff' : 'border:2px solid var(--line)'}">${ok ? '✓' : ''}</span>${t}</div>`;
+  TOP.founders = { ic: '🏅', t: '۱۰۰ عضو بنیان‌گذار', d: '۳ قدم تا شمارهٔ اختصاصی و ۲ سال بدون کمیسیون', page: 'home',
+    steps: [
+      { t: 'در صفحهٔ خانه کارت «۱۰۰ عضو بنیان‌گذار» را ببین؛ عدد بالا یعنی چند جا مانده.', s: `<div class="card" style="padding:10px;border-radius:14px;font-size:11px"><b>۱۰۰ عضو بنیان‌گذار بلوک</b> · ۷۳ جا مانده</div>`, sel: '#fnd54' },
+      { t: '«فالو کردم» را بزن تا پیج اینستاگرام باز شود؛ بعد احراز هویت را انجام بده.', s: `<div class="card" style="padding:8px 10px;border-radius:14px">${stepMini(true, 'فالو اینستاگرام')}${stepMini(false, 'احراز هویت')}${stepMini(false, 'دعوت یک دوست')}</div>` + F(80, 30) },
+      { t: '«اشتراک لینک» را بزن و برای دوستت بفرست؛ وقتی با لینک تو ثبت‌نام کند، تیک سوم می‌خورد.', s: `<div class="card" style="padding:10px;border-radius:14px;font-size:11px;direction:ltr">blooko.ir/i/B-7K31</div>` + btnMini('اشتراک لینک') },
+      { t: 'با ۳ تیک، شمارهٔ بنیان‌گذار به ترتیب به تو می‌رسد و نشانش روی پروفایلت می‌نشیند.', s: `<div style="text-align:center;font-size:34px">🏅</div><div style="text-align:center;font-weight:900;font-size:20px;color:var(--gold)">#۷</div>` },
+    ] };
+  ORDER.push('founders');
 
   /* ================= ترجمهٔ انگلیسی ================= */
   if (typeof I18N === 'object') {
