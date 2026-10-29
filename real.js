@@ -80,6 +80,15 @@
     document.querySelectorAll('#sigC:not([data-otp]), #gCode:not([data-otp])').forEach((x) => {
       x.dataset.otp = '1';
       x.setAttribute('autocomplete', 'one-time-code');
+      // دور ۵۵: با ۵ رقم (خودکار، چسباندن یا تایپ) همان لحظه تأیید/امضا زده می‌شود؛ هر کد فقط یک بار
+      x.addEventListener('input', () => {
+        const v = toEnD(x.value).replace(/\D/g, '');
+        if (v.length !== 5 || x.dataset.sent === v) return;
+        x.dataset.sent = v;
+        let b = x.nextElementSibling;
+        while (b && !(b.matches && b.matches('button.cta'))) b = b.nextElementSibling;
+        if (b && !b.disabled) setTimeout(() => b.click(), 150);
+      });
       listenSms((code) => { if (document.body.contains(x)) { x.value = toEnD(code).replace(/\D/g, '').slice(0, 5); x.dispatchEvent(new Event('input', { bubbles: true })); } });
     });
     if (!document.querySelector('#otp input, #sigC, #gCode') && webOtp) { webOtp.abort(); webOtp = null; }
