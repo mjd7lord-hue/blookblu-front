@@ -59,6 +59,12 @@
   #fnd54 .st.ok .ck{background:var(--ok);border-color:var(--ok);color:#fff}#fnd54 .st .tx{flex:1;min-width:0}#fnd54 .st .tx b{display:block;font-size:14px}#fnd54 .st .tx small{color:var(--muted);font-size:12px}
   #fnd54 .st button{border:0;border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;font-weight:800;background:var(--gold);color:#3b2a00;cursor:pointer;flex:none}#fnd54 .st.ok button{background:var(--soft,var(--bg));color:var(--muted)}
   #fnd54 .lnk{direction:ltr;font-size:12px;color:var(--muted);word-break:break-all}#fnd54 .pk{margin:10px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted)}#fnd54 .pk li::before{content:"★ ";color:var(--gold)}
+  .fnd-ring{display:inline-block;line-height:0;flex:none;filter:drop-shadow(2.5px 0 0 #F2B53A) drop-shadow(-2.5px 0 0 #F2B53A) drop-shadow(0 2.5px 0 #F2B53A) drop-shadow(0 -2.5px 0 #F2B53A) drop-shadow(0 0 6px rgba(242,181,58,.7))}
+  .fnd-badge.sm{font-size:11.5px;padding:2px 8px;margin-top:4px}
+  .fnd-ribbon{position:absolute;bottom:12px;left:-40px;transform:rotate(45deg);background:linear-gradient(90deg,#F2B53A,#F97316);color:#3b2a00;font-size:10.5px;font-weight:900;padding:3px 34px;box-shadow:0 2px 6px rgba(0,0,0,.25);pointer-events:none}
+  #s-trust .sb-head{position:relative;overflow:hidden}
+  #fnd54 .fnd-todo{margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--gold) 12%,transparent);border:1px dashed var(--gold)}#fnd54 .fnd-todo b{display:block;font-size:14px}#fnd54 .fnd-todo small{color:var(--muted);font-size:12.5px}
+  #fnd54 .fnd-todo-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}#fnd54 .fnd-todo-b button{border:0;border-radius:10px;padding:7px 12px;font:inherit;font-size:13px;font-weight:800;background:var(--gold);color:#3b2a00;cursor:pointer}
   .fnd-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12.5px;font-weight:800;border-radius:20px;padding:3px 10px;background:linear-gradient(90deg,#F2B53A,#F97316);color:#3b2a00}
   .cel-sheet{text-align:center}.cel-sheet .big{font-size:54px;line-height:1}.cel-sheet h3{margin:10px 0 4px;font-size:20px}.cel-sheet .num-b{font-size:34px;font-weight:900;color:var(--gold)}
   #celCv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999}`;
@@ -68,7 +74,9 @@
   function cardHTML(st, m) {
     if (m && m.number) {
       const until = m.commissionFreeUntil ? new Date(m.commissionFreeUntil).toLocaleDateString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-      return `<div class="card"><div class="fh"><span class="md">${MEDAL}</span><div><b>تو عضو بنیان‌گذار #${fa(m.number)} بلوک هستی</b><small>بدون کمیسیون بلوک${until ? ' تا ' + until : ''}</small></div></div></div>`;
+      const pr = m.profile || { complete: true };
+      const todo = pr.complete ? '' : `<div class="fnd-todo"><b>پروفایلت را کامل کن</b><small>بنیان‌گذار با عکس و معرفی کامل بیشتر دیده می‌شود و اعتماد بیشتری می‌گیرد.</small><div class="fnd-todo-b">${pr.photo ? '' : '<button onclick="avOpen()">گذاشتن عکس پروفایل</button>'}${pr.bio ? '' : '<button onclick="typeof openEditAll===\'function\'?openEditAll():go(\'edit\')">نوشتن معرفی کوتاه</button>'}</div></div>`;
+      return `<div class="card"><div class="fh"><span class="md">${MEDAL}</span><div><b>تو عضو بنیان‌گذار #${fa(m.number)} بلوک هستی</b><small>بدون کمیسیون بلوک${until ? ' تا ' + until : ''}</small></div></div>${todo}</div>`;
     }
     const s = (m && m.steps) || { follow: false, kyc: false, invite: false }, done = (m && m.done) || 0;
     const step = (ok, t, sub, btn, fn) => `<div class="st ${ok ? 'ok' : ''}"><span class="ck">${ok ? '✓' : ''}</span><div class="tx"><b>${t}</b><small>${sub}</small></div>${btn ? `<button onclick="${fn}">${ok ? '✓ ' : ''}${btn}</button>` : ''}</div>`;
@@ -132,6 +140,23 @@
     const n = p && (p.founder || (p.me && me() && me().number));
     const rl = n && document.querySelector('#s-profile .phero .rl');
     if (rl && !document.querySelector('#s-profile .fnd-badge')) rl.insertAdjacentHTML('afterend', `<div class="fnd-badge">${MEDAL.replace('<svg', '<svg style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2"')}عضو بنیان‌گذار #${fa(n)}</div>`);
+    const av = n && document.querySelector('#s-profile .phero .hex');
+    if (av && !av.closest('.fnd-ring')) { const w = document.createElement('span'); w.className = 'fnd-ring'; av.replaceWith(w); w.appendChild(av); }
+    return r;
+  });
+
+  /* ---------- دور ۵۷: نشان روی شناسنامهٔ کاری ---------- */
+  wrapW('renderTrust', function (prev, ...a) {
+    const r = prev(...a);
+    const p = typeof person === 'function' ? person(S.tid) : null;
+    const n = p && (p.founder || (p.me && me() && me().number));
+    if (!n) return r;
+    const nm = document.querySelector('#s-trust .sb-nm');
+    if (nm && !nm.querySelector('.fnd-badge')) nm.insertAdjacentHTML('beforeend', `<div class="fnd-badge sm">${MEDAL.replace('<svg', '<svg style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2"')}عضو بنیان‌گذار #${fa(n)}</div>`);
+    const av = document.querySelector('#s-trust .sb-id .hex');
+    if (av && !av.closest('.fnd-ring')) { const w = document.createElement('span'); w.className = 'fnd-ring'; av.replaceWith(w); w.appendChild(av); }
+    const head = document.querySelector('#s-trust .sb-head');
+    if (head && !head.querySelector('.fnd-ribbon')) head.insertAdjacentHTML('beforeend', `<span class="fnd-ribbon">بنیان‌گذار #${fa(n)}</span>`);
     return r;
   });
 
@@ -208,6 +233,8 @@
       if (preview === 'welcome') celebrateWelcome('حسین');
       else if (preview === 'founder') celebrateFounder(7);
       else if (preview === 'founders') { F.st = demoState(); if (S.cur === 'home') paint(); else go('home'); }
+      // دور ۵۷: نشان روی شناسنامه و کارت خانهٔ بنیان‌گذار با یادآوری تکمیل پروفایل
+      else if (preview === 'badge') { F.st = demoState(); Object.assign(F.st.me, { number: 7, done: 3, steps: { follow: true, kyc: true, invite: true }, commissionFreeUntil: new Date(Date.now() + 730 * 864e5).toISOString(), profile: { photo: false, bio: false, complete: false } }); go('home'); setTimeout(() => openTrust('me'), 1200); }
     }, 1500);
   }
 
@@ -223,7 +250,8 @@
       'تبریک! عضو بنیان‌گذار بلوک شدی': 'Congrats! You are a Blook founding member', 'نشان بنیان‌گذار روی پروفایلت نشست و ۲ سال از کمیسیون بلوک معافی.': 'The founder badge is on your profile and you pay no Blook commission for 2 years.',
       'عالیه!': 'Awesome!', 'شروع کنیم': "Let's start", 'از امروز کار و نیروی ساختمانی را در بلوک پیدا کن.': 'From today, find construction work and workers on Blook.',
       'نشان «عضو بنیان‌گذار» با شمارهٔ اختصاصی روی پروفایل': '“Founding member” badge with your own number on your profile', '۲ سال معافیت از کمیسیون بلوک': '2 years without Blook commission', 'اولویت در پشتیبانی و دیده شدن': 'Priority in support and visibility',
-      'عضو بنیان‌گذار': 'Founding member',
+      'عضو بنیان‌گذار': 'Founding member', 'پروفایلت را کامل کن': 'Complete your profile', 'گذاشتن عکس پروفایل': 'Add a profile photo', 'نوشتن معرفی کوتاه': 'Write a short bio',
+      'بنیان‌گذار با عکس و معرفی کامل بیشتر دیده می‌شود و اعتماد بیشتری می‌گیرد.': 'A founder with a photo and full bio is seen more and trusted more.', 'بنیان‌گذار #{#}': 'Founder #{#}', 'عضو بنیان‌گذار #{#}': 'Founding member #{#}',
     });
     I18N.re = null;
   }

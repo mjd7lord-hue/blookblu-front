@@ -458,6 +458,8 @@
     if (link.screen === 'myads') return "go('myads')";
     if (link.screen === 'strikes') return "go('strikes')";
     if (link.screen === 'guar') return "go('guar')";
+    // دور ۵۷: «پروفایلت را کامل کن» (بنیان‌گذاران)
+    if (link.screen === 'edit') return "typeof openEditAll === 'function' ? openEditAll() : go('edit')";
     return "go('notif')";
   }
   const mapNotif = (n) => ({ id: n.id, g: group(n.createdAt), ty: NTY[n.type] || 'req', t: n.title, s: n.body || '', time: rel(n.createdAt), go: goFor(n.link), read: !!n.readAt });
