@@ -230,7 +230,7 @@
     if (id === 'me') return 'me';
     Object.assign(P[id], {
       _full: true, _pid: pp.id, bio: pp.bio || '', place: pp.city, born: pp.city, since: monthYear(pp.since), phone: faPhone(pp.phone),
-      adj: (pp.trust && pp.trust.adj) || 0, strikes: pp.strikes || 0, founder: pp.founder || null,
+      adj: (pp.trust && pp.trust.adj) || 0, strikes: pp.strikes || 0, founder: pp.founder || null, ambassador: !!pp.ambassador, invites: pp.invites || 0,
       verified: !!pp.identityVerified, docVerified: !!pp.verified, stars: pp.stars, exp: (pp.data && pp.data.exp) || '—', age: (L.ageOf && pp.data && L.ageOf(pp.data.by)) || '—',
       skills: pp.skills.map(skillRow), revs: pp.reviews.map(revRow), guar: pp.guarantors.map((g) => [g.name, g.relation, 'general']),
       pf: (pp.portfolio || []).map((x) => [x.title, x.place || '', abs(x.url)]),

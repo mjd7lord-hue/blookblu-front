@@ -254,6 +254,31 @@
   });
   window.refOpen = (code) => { const x = (S.refs || []).find((r) => r.code === code); if (!x) return; const id = LIVE.upsertPerson({ code: x.code, role: x.role, name: x.name, doneCount: x.doneCount }, x.city); openProfile(id); };
 
+  /* ---- دور ۵۸: «پشتیبانی بلوک» همیشه بالای پیام‌ها، برای همه (مهمان ← اول ورود) ---- */
+  const supCss = document.createElement('style');
+  supCss.textContent = `.sup58{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:18px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 10%,var(--surface)),var(--surface));font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .sup58 .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--accent);color:#fff;flex:none}.sup58 .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .sup58 .t{flex:1;min-width:0}.sup58 b{display:block;font-size:15px}.sup58 small{color:var(--muted);font-size:12.5px}.sup58 em{font-style:normal;background:var(--bad);color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;font-size:12px;font-weight:800}
+  .sup58 .on{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-inline-end:4px;vertical-align:1px}`;
+  document.head.appendChild(supCss);
+  const SUP_IC = '<svg viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.5-2 2.5-5 2.5"/></svg>';
+  wrapW('renderMsgs', function (prev, ...a) {
+    const r = prev(...a);
+    if (!on()) return r;
+    const hero = document.querySelector('#s-msg .inbox-hero');
+    if (hero && !document.querySelector('#s-msg .sup58')) {
+      const sc = (S.convs || []).find((c) => c.type === 'support');
+      const un = sc ? sc.unread || 0 : 0;
+      hero.insertAdjacentHTML('afterend', `<button class="sup58" onclick="openChat('c-support')"><span class="ic">${SUP_IC}</span><span class="t"><b>پشتیبانی بلوک</b><small><i class="on"></i>مشکلی داری؟ همین‌جا بنویس؛ کارشناس‌ها جواب می‌دهند</small></span>${un ? `<em class="num">${fa(un)}</em>` : '<span class="arr">‹</span>'}</button>`);
+    }
+    return r;
+  });
+  // گفت‌وگوی پشتیبانی فقط در ردیف ثابت بالا (و در فیلتر «پشتیبانی») — تکراری در فهرست نیاید
+  wrapW('renderMsgList', function (prev, L, ...a) {
+    if (on() && Array.isArray(L) && S.mf !== 'support') L = L.filter((c) => c.type !== 'support');
+    return prev(L, ...a);
+  });
+
   /* ---- دربارهٔ بلوک: وضعیت واقعی سرویس ---- */
   S.health = null;
   wrapW('renderAbout', function (prev, ...a) {
@@ -290,6 +315,7 @@
       'اول یک مهندس انتخاب کن': 'Pick an engineer first',
       'در کاوش، پروفایل مهندس را باز کن و «رزرو بازدید» را بزن؛ زمان‌های آزاد واقعی او اینجا می‌آید.': 'In Explore, open an engineer’s profile and tap “Book a visit”; their real free times appear here.',
       'پیدا کردن مهندس': 'Find an engineer', 'نمونه': 'Sample', 'این آگهی «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.': 'This is a “sample” ad made to showcase Blook; there is no real person behind it.', 'این پروفایل «نمونه» است و برای نمایش بلوک ساخته شده؛ پشت آن شخص واقعی نیست.': 'This is a “sample” profile made to showcase Blook; there is no real person behind it.',
+      'پشتیبانی بلوک': 'Blook support', 'مشکلی داری؟ همین‌جا بنویس؛ کارشناس‌ها جواب می‌دهند': 'Got a problem? Write here; our team replies', 'سفیر بلوک': 'Blook ambassador',
       'هویت تأیید شده': 'Identity verified', 'تأیید هویت در حال بررسی': 'Identity check in review', 'با «تأیید هویت»: کارت ملی + سلفی': 'Via “Verify identity”: national card + selfie', 'تأیید هویت': 'Verify identity',
     });
     I18N.re = null;

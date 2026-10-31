@@ -145,6 +145,29 @@
     return r;
   });
 
+  /* ---------- دور ۵۸: نشان «سفیر بلوک» (۱۰+ دعوت موفق) روی پروفایل و شناسنامه ---------- */
+  const AMB = '<svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8L3.6 9.1l5.8-.8z"/></svg>';
+  const ambOf = (p) => !!p && (p.ambassador || (p.me && me() && (me().invites || 0) >= 10));
+  const ambBadge = (sm) => `<div class="amb-badge${sm ? ' sm' : ''}">${AMB}سفیر بلوک</div>`;
+  const ambCss = document.createElement('style');
+  ambCss.textContent = `.amb-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;margin-inline-start:6px;font-size:12.5px;font-weight:800;border-radius:20px;padding:3px 10px;background:linear-gradient(90deg,#7C3AED,#2563EB);color:#fff}.amb-badge.sm{font-size:11.5px;padding:2px 8px;margin-top:4px}`;
+  document.head.appendChild(ambCss);
+  wrapW('renderProfile', function (prev, ...a) {
+    const r = prev(...a);
+    const p = typeof person === 'function' ? person(S.pid) : null;
+    if (!ambOf(p) || document.querySelector('#s-profile .amb-badge')) return r;
+    const at = document.querySelector('#s-profile .fnd-badge') || document.querySelector('#s-profile .phero .rl');
+    if (at) at.insertAdjacentHTML('afterend', ambBadge());
+    return r;
+  });
+  wrapW('renderTrust', function (prev, ...a) {
+    const r = prev(...a);
+    const p = typeof person === 'function' ? person(S.tid) : null;
+    const nm = ambOf(p) && document.querySelector('#s-trust .sb-nm');
+    if (nm && !nm.querySelector('.amb-badge')) nm.insertAdjacentHTML('beforeend', ambBadge(true));
+    return r;
+  });
+
   /* ---------- دور ۵۷: نشان روی شناسنامهٔ کاری ---------- */
   wrapW('renderTrust', function (prev, ...a) {
     const r = prev(...a);
@@ -234,7 +257,7 @@
       else if (preview === 'founder') celebrateFounder(7);
       else if (preview === 'founders') { F.st = demoState(); if (S.cur === 'home') paint(); else go('home'); }
       // دور ۵۷: نشان روی شناسنامه و کارت خانهٔ بنیان‌گذار با یادآوری تکمیل پروفایل
-      else if (preview === 'badge') { F.st = demoState(); Object.assign(F.st.me, { number: 7, done: 3, steps: { follow: true, kyc: true, invite: true }, commissionFreeUntil: new Date(Date.now() + 730 * 864e5).toISOString(), profile: { photo: false, bio: false, complete: false } }); go('home'); setTimeout(() => openTrust('me'), 1200); }
+      else if (preview === 'badge') { F.st = demoState(); Object.assign(F.st.me, { invites: 12, number: 7, done: 3, steps: { follow: true, kyc: true, invite: true }, commissionFreeUntil: new Date(Date.now() + 730 * 864e5).toISOString(), profile: { photo: false, bio: false, complete: false } }); go('home'); setTimeout(() => openTrust('me'), 1200); }
     }, 1500);
   }
 
@@ -250,7 +273,7 @@
       'تبریک! عضو بنیان‌گذار بلوک شدی': 'Congrats! You are a Blook founding member', 'نشان بنیان‌گذار روی پروفایلت نشست و ۲ سال از کمیسیون بلوک معافی.': 'The founder badge is on your profile and you pay no Blook commission for 2 years.',
       'عالیه!': 'Awesome!', 'شروع کنیم': "Let's start", 'از امروز کار و نیروی ساختمانی را در بلوک پیدا کن.': 'From today, find construction work and workers on Blook.',
       'نشان «عضو بنیان‌گذار» با شمارهٔ اختصاصی روی پروفایل': '“Founding member” badge with your own number on your profile', '۲ سال معافیت از کمیسیون بلوک': '2 years without Blook commission', 'اولویت در پشتیبانی و دیده شدن': 'Priority in support and visibility',
-      'عضو بنیان‌گذار': 'Founding member', 'پروفایلت را کامل کن': 'Complete your profile', 'گذاشتن عکس پروفایل': 'Add a profile photo', 'نوشتن معرفی کوتاه': 'Write a short bio',
+      'عضو بنیان‌گذار': 'Founding member', 'سفیر بلوک': 'Blook ambassador', 'پروفایلت را کامل کن': 'Complete your profile', 'گذاشتن عکس پروفایل': 'Add a profile photo', 'نوشتن معرفی کوتاه': 'Write a short bio',
       'بنیان‌گذار با عکس و معرفی کامل بیشتر دیده می‌شود و اعتماد بیشتری می‌گیرد.': 'A founder with a photo and full bio is seen more and trusted more.', 'بنیان‌گذار #{#}': 'Founder #{#}', 'عضو بنیان‌گذار #{#}': 'Founding member #{#}',
     });
     I18N.re = null;
